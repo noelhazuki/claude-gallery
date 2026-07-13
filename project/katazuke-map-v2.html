@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>おうち収納マップ</title>
+<style>
+  :root{
+    --bg:#f6f3ee;
+    --text:#333;
+    --accent:#e8967a;
+    --room-fill:#ffffff;
+    --room-border:#3a3a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom:30px;
+  }
+  header{
+    padding:16px 16px 4px;
+    text-align:center;
+  }
+  header h1{ font-size:19px; margin:0 0 2px; }
+  header p{ font-size:12px; color:#999; margin:0; }
+
+  /* パンくず */
+  .breadcrumb{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:10px 14px;
+    font-size:13px;
+    color:#888;
+    flex-wrap:wrap;
+  }
+  .breadcrumb .crumb{
+    cursor:pointer;
+    color:#888;
+  }
+  .breadcrumb .crumb.current{
+    color:var(--text);
+    font-weight:bold;
+  }
+  .breadcrumb .sep{ color:#ccc; }
+  .back-btn{
+    display:none;
+    margin:0 14px 10px;
+    border:none;
+    background:#fff;
+    border:1px solid #ddd;
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:13px;
+    color:#666;
+  }
+  .back-btn.show{ display:inline-block; }
+
+  /* 間取りマップ */
+  .map-wrap{ padding:0 12px 24px; }
+  .house-grid{
+    display:grid;
+    gap:1px;
+    margin:0 auto;
+    position:relative;
+  }
+  /* 列/行数・1マスのサイズはJS側で room-tile-tool と同じロジックで計算し、
+     縦横とも同じpx数の正方形マスとして上書きする(間取りの形をそのまま再現するため) */
+
+  /* room-tile-toolと同じ考え方で、部屋は「大きい1個の箱」ではなく
+     マス目1個1個に色を塗って表現する。同じ色のマスが隣り合えば継ぎ目なく繋がって見える */
+  .room-cell{
+    box-sizing:border-box;
+    cursor:default;
+  }
+  .room-cell.clickable{ cursor:pointer; }
+  .room-cell.clickable:active{ filter:brightness(0.9); }
+  .room-cell.storage-cell{ cursor:pointer; }
+  .room-cell.storage-cell:active{ filter:brightness(0.9); }
+
+  .room-name-tag{
+    position:absolute;
+    font-weight:bold;
+    font-size:10px;
+    color:#fff;
+    background:#3a3a3a;
+    padding:2px 6px;
+    border-radius:6px;
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:10;
+  }
+  .room-name-tag .cnt{
+    background:var(--accent);
+    border-radius:8px;
+    padding:0 5px;
+    margin-left:4px;
+  }
+  .storage-name-tag{
+    position:absolute;
+    font-size:9px;
+    color:#5c4f3c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    line-height:1.1;
+    padding:1px;
+    box-sizing:border-box;
+    pointer-events:none;
+    z-index:5;
+    overflow:hidden;
+    word-break:break-all;
+  }
+
+  /* ラベル一覧(中間階層) */
+  .label-list{
+    padding:4px 14px 20px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .label-btn{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#fff;
+    border:1px solid #e5e0d8;
+    border-radius:12px;
+    padding:16px 18px;
+    font-size:15px;
+    margin-bottom:10px;
+    color:var(--text);
+    position:relative;
+  }
+  .label-btn .badge{
+    position:absolute;
+    top:14px;
+    right:16px;
+    font-size:11px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:8px;
+    padding:2px 7px;
+    display:none;
+  }
+  .label-btn .badge.show{ display:inline-block; }
+  .label-btn:active{ background:#faf8f5; }
+
+  /* 入力画面 */
+  .input-wrap{
+    padding:4px 14px 30px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .item-card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:12px;
+    display:flex;
+    gap:12px;
+  }
+  .item-card img{
+    width:64px;
+    height:64px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#eee;
+    flex-shrink:0;
+  }
+  .item-card .no-photo{
+    width:64px;
+    height:64px;
+    border-radius:10px;
+    background:#f2f0ec;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+  }
+  .item-info{ flex:1; min-width:0; }
+  .cat-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:11px;
+    color:#fff;
+    padding:2px 8px;
+    border-radius:10px;
+    margin-bottom:5px;
+  }
+  .item-info .item-name{ font-weight:bold; font-size:15px; margin-bottom:3px; }
+  .item-info .item-qty{ font-size:12px; color:#777; margin-bottom:6px; }
+  .item-actions{ display:flex; gap:6px; }
+  .item-actions button{
+    border:1px solid #ddd;
+    background:#fff;
+    border-radius:8px;
+    padding:4px 10px;
+    font-size:11px;
+    color:#666;
+  }
+  .item-actions button.danger{ color:#c0563f; border-color:#f0d0c5; }
+  .empty-msg{ font-size:13px; color:#aaa; text-align:center; padding:20px 0; }
+
+  .add-form{
+    margin-top:16px;
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    border:1px solid #eee;
+  }
+  .add-form h3{ font-size:14px; margin:0 0 12px; color:#888; }
+  .add-form label{ display:block; font-size:12px; color:#888; margin-bottom:5px; }
+  .add-form input[type="text"]{
+    width:100%;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:10px;
+    font-size:14px;
+    margin-bottom:12px;
+  }
+  .cat-grid{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:6px;
+    margin-bottom:14px;
+  }
+  .cat-opt{
+    border:2px solid transparent;
+    border-radius:10px;
+    padding:8px 2px;
+    text-align:center;
+    font-size:10px;
+    color:#fff;
+    cursor:pointer;
+  }
+  .cat-opt .icon{ font-size:18px; display:block; margin-bottom:2px; }
+  .cat-opt.selected{ border-color:#333; }
+  .photo-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .photo-preview{
+    width:56px; height:56px; border-radius:10px; object-fit:cover; background:#f2f0ec;
+  }
+  .photo-btn{
+    border:1px solid #ddd; background:#fff; border-radius:8px; padding:9px 14px; font-size:13px; color:#666;
+  }
+  .save-btn{
+    width:100%;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:13px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:bold;
+  }
+
+  /* 段・仕切りを追加するツールバー(入力画面の上) */
+  .partition-toolbar{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .partition-toolbar button{
+    flex:1;
+    border:1px dashed #cbb89a;
+    background:#fdfaf5;
+    color:#8a6d3f;
+    border-radius:10px;
+    padding:10px 6px;
+    font-size:12px;
+  }
+  .partition-toolbar button:active{ background:#f5eee0; }
+
+  /* 本棚ビュー(段) */
+  .shelf-case{
+    max-width:520px;
+    margin:0 auto;
+    padding:4px 14px 24px;
+  }
+  .shelf-tier{
+    position:relative;
+    background:linear-gradient(180deg,#e0b489,#c8935a);
+    border-left:8px solid #a9743f;
+    border-right:8px solid #a9743f;
+    border-bottom:8px solid #96652f;
+    padding:16px 14px;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .shelf-tier:first-child{ border-top:8px solid #a9743f; border-radius:6px 6px 0 0; }
+  .shelf-tier:last-child{ border-radius:0 0 6px 6px; }
+  .shelf-tier .tier-name{
+    font-weight:bold;
+    font-size:14px;
+    color:#4a3520;
+    text-shadow:0 1px 0 rgba(255,255,255,0.3);
+  }
+  .shelf-tier .tier-badge{
+    font-size:11px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:8px;
+    padding:2px 7px;
+    margin-left:8px;
+  }
+  .shelf-tier .tier-actions{ display:flex; gap:8px; align-items:center; flex-shrink:0; }
+  .shelf-tier .tier-actions span{ font-size:13px; opacity:0.8; }
+  .shelf-zones-inline{
+    display:flex;
+    gap:4px;
+    flex:1;
+    margin:0 8px;
+  }
+  .shelf-zones-inline .zone-chip{
+    flex:1;
+    background:rgba(255,255,255,0.35);
+    border-radius:6px;
+    padding:6px 4px;
+    text-align:center;
+    font-size:11px;
+    color:#4a3520;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .add-tier-btn{
+    display:block;
+    width:100%;
+    margin-top:12px;
+    border:1px dashed #cbb89a;
+    background:#fdfaf5;
+    color:#8a6d3f;
+    border-radius:10px;
+    padding:12px;
+    font-size:13px;
+  }
+
+  /* 区画ビュー(横並び) */
+  .zone-wrap{
+    max-width:520px;
+    margin:0 auto;
+    padding:4px 14px 24px;
+  }
+  .zone-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .zone-box{
+    flex:1 1 90px;
+    background:#fff;
+    border:1px solid #e5e0d8;
+    border-radius:12px;
+    padding:16px 8px;
+    text-align:center;
+    font-size:13px;
+    position:relative;
+    min-width:0;
+  }
+  .zone-box .zone-name{ font-weight:bold; margin-bottom:6px; word-break:break-all; }
+  .zone-box .zone-badge{
+    display:inline-block;
+    font-size:11px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:8px;
+    padding:2px 7px;
+  }
+  .zone-box .zone-del{
+    position:absolute;
+    top:4px;
+    right:6px;
+    font-size:12px;
+    color:#c0563f;
+  }
+  .zone-box .zone-edit{
+    position:absolute;
+    top:4px;
+    left:6px;
+    font-size:12px;
+    color:#aaa;
+  }
+
+  /* 仕切り追加・区切り選択の画面 */
+  .partition-screen{
+    max-width:520px;
+    margin:0 auto;
+    padding:20px 14px 30px;
+  }
+  .partition-screen h2{ font-size:15px; margin:0 0 6px; }
+  .partition-screen p.hint{ font-size:12px; color:#999; margin:0 0 18px; }
+  .partition-screen input[type="text"]{
+    width:100%;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:12px;
+    font-size:15px;
+    margin-bottom:16px;
+  }
+  .partition-choice-btn{
+    display:block;
+    width:100%;
+    background:#fff;
+    border:1px solid #e5e0d8;
+    border-radius:12px;
+    padding:15px;
+    font-size:14px;
+    text-align:left;
+    margin-bottom:10px;
+    color:var(--text);
+  }
+  .partition-choice-btn:active{ background:#faf8f5; }
+  .partition-screen .row-btn{ display:flex; gap:8px; margin-top:6px; }
+  .partition-screen .row-btn button{ flex:1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>おうち収納マップ</h1>
+  <p id="headerSub">1階 ／ タップして中身をチェック</p>
+</header>
+
+<div class="breadcrumb" id="breadcrumb"></div>
+<button class="back-btn" id="backBtn" onclick="goBack()">← 戻る</button>
+
+<div style="max-width:560px;margin:0 auto;padding:0 14px 8px;text-align:right;">
+  <button id="importToggleBtn" style="border:1px solid #ddd;background:#fff;color:#666;border-radius:20px;padding:6px 14px;font-size:12px;">📥 間取りを読み込む</button>
+</div>
+<div id="importPanel" style="display:none;max-width:560px;margin:0 auto 14px;padding:0 14px;">
+  <div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:14px;">
+    <p style="font-size:12px;color:#888;margin:0 0 8px;">部屋タイル作成ツールで書き出したJSONをここに貼ってな。読み込むと今の間取りは丸ごと入れ替わるで。</p>
+    <textarea id="importArea" style="width:100%;height:140px;font-size:11px;font-family:monospace;border:1px solid #ddd;border-radius:8px;padding:8px;box-sizing:border-box;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button id="importRunBtn" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:bold;">この内容で読み込む</button>
+      <button id="importCancelBtn" style="flex:1;background:#fff;color:#666;border:1px solid #ddd;border-radius:10px;padding:10px;font-size:13px;">やめる</button>
+    </div>
+  </div>
+</div>
+
+<div id="screenHouse" class="map-wrap">
+  <div class="house-grid" id="houseGrid"></div>
+</div>
+
+<div id="screenLabels" class="label-list" style="display:none;"></div>
+
+<div id="screenInput" class="input-wrap" style="display:none;">
+  <div class="partition-toolbar">
+    <button onclick="openAddChildScreen('shelf')">📚 ＋段を追加する</button>
+    <button onclick="openDivideScreen()">🔲 ＋この場所を区切る</button>
+  </div>
+  <div id="itemList"></div>
+  <div class="add-form">
+    <h3>あたらしく登録する</h3>
+
+    <label>カテゴリ</label>
+    <div class="cat-grid" id="catGrid"></div>
+
+    <label>写真</label>
+    <div class="photo-row">
+      <img id="photoPreview" class="photo-preview" style="display:none;">
+      <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none;" onchange="onPhotoSelected(event)">
+      <button class="photo-btn" onclick="document.getElementById('photoInput').click()">📷 写真をえらぶ</button>
+    </div>
+
+    <label>名前(何が入ってる？)</label>
+    <input type="text" id="newName" placeholder="例：厚手ニット、絆創膏セット">
+
+    <label>個数・量のメモ</label>
+    <input type="text" id="newQty" placeholder="例：5枚くらい、箱1つ分">
+
+    <button class="save-btn" onclick="addItem()">追加する</button>
+  </div>
+</div>
+
+<div id="screenShelf" class="shelf-case" style="display:none;"></div>
+<div id="screenZone" class="zone-wrap" style="display:none;"></div>
+
+<div id="screenAddChild" class="partition-screen" style="display:none;">
+  <h2 id="addChildTitle">名前をつけてな</h2>
+  <p class="hint" id="addChildHint"></p>
+  <input type="text" id="addChildName" placeholder="例：段1、上段、右のボックス">
+  <div class="row-btn">
+    <button class="save-btn" onclick="confirmAddChild()">追加する</button>
+    <button class="photo-btn" onclick="cancelAddChild()">やめる</button>
+  </div>
+  <div id="addChildLoopArea" style="display:none;margin-top:18px;">
+    <p class="hint">続けて追加できるで。もう十分やったら「これで区切り終わり」を押してな</p>
+    <button class="save-btn" style="background:#8bb84a;" onclick="finishZoneLoop()">これで区切り終わり</button>
+  </div>
+</div>
+
+<div id="screenDivide" class="partition-screen" style="display:none;">
+  <h2>どう区切る？</h2>
+  <p class="hint">この場所を分ける形をえらんでな。あとから増やすこともできるで</p>
+  <button class="partition-choice-btn" onclick="quickDivide(2)">左右半分に分ける</button>
+  <button class="partition-choice-btn" onclick="quickDivide(3)">3つに分ける</button>
+  <button class="partition-choice-btn" onclick="startFreeZoneLoop()">自分で名前を決めて分ける</button>
+  <button class="photo-btn" style="width:100%;margin-top:6px;" onclick="cancelDivide()">やめる(丸ごと1つのまま使う)</button>
+</div>
+
+<script>
+/* ---------------- カテゴリ定義 ---------------- */
+const categories = [
+  {id:'clothes', name:'衣類',       icon:'👕', color:'#5b8fc7'},
+  {id:'daily',   name:'日用品',     icon:'🧻', color:'#8bb84a'},
+  {id:'stationery', name:'文具',    icon:'✏️', color:'#e0b93c'},
+  {id:'books',   name:'書籍',       icon:'📚', color:'#a97155'},
+  {id:'kitchen', name:'キッチン用具', icon:'🍳', color:'#d9544a'},
+  {id:'cleaning',name:'掃除用具',   icon:'🧹', color:'#5cb3c9'},
+  {id:'pet',     name:'ペット',     icon:'🐾', color:'#c2a06e'},
+  {id:'toy',     name:'おもちゃ',   icon:'🧸', color:'#e493b3'},
+  {id:'hobby',   name:'趣味',       icon:'🎨', color:'#e0863c'},
+  {id:'other',   name:'その他',     icon:'📦', color:'#a3a3a3'},
+];
+
+/* ---------------- 間取り階層データ(1階) ---------------- */
+// path は localStorage 上のキーになる一意なID配列
+// これは「読み込みがまだの時に使う初期サンプル」。読み込み後はlocalStorageの内容が優先される
+const DEFAULT_HOUSE_TREE = [
+  { key:'yousitsu1', name:'洋室①', tiles:[{col:'1 / 4', row:'1 / 2'}],
+    children:[
+      { key:'zentai', name:'洋室①(全体)' },
+      { key:'futon', name:'布団収納棚' },
+    ]},
+  { key:'laundry', name:'ランドリールーム', tiles:[{col:'4 / 8', row:'1 / 3'}],
+    children:[
+      { key:'heyagawa', name:'棚(部屋側)', children:[
+        {key:'jou', name:'上段'}, {key:'hanger', name:'ハンガー掛け'},
+        {key:'tana', name:'棚'}, {key:'ge', name:'下段'},
+      ]},
+      { key:'madogawa', name:'棚(窓側)', children:[
+        {key:'jou', name:'上段'}, {key:'hanger', name:'ハンガー掛け'},
+        {key:'tana', name:'棚'}, {key:'ge', name:'下段'},
+      ]},
+    ]},
+  { key:'ub', name:'UB', tiles:[{col:'8 / 9', row:'1 / 2'}],
+    children:[
+      { key:'zentai', name:'UB(全体)' },
+      { key:'yoko', name:'UB横の収納' },
+    ]},
+  { key:'wc1', name:'WC①', tiles:[{col:'1 / 2', row:'2 / 3'}] },
+  { key:'senmen', name:'洗面', tiles:[{col:'2 / 3', row:'2 / 3'}],
+    children:[
+      { key:'zentai', name:'洗面(全体)' },
+      { key:'tana', name:'洗面右端の棚' },
+      { key:'hikidashi', name:'洗面台右の引き出し' },
+    ]},
+  { key:'kitchen', name:'キッチン', tiles:[
+      {col:'3 / 6', row:'3 / 5'},
+      {col:'3 / 4', row:'2 / 3', secondary:true},
+    ],
+    children:[
+      { key:'shita1', name:'キッチン下収納①' },
+      { key:'shita2', name:'キッチン下収納②' },
+      { key:'oku_shuunou', name:'キッチン奥の収納' },
+      { key:'oku_space', name:'キッチン奥のスペース' },
+    ]},
+  { key:'ldk', name:'LDK', tiles:[
+      {col:'6 / 9', row:'3 / 5'},
+      {col:'4 / 9', row:'5 / 8'},
+    ]},
+  { key:'genkan1', name:'玄関ホール①', tiles:[{col:'1 / 3', row:'3 / 6'}] },
+  { key:'myroom', name:'私の部屋(階段下)', tiles:[{col:'3 / 4', row:'5 / 6'}] },
+  { key:'hondana', name:'階段の本棚', tiles:[{col:'3 / 4', row:'6 / 8'}] },
+  { key:'sic', name:'SIC', tiles:[{col:'1 / 3', row:'6 / 8'}] },
+];
+
+const STORAGE_KEY = 'katazuke_app_data_v2';
+function loadData(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; } }
+function saveData(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+/* ---------------- 間取りデータの保存/読み込み ---------------- */
+const HOUSE_KEY = 'katazuke_house_tree_v1';
+const GRID_KEY = 'katazuke_grid_size_v1';
+
+function loadHouseTree(){
+  try{
+    const d = JSON.parse(localStorage.getItem(HOUSE_KEY));
+    if(Array.isArray(d) && d.length) return d;
+  }catch(e){}
+  return DEFAULT_HOUSE_TREE;
+}
+function saveHouseTree(){ localStorage.setItem(HOUSE_KEY, JSON.stringify(houseTree)); }
+
+function loadGridSize(){
+  try{
+    const d = JSON.parse(localStorage.getItem(GRID_KEY));
+    if(d && d.cols && d.rows) return d;
+  }catch(e){}
+  return { cols:8, rows:7 };
+}
+function saveGridSize(){ localStorage.setItem(GRID_KEY, JSON.stringify(gridSize)); }
+
+function computeGridSize(tree){
+  let maxCol = 8, maxRow = 7;
+  (function walk(nodes){
+    nodes.forEach(n=>{
+      (n.tiles||[]).forEach(t=>{
+        const c2 = parseInt(String(t.col).split('/')[1]);
+        const r2 = parseInt(String(t.row).split('/')[1]);
+        if(!isNaN(c2) && c2-1 > maxCol) maxCol = c2-1;
+        if(!isNaN(r2) && r2-1 > maxRow) maxRow = r2-1;
+      });
+      if(n.children) walk(n.children);
+    });
+  })(tree);
+  return { cols:maxCol, rows:maxRow };
+}
+
+let houseTree = loadHouseTree();
+let gridSize = loadGridSize();
+let gridMetrics = { cellSize: 20, gap: 4 }; // applyGridCellSizeで実際の値に更新される
+
+// room-tile-toolと同じ考え方で「横幅から逆算した正方形の1マスのpx数」を出して、
+// 縦横ともそのサイズで固定する。これで部屋タイル作成ツールで選んだマスの形・位置が
+// そのまま再現される(列と行でサイズがズレて間取りが歪むのを防ぐ)
+function applyGridCellSize(){
+  const grid = document.getElementById('houseGrid');
+  const wrap = document.getElementById('screenHouse');
+  const gap = 1;
+  const paddingTotal = 24; // .map-wrap の左右padding合計(12px*2)
+  const containerWidth = Math.min(wrap.clientWidth || 560, 560);
+  const availWidth = containerWidth - paddingTotal;
+  const cellSize = Math.max(10, Math.floor((availWidth - (gridSize.cols-1)*gap) / gridSize.cols));
+  gridMetrics = { cellSize, gap };
+  grid.style.gridTemplateColumns = `repeat(${gridSize.cols}, ${cellSize}px)`;
+  grid.style.gridTemplateRows = `repeat(${gridSize.rows}, ${cellSize}px)`;
+}
+window.addEventListener('resize', ()=>{ if(navPath.length===0) renderHouse(); });
+
+// "1 / 5" のようなcol/row文字列を{start,end}の数値に変換(endは排他的、grid-columnと同じ考え方)
+function parseSpan(str){
+  const parts = String(str).split('/').map(s=>parseInt(s.trim(), 10));
+  return { start: parts[0], end: parts[1] };
+}
+// col/row文字列から、グリッド全体の左上(1列1行目)を原点にした絶対px位置・サイズを算出
+function gridRect(colStr, rowStr, cellSize, gap){
+  const cs = parseSpan(colStr), rs = parseSpan(rowStr);
+  const step = cellSize + gap;
+  const left = (cs.start - 1) * step;
+  const top = (rs.start - 1) * step;
+  const width = (cs.end - cs.start) * cellSize + Math.max(cs.end-cs.start-1, 0) * gap;
+  const height = (rs.end - rs.start) * cellSize + Math.max(rs.end-rs.start-1, 0) * gap;
+  return { left, top, width, height };
+}
+function hexToRgba(hex, a){
+  const h = String(hex||'#999999').replace('#','');
+  const r = parseInt(h.substring(0,2),16) || 150, g = parseInt(h.substring(2,4),16) || 150, b = parseInt(h.substring(4,6),16) || 150;
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ---------------- 部屋タイル作成ツールJSON → houseTree 変換 ---------------- */
+// よく出る単語は辞書優先で変換、それ以外はかな部分だけローマ字化する簡易変換
+const ROOM_WORD_DICT = {
+  '洋室':'yousitsu','和室':'washitsu','寝室':'shinshitsu','子供部屋':'kodomobeya',
+  '玄関':'genkan','廊下':'rouka','階段':'kaidan','洗面':'senmen','浴室':'yokushitsu',
+  '風呂':'furo','脱衣':'datsui','押入':'oshiire','収納':'shuunou','書斎':'shosai',
+  '本棚':'hondana','屋根裏':'yaneura','倉庫':'souko','物置':'monooki','部屋':'heya',
+  '私の':'my','台所':'daidokoro','居間':'ima','客間':'kyakuma','納戸':'nando',
+  '窓側':'madogawa','部屋側':'heyagawa','上段':'jou','下段':'ge',
+  '左':'hidari','右':'migi','中央':'chuo','真ん中':'mannaka','箱':'hako','段':'dan',
+};
+const YOON = {
+  'きゃ':'kya','きゅ':'kyu','きょ':'kyo','しゃ':'sha','しゅ':'shu','しょ':'sho',
+  'ちゃ':'cha','ちゅ':'chu','ちょ':'cho','にゃ':'nya','にゅ':'nyu','にょ':'nyo',
+  'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo','みゃ':'mya','みゅ':'myu','みょ':'myo',
+  'りゃ':'rya','りゅ':'ryu','りょ':'ryo','ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
+  'じゃ':'ja','じゅ':'ju','じょ':'jo','びゃ':'bya','びゅ':'byu','びょ':'byo',
+  'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo',
+};
+const KANA = {
+  'あ':'a','い':'i','う':'u','え':'e','お':'o',
+  'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
+  'た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+  'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+  'や':'ya','ゆ':'yu','よ':'yo',
+  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
+  'わ':'wa','を':'o','ん':'n',
+  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
+  'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+  'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do',
+  'ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+  'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+  'ぁ':'a','ぃ':'i','ぅ':'u','ぇ':'e','ぉ':'o',
+};
+function kataToHira(str){
+  return str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+}
+function kanaToRomaji(str){
+  const s = kataToHira(str);
+  let out = '';
+  let i = 0;
+  while(i < s.length){
+    const two = s.substr(i,2);
+    if(YOON[two]){ out += YOON[two]; i+=2; continue; }
+    const ch = s[i];
+    if(ch === 'っ'){
+      const rest = s.substr(i+1);
+      const nextRomaji = YOON[rest.substr(0,2)] || KANA[rest[0]] || '';
+      if(nextRomaji) out += nextRomaji[0];
+      i += 1; continue;
+    }
+    if(ch === 'ー'){
+      const lastVowel = out.slice(-1);
+      if('aiueo'.includes(lastVowel)) out += lastVowel;
+      i += 1; continue;
+    }
+    if(KANA[ch] !== undefined){ out += KANA[ch]; i+=1; continue; }
+    if(/[a-zA-Z0-9]/.test(ch)) out += ch;
+    i += 1;
+  }
+  return out;
+}
+function nameToId(name){
+  let s = name || '';
+  Object.keys(ROOM_WORD_DICT).forEach(k=>{ s = s.split(k).join(ROOM_WORD_DICT[k]); });
+  s = kanaToRomaji(s);
+  let cleaned = s.replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+  if(!cleaned) cleaned = 'room';
+  return cleaned;
+}
+function uniqueKey(base, usedKeys){
+  let candidate = base;
+  let n = 1;
+  while(usedKeys.has(candidate)){
+    n++;
+    candidate = base + n;
+  }
+  usedKeys.add(candidate);
+  return candidate;
+}
+// 部屋タイル作成ツールの書き出しJSON([{name,color,tiles,fixedStorages}]) → houseTree配列
+function convertRoomTileExport(json){
+  const usedKeys = new Set();
+  return json.map(room=>{
+    const base = nameToId(room.name);
+    const key = uniqueKey(base, usedKeys);
+    const hasChildren = !!(room.fixedStorages && room.fixedStorages.length);
+    // 部屋が複数ブロック(L字など)に分かれてる場合、2枚目以降は「続きの余白」として
+    // ラベルや収納チップを出さない(secondary)扱いにする。1枚目だけに情報を集約する
+    const tiles = (room.tiles || []).map((t, i)=>{
+      if(hasChildren && i > 0) return Object.assign({}, t, { secondary:true });
+      return Object.assign({}, t);
+    });
+    const node = { key, name: room.name, color: room.color, tiles };
+    if(hasChildren){
+      node.children = room.fixedStorages.map((st, i)=>({
+        key: 'storage' + (i+1),
+        name: '収納' + (i+1),
+        tiles: [st],
+      }));
+    }
+    return node;
+  });
+}
+
+/* ---------------- ナビゲーション状態 ---------------- */
+let navPath = []; // [{key, name}, ...]  現在たどっているノードの配列
+let currentNodeList = houseTree; // 表示中の兄弟ノードリスト(ラベル画面用)
+let selectedCategory = null;
+let pendingPhotoDataUrl = null;
+
+function findNodeByPath(path){
+  let list = houseTree;
+  let node = null;
+  for(const p of path){
+    node = list.find(n => n.key === p.key);
+    if(!node) return null;
+    list = node.children || [];
+  }
+  return node;
+}
+
+function pathToStorageKey(path){
+  return path.map(p=>p.key).join('/');
+}
+
+/* ---------------- 画面切り替え ---------------- */
+function renderBreadcrumb(){
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = '';
+  const homeSpan = document.createElement('span');
+  homeSpan.className = 'crumb' + (navPath.length===0 ? ' current' : '');
+  homeSpan.textContent = '家';
+  homeSpan.onclick = () => { navPath = []; renderHouse(); };
+  bc.appendChild(homeSpan);
+
+  navPath.forEach((p, idx)=>{
+    const sep = document.createElement('span');
+    sep.className = 'sep';
+    sep.textContent = '›';
+    bc.appendChild(sep);
+
+    const span = document.createElement('span');
+    span.className = 'crumb' + (idx === navPath.length-1 ? ' current' : '');
+    span.textContent = p.name;
+    span.onclick = () => {
+      navPath = navPath.slice(0, idx+1);
+      renderCurrent();
+    };
+    bc.appendChild(span);
+  });
+
+  document.getElementById('backBtn').classList.toggle('show', navPath.length>0);
+}
+
+function goBack(){
+  navPath.pop();
+  renderCurrent();
+}
+
+function renderCurrent(){
+  if(navPath.length === 0){ renderHouse(); return; }
+  const node = findNodeByPath(navPath);
+  if(!node){ navPath = []; renderHouse(); return; }
+  if(node.children && node.children.length>0){
+    const firstChild = node.children[0];
+    if(firstChild.tiles){
+      renderLabels(node.children);
+    } else if(node.layout === 'shelf'){
+      renderShelf(node);
+    } else if(node.layout === 'zone'){
+      renderZone(node);
+    } else {
+      renderLabels(node.children);
+    }
+  } else {
+    renderInput();
+  }
+}
+
+function showScreen(name){
+  document.getElementById('screenHouse').style.display = name==='house' ? 'block' : 'none';
+  document.getElementById('screenLabels').style.display = name==='labels' ? 'block' : 'none';
+  document.getElementById('screenInput').style.display = name==='input' ? 'block' : 'none';
+  document.getElementById('screenShelf').style.display = name==='shelf' ? 'block' : 'none';
+  document.getElementById('screenZone').style.display = name==='zone' ? 'block' : 'none';
+  document.getElementById('screenAddChild').style.display = name==='addChild' ? 'block' : 'none';
+  document.getElementById('screenDivide').style.display = name==='divide' ? 'block' : 'none';
+}
+
+/* ---- 家の間取りマップ ---- */
+function renderHouse(){
+  showScreen('house');
+  document.getElementById('headerSub').textContent = '1階 ／ タップして中身をチェック';
+  renderBreadcrumb();
+  const grid = document.getElementById('houseGrid');
+  grid.innerHTML = '';
+  applyGridCellSize();
+  const { cellSize, gap } = gridMetrics;
+  const overlays = []; // room-name-tag / storage-name-tag はセルの上に浮かせるので後からまとめて追加する
+
+  // 先に「どのマスがどの部屋のものか」を全部屋分まとめて調べておく。
+  // これで「同じ部屋同士が接する辺には線を引かない、違う部屋・何もない場所と接する辺だけ太線」が判定できる
+  const ownerMap = new Map(); // "c,r" -> node
+  houseTree.forEach(node=>{
+    (node.tiles || []).forEach(t=>{
+      const cs = parseSpan(t.col), rs = parseSpan(t.row);
+      for(let r=rs.start; r<rs.end; r++){
+        for(let c=cs.start; c<cs.end; c++) ownerMap.set(c+','+r, node);
+      }
+    });
+  });
+
+  houseTree.forEach(node=>{
+    const hasChildren = node.children && node.children.length > 0;
+    const color = node.color || '#8a8a8a';
+
+    // 部屋が占めるマス目を全部洗い出す(複数ブロックに分かれてても1個ずつのマスにバラす)
+    const cells = [];
+    (node.tiles || []).forEach(t=>{
+      const cs = parseSpan(t.col), rs = parseSpan(t.row);
+      for(let r=rs.start; r<rs.end; r++){
+        for(let c=cs.start; c<cs.end; c++) cells.push({c,r});
+      }
+    });
+    if(cells.length===0) return;
+
+    // 収納が占めるマスの集合(色を濃くする＆タップ先を変えるため)
+    const storageCellMap = new Map(); // "c,r" -> child
+    if(hasChildren){
+      node.children.forEach(child=>{
+        const ct = child.tiles && child.tiles[0];
+        if(!ct) return;
+        const cs = parseSpan(ct.col), rs = parseSpan(ct.row);
+        for(let r=rs.start; r<rs.end; r++){
+          for(let c=cs.start; c<cs.end; c++) storageCellMap.set(c+','+r, child);
+        }
+      });
+    }
+
+    const sameRoom = (c,r) => ownerMap.get(c+','+r) === node;
+    const outline = `2px solid ${color}`;
+    const noLine = '1px solid transparent';
+
+    cells.forEach(({c,r})=>{
+      const cell = document.createElement('div');
+      cell.className = 'room-cell';
+      cell.style.gridColumn = `${c} / ${c+1}`;
+      cell.style.gridRow = `${r} / ${r+1}`;
+      // 外周(=他の部屋や何もない場所と接する辺)だけ太線、同じ部屋同士が接する辺は線なしにして継ぎ目を消す
+      cell.style.borderTop = sameRoom(c, r-1) ? noLine : outline;
+      cell.style.borderBottom = sameRoom(c, r+1) ? noLine : outline;
+      cell.style.borderLeft = sameRoom(c-1, r) ? noLine : outline;
+      cell.style.borderRight = sameRoom(c+1, r) ? noLine : outline;
+
+      const storageOwner = storageCellMap.get(c+','+r);
+      if(storageOwner){
+        cell.classList.add('storage-cell');
+        cell.style.background = hexToRgba(color, 0.62);
+        const childPath = [{key:node.key,name:node.name},{key:storageOwner.key,name:storageOwner.name}];
+        cell.onclick = ()=>{ navPath = childPath; renderCurrent(); };
+      } else {
+        cell.style.background = hexToRgba(color, 0.32);
+        if(!hasChildren){
+          cell.classList.add('clickable');
+          cell.onclick = ()=>{ navPath = [{key:node.key, name:node.name}]; renderCurrent(); };
+        }
+      }
+      grid.appendChild(cell);
+    });
+
+    // 部屋名タグ(先頭のマスの左上あたりに浮かせる)
+    const firstTile = node.tiles[0];
+    const anchorRect = gridRect(firstTile.col, `${parseSpan(firstTile.row).start} / ${parseSpan(firstTile.row).start+1}`, cellSize, gap);
+    const tag = document.createElement('div');
+    tag.className = 'room-name-tag';
+    let tagHtml = node.name;
+    if(!hasChildren){
+      const count = countItemsUnder([{key:node.key,name:node.name}], node);
+      if(count>0) tagHtml += `<span class="cnt">${count}</span>`;
+    }
+    tag.innerHTML = tagHtml;
+    tag.style.left = anchorRect.left + 'px';
+    tag.style.top = (anchorRect.top - 16) + 'px';
+    overlays.push(tag);
+
+    // 収納名タグ(位置情報を持つものだけ、実際の場所に重ねて表示)
+    const legacyChildren = [];
+    if(hasChildren){
+      node.children.forEach(child=>{
+        const ct = child.tiles && child.tiles[0];
+        const cnt = countItemsUnder([{key:node.key,name:node.name},{key:child.key,name:child.name}], child);
+        if(ct){
+          const rect = gridRect(ct.col, ct.row, cellSize, gap);
+          const label = document.createElement('div');
+          label.className = 'storage-name-tag';
+          label.textContent = child.name + (cnt>0 ? `(${cnt})` : '');
+          label.style.left = rect.left + 'px';
+          label.style.top = rect.top + 'px';
+          label.style.width = rect.width + 'px';
+          label.style.height = rect.height + 'px';
+          overlays.push(label);
+        } else {
+          legacyChildren.push({child, cnt});
+        }
+      });
+    }
+    // 位置情報を持たない古いデータの収納は、部屋名タグの下に小さく積む
+    legacyChildren.forEach(({child, cnt}, i)=>{
+      const tagEl = document.createElement('div');
+      tagEl.className = 'room-name-tag';
+      tagEl.style.background = '#8a7a5f';
+      tagEl.textContent = child.name + (cnt>0 ? `(${cnt})` : '');
+      tagEl.style.left = anchorRect.left + 'px';
+      tagEl.style.top = (anchorRect.top + 2 + (i+1)*16) + 'px';
+      tagEl.style.pointerEvents = 'auto';
+      tagEl.style.cursor = 'pointer';
+      tagEl.onclick = ()=>{
+        navPath = [{key:node.key,name:node.name},{key:child.key,name:child.name}];
+        renderCurrent();
+      };
+      overlays.push(tagEl);
+    });
+  });
+
+  overlays.forEach(el=>grid.appendChild(el));
+}
+
+// 指定ノード配下(自分含む全子孫の入力先)に登録されてるアイテム総数を数える
+function countItemsUnder(path, node){
+  const data = loadData();
+  if(!node.children || node.children.length===0){
+    const key = pathToStorageKey(path);
+    return (data[key]||[]).length;
+  }
+  let total = 0;
+  node.children.forEach(child=>{
+    total += countItemsUnder([...path, {key:child.key, name:child.name}], child);
+  });
+  return total;
+}
+
+/* ---- ラベル一覧(中間階層) ---- */
+function renderLabels(children){
+  showScreen('labels');
+  document.getElementById('headerSub').textContent = navPath[navPath.length-1].name;
+  renderBreadcrumb();
+  const wrap = document.getElementById('screenLabels');
+  wrap.innerHTML = '';
+  const data = loadData();
+  children.forEach(child=>{
+    const btn = document.createElement('div');
+    btn.className = 'label-btn';
+    btn.innerHTML = `<span>${child.name}</span><span class="badge"></span>`;
+    const editBtn = document.createElement('span');
+    editBtn.textContent = '✏️';
+    editBtn.style.cssText = 'position:absolute;top:14px;right:44px;font-size:13px;color:#aaa;';
+    editBtn.onclick = (e)=>{
+      e.stopPropagation();
+      const newName = prompt('名前を入れてな', child.name);
+      if(newName && newName.trim()){
+        child.name = newName.trim();
+        saveHouseTree();
+        renderLabels(children);
+      }
+    };
+    btn.appendChild(editBtn);
+    btn.onclick = () => { navPath = [...navPath, {key:child.key, name:child.name}]; renderCurrent(); };
+    wrap.appendChild(btn);
+    const count = countItemsUnder([...navPath, {key:child.key,name:child.name}], child);
+    const badge = btn.querySelector('.badge');
+    if(count>0){ badge.textContent = count; badge.classList.add('show'); }
+  });
+}
+
+/* ---- 段一覧(本棚ビュー) ---- */
+function renderShelf(node){
+  showScreen('shelf');
+  document.getElementById('headerSub').textContent = navPath[navPath.length-1].name;
+  renderBreadcrumb();
+  const wrap = document.getElementById('screenShelf');
+  wrap.innerHTML = '';
+  node.children.forEach(child=>{
+    const tier = document.createElement('div');
+    tier.className = 'shelf-tier';
+
+    const left = document.createElement('div');
+    left.style.cssText = 'display:flex;align-items:center;flex-shrink:0;';
+    left.innerHTML = `<span class="tier-name">${child.name}</span>`;
+    const count = countItemsUnder([...navPath, {key:child.key,name:child.name}], child);
+    if(count>0){
+      const badge = document.createElement('span');
+      badge.className = 'tier-badge';
+      badge.textContent = count;
+      left.appendChild(badge);
+    }
+    tier.appendChild(left);
+
+    if(child.layout==='zone' && child.children && child.children.length>0){
+      const zoneWrap = document.createElement('div');
+      zoneWrap.className = 'shelf-zones-inline';
+      child.children.forEach(z=>{
+        const chip = document.createElement('div');
+        chip.className = 'zone-chip';
+        chip.textContent = z.name;
+        zoneWrap.appendChild(chip);
+      });
+      tier.appendChild(zoneWrap);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'tier-actions';
+    const editSpan = document.createElement('span');
+    editSpan.textContent = '✏️';
+    editSpan.onclick = (e)=>{
+      e.stopPropagation();
+      const newName = prompt('名前を入れてな', child.name);
+      if(newName && newName.trim()){ child.name = newName.trim(); saveHouseTree(); renderShelf(node); }
+    };
+    const delSpan = document.createElement('span');
+    delSpan.textContent = '🗑';
+    delSpan.onclick = (e)=>{ e.stopPropagation(); deleteChild(node, child); };
+    actions.appendChild(editSpan);
+    actions.appendChild(delSpan);
+    tier.appendChild(actions);
+
+    tier.onclick = ()=>{ navPath = [...navPath, {key:child.key, name:child.name}]; renderCurrent(); };
+    wrap.appendChild(tier);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-tier-btn';
+  addBtn.textContent = '＋段を追加する';
+  addBtn.onclick = ()=> openAddChildScreen('shelf');
+  wrap.appendChild(addBtn);
+}
+
+/* ---- 区画一覧(横並びビュー) ---- */
+function renderZone(node){
+  showScreen('zone');
+  document.getElementById('headerSub').textContent = navPath[navPath.length-1].name;
+  renderBreadcrumb();
+  const wrap = document.getElementById('screenZone');
+  wrap.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'zone-row';
+  node.children.forEach(child=>{
+    const box = document.createElement('div');
+    box.className = 'zone-box';
+    const count = countItemsUnder([...navPath, {key:child.key,name:child.name}], child);
+    box.innerHTML = `
+      <span class="zone-edit">✏️</span>
+      <span class="zone-del">🗑</span>
+      <div class="zone-name">${child.name}</div>
+      ${count>0 ? `<span class="zone-badge">${count}</span>` : ''}
+    `;
+    box.querySelector('.zone-edit').onclick = (e)=>{
+      e.stopPropagation();
+      const newName = prompt('名前を入れてな', child.name);
+      if(newName && newName.trim()){ child.name = newName.trim(); saveHouseTree(); renderZone(node); }
+    };
+    box.querySelector('.zone-del').onclick = (e)=>{ e.stopPropagation(); deleteChild(node, child); };
+    box.onclick = ()=>{ navPath = [...navPath, {key:child.key, name:child.name}]; renderCurrent(); };
+    row.appendChild(box);
+  });
+  wrap.appendChild(row);
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-tier-btn';
+  addBtn.textContent = '＋この場所にもう1つ区画を追加する';
+  addBtn.onclick = ()=> openAddChildScreen('zone');
+  wrap.appendChild(addBtn);
+}
+
+// 子ノード削除(中に入ってるアイテムデータも一緒に掃除する)
+function deleteChild(parentNode, child){
+  if(!confirm(`「${child.name}」を消すで。中に登録したアイテムも一緒に消えるけど、ええか？`)) return;
+  parentNode.children = parentNode.children.filter(c=>c.key!==child.key);
+  const data = loadData();
+  const keysToClean = [];
+  (function collectKeys(path, n){
+    keysToClean.push(pathToStorageKey(path));
+    (n.children||[]).forEach(c=>collectKeys([...path, {key:c.key,name:c.name}], c));
+  })([...navPath, {key:child.key,name:child.name}], child);
+  keysToClean.forEach(k=> delete data[k]);
+  saveData(data);
+  if(parentNode.children.length===0){ delete parentNode.layout; }
+  saveHouseTree();
+  renderCurrent();
+}
+
+/* ---- 仕切り(段/区画)を追加する画面 ---- */
+let partitionMode = null;        // 'shelf' | 'zone' | 'zoneLoop'
+let partitionParentPath = null;  // 仕切りを追加する対象ノードのnavPath
+
+function openAddChildScreen(mode){
+  partitionMode = mode;
+  partitionParentPath = navPath.slice();
+  document.getElementById('addChildName').value = '';
+  document.getElementById('addChildLoopArea').style.display = 'none';
+  document.getElementById('addChildTitle').textContent = mode==='shelf' ? '段の名前をつけてな' : '区画の名前をつけてな';
+  document.getElementById('addChildHint').textContent = mode==='shelf' ? '例：段1、上段、下段' : '例：左、右、収納ボックスA';
+  showScreen('addChild');
+}
+
+function confirmAddChild(){
+  const name = document.getElementById('addChildName').value.trim();
+  if(!name){ alert('名前を入れてな'); return; }
+  const node = findNodeByPath(partitionParentPath);
+  if(!node) return;
+  if(!node.children || node.children.length===0){
+    const data = loadData();
+    const key = pathToStorageKey(partitionParentPath);
+    if((data[key]||[]).length>0){
+      if(!confirm('ここに直接登録したアイテムがあるけど、仕切りを追加すると一覧から見えんくなるで。それでも続ける？')) return;
+    }
+    node.children = [];
+    node.layout = (partitionMode==='zone' || partitionMode==='zoneLoop') ? 'zone' : 'shelf';
+  }
+  const usedKeys = new Set(node.children.map(c=>c.key));
+  const base = nameToId(name);
+  const key = uniqueKey(base, usedKeys);
+  node.children.push({ key, name });
+  saveHouseTree();
+
+  if(partitionMode==='zoneLoop'){
+    document.getElementById('addChildName').value = '';
+    document.getElementById('addChildName').focus();
+    document.getElementById('addChildLoopArea').style.display = 'block';
+    return;
+  }
+  navPath = partitionParentPath.slice();
+  renderCurrent();
+}
+
+function cancelAddChild(){
+  navPath = partitionParentPath ? partitionParentPath.slice() : navPath;
+  renderCurrent();
+}
+
+/* ---- 区切り方をえらぶ画面 ---- */
+function openDivideScreen(){
+  partitionParentPath = navPath.slice();
+  showScreen('divide');
+}
+
+function cancelDivide(){
+  navPath = partitionParentPath.slice();
+  renderCurrent();
+}
+
+function quickDivide(n){
+  const node = findNodeByPath(partitionParentPath);
+  if(!node) return;
+  const data = loadData();
+  const key = pathToStorageKey(partitionParentPath);
+  if((data[key]||[]).length>0){
+    if(!confirm('ここに直接登録したアイテムがあるけど、区切ると一覧から見えんくなるで。それでも続ける？')) return;
+  }
+  const names = n===2 ? ['左','右'] : ['左','中央','右'];
+  const usedKeys = new Set();
+  node.children = names.map(nm=>{
+    const base = nameToId(nm);
+    const k = uniqueKey(base, usedKeys);
+    return { key:k, name:nm };
+  });
+  node.layout = 'zone';
+  saveHouseTree();
+  navPath = partitionParentPath.slice();
+  renderCurrent();
+}
+
+function startFreeZoneLoop(){
+  partitionMode = 'zoneLoop';
+  document.getElementById('addChildName').value = '';
+  document.getElementById('addChildLoopArea').style.display = 'none';
+  document.getElementById('addChildTitle').textContent = '区画の名前をつけてな';
+  document.getElementById('addChildHint').textContent = '例：左、右、収納ボックスA。1個ずつ追加していけるで';
+  showScreen('addChild');
+}
+
+function finishZoneLoop(){
+  navPath = partitionParentPath.slice();
+  renderCurrent();
+}
+
+/* ---- 入力画面(一番深い階層) ---- */
+function renderInput(){
+  showScreen('input');
+  document.getElementById('headerSub').textContent = navPath.map(p=>p.name).join(' / ');
+  renderBreadcrumb();
+  renderCatGrid();
+  resetForm();
+  renderItems();
+}
+
+function renderCatGrid(){
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  categories.forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'cat-opt';
+    div.style.background = cat.color;
+    div.innerHTML = `<span class="icon">${cat.icon}</span>${cat.name}`;
+    div.onclick = () => {
+      selectedCategory = cat.id;
+      document.querySelectorAll('.cat-opt').forEach(el=>el.classList.remove('selected'));
+      div.classList.add('selected');
+    };
+    grid.appendChild(div);
+  });
+}
+
+function resetForm(){
+  selectedCategory = null;
+  pendingPhotoDataUrl = null;
+  document.getElementById('newName').value = '';
+  document.getElementById('newQty').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoInput').value = '';
+}
+
+function onPhotoSelected(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 400;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('photoPreview');
+      preview.src = pendingPhotoDataUrl;
+      preview.style.display = 'block';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderItems(){
+  const key = pathToStorageKey(navPath);
+  const data = loadData();
+  const items = data[key] || [];
+  const list = document.getElementById('itemList');
+  list.innerHTML = '';
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty-msg">まだ何も登録されてへんで</div>';
+    return;
+  }
+  items.forEach(item=>{
+    const cat = categories.find(c=>c.id===item.categoryId) || categories[categories.length-1];
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      ${item.photo ? `<img src="${item.photo}">` : `<div class="no-photo">${cat.icon}</div>`}
+      <div class="item-info">
+        <span class="cat-chip" style="background:${cat.color}">${cat.icon} ${cat.name}</span>
+        <div class="item-name"></div>
+        <div class="item-qty"></div>
+        <div class="item-actions">
+          <button onclick="deleteItem('${item.id}')" class="danger">削除</button>
+        </div>
+      </div>
+    `;
+    card.querySelector('.item-name').textContent = item.name;
+    card.querySelector('.item-qty').textContent = item.qty ? item.qty : '';
+    list.appendChild(card);
+  });
+}
+
+function addItem(){
+  const name = document.getElementById('newName').value.trim();
+  const qty = document.getElementById('newQty').value.trim();
+  if(!name){ alert('名前を入れてな'); return; }
+  if(!selectedCategory){ alert('カテゴリをえらんでな'); return; }
+  const key = pathToStorageKey(navPath);
+  const data = loadData();
+  if(!data[key]) data[key] = [];
+  data[key].push({
+    id: 'i'+Date.now(),
+    name, qty,
+    categoryId: selectedCategory,
+    photo: pendingPhotoDataUrl,
+  });
+  saveData(data);
+  resetForm();
+  document.querySelectorAll('.cat-opt').forEach(el=>el.classList.remove('selected'));
+  renderItems();
+}
+
+function deleteItem(itemId){
+  if(!confirm('これ削除してええ？')) return;
+  const key = pathToStorageKey(navPath);
+  const data = loadData();
+  data[key] = (data[key]||[]).filter(i=>i.id!==itemId);
+  saveData(data);
+  renderItems();
+}
+
+/* ---------------- 間取りインポート ---------------- */
+document.getElementById('importToggleBtn').onclick = ()=>{
+  const p = document.getElementById('importPanel');
+  p.style.display = (p.style.display==='none' || !p.style.display) ? 'block' : 'none';
+};
+document.getElementById('importCancelBtn').onclick = ()=>{
+  document.getElementById('importPanel').style.display = 'none';
+  document.getElementById('importArea').value = '';
+};
+document.getElementById('importRunBtn').onclick = ()=>{
+  const raw = document.getElementById('importArea').value.trim();
+  if(!raw){ alert('JSONを貼ってな'); return; }
+  let data;
+  try{ data = JSON.parse(raw); }catch(e){ alert('JSONの形が読み取れんかった…コピーしなおしてみてな'); return; }
+  if(!Array.isArray(data)){ alert('部屋タイル作成ツールの書き出しJSONを貼ってな'); return; }
+  if(!confirm('今の間取りデータを、貼った内容で丸ごと入れ替えるで。ええか？')) return;
+  const newTree = convertRoomTileExport(data);
+  houseTree = newTree;
+  gridSize = computeGridSize(newTree);
+  saveHouseTree();
+  saveGridSize();
+  document.getElementById('importPanel').style.display = 'none';
+  document.getElementById('importArea').value = '';
+  navPath = [];
+  renderHouse();
+  alert('読み込んだで！収納の名前は各部屋の中の✏️マークからいつでも変えられるで');
+};
+
+renderHouse();
+</script>
+</body>
+</html>
