@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自分の通信は、どこを通っているのか</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF9F4;
+    --ink:#23272D;
+    --sub:#6B7280;
+    --line-normal:#1E66B8;
+    --line-vpn:#7A4FBF;
+    --line-dns:#C8861F;
+    --line-alert:#C8463C;
+    --line-ok:#2E8B57;
+    --card:#FFFFFF;
+    --rule:#E2E0D8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    line-height:1.85;
+    font-size:15px;
+  }
+  .wrap{max-width:660px;margin:0 auto;padding:0 18px 80px;}
+
+  /* ── ヒーロー ── */
+  header{
+    padding:56px 0 36px;
+    border-bottom:3px solid var(--ink);
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:11px;
+    letter-spacing:.18em;
+    font-weight:700;
+    color:var(--paper);
+    background:var(--ink);
+    padding:3px 10px;
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Zen Old Mincho',serif;
+    font-weight:900;
+    font-size:clamp(26px,7vw,38px);
+    line-height:1.45;
+    letter-spacing:.02em;
+  }
+  .lede{margin-top:16px;color:var(--sub);font-size:14px;}
+
+  /* ── セクション見出し:駅名標風 ── */
+  section{margin-top:64px;}
+  .station-sign{
+    border:2px solid var(--ink);
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:24px;
+    background:var(--card);
+  }
+  .station-sign .bar{height:8px;}
+  .station-sign .label{
+    padding:10px 14px 8px;
+  }
+  .station-sign .no{
+    font-size:11px;
+    letter-spacing:.15em;
+    font-weight:700;
+    color:var(--sub);
+  }
+  .station-sign h2{
+    font-family:'Zen Old Mincho',serif;
+    font-weight:700;
+    font-size:20px;
+    line-height:1.4;
+  }
+  p{margin-bottom:14px;}
+  p:last-child{margin-bottom:0;}
+  strong{font-weight:700;}
+  .note{
+    font-size:13px;
+    color:var(--sub);
+    border-left:3px solid var(--rule);
+    padding-left:12px;
+    margin-top:18px;
+  }
+
+  /* ── 伝票(パケット)カード ── */
+  .packet{
+    background:var(--card);
+    border:1.5px solid var(--ink);
+    border-radius:4px;
+    max-width:340px;
+    margin:22px auto;
+    box-shadow:4px 4px 0 var(--rule);
+  }
+  .packet .head{
+    background:var(--ink);
+    color:var(--paper);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.12em;
+    padding:6px 12px;
+  }
+  .packet table{width:100%;border-collapse:collapse;font-size:13px;}
+  .packet td{padding:9px 12px;border-bottom:1px dashed var(--rule);vertical-align:top;}
+  .packet tr:last-child td{border-bottom:none;}
+  .packet .k{width:5.5em;color:var(--sub);font-weight:500;white-space:nowrap;}
+  .packet .v{font-weight:700;}
+  .packet .v small{display:block;font-weight:400;color:var(--sub);font-size:11px;line-height:1.5;}
+
+  /* ── 縦型路線図(配送ルート) ── */
+  .routemap{
+    background:var(--card);
+    border:1.5px solid var(--rule);
+    border-radius:10px;
+    padding:22px 18px 18px;
+    margin:22px 0;
+  }
+  .route{list-style:none;position:relative;}
+  .route li{
+    position:relative;
+    padding:0 0 26px 34px;
+  }
+  .route li:last-child{padding-bottom:0;}
+  .route li::before{
+    content:"";
+    position:absolute;
+    left:9px;top:14px;
+    width:6px;height:100%;
+    background:var(--route-color,var(--line-normal));
+    border-radius:3px;
+  }
+  .route li:last-child::before{display:none;}
+  .route li::after{
+    content:"";
+    position:absolute;
+    left:4px;top:4px;
+    width:16px;height:16px;
+    background:var(--card);
+    border:4px solid var(--route-color,var(--line-normal));
+    border-radius:50%;
+  }
+  .route .st-name{font-weight:700;font-size:15px;line-height:1.5;}
+  .route .st-desc{font-size:12.5px;color:var(--sub);line-height:1.65;margin-top:2px;}
+  .route li.detour::before,
+  .route li.detour::after{border-color:var(--line-vpn);}
+  .route li.detour .st-name{color:var(--line-vpn);}
+
+  /* ── インタラクティブ切替 ── */
+  .mode-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .mode-tabs button{
+    flex:1;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    padding:10px 4px;
+    border:2px solid var(--ink);
+    border-radius:8px;
+    background:var(--card);
+    color:var(--ink);
+    cursor:pointer;
+    transition:background .15s,color .15s;
+  }
+  .mode-tabs button[aria-pressed="true"]{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .mode-pane{display:none;}
+  .mode-pane.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion: reduce){
+    .mode-pane.active{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+
+  /* 判定札 */
+  .verdict{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13.5px;
+    line-height:1.7;
+    margin-top:16px;
+    font-weight:500;
+  }
+  .verdict .mark{
+    font-size:18px;
+    font-weight:900;
+    line-height:1.4;
+  }
+  .verdict.ok{background:#EAF4EC;color:#1F5C38;}
+  .verdict.ng{background:#F9ECEA;color:#8A2F27;}
+
+  /* ── 案内係とのやり取り(チャット風) ── */
+  .dns-talk{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin:22px 0;
+  }
+  .bubble{
+    max-width:85%;
+    padding:10px 14px;
+    border-radius:14px;
+    font-size:13.5px;
+    line-height:1.7;
+    position:relative;
+  }
+  .bubble .who{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--sub);
+    margin-bottom:2px;
+  }
+  .bubble.q{
+    align-self:flex-start;
+    background:var(--card);
+    border:1.5px solid var(--rule);
+    border-bottom-left-radius:4px;
+  }
+  .bubble.a{
+    align-self:flex-end;
+    background:#FBF3E2;
+    border:1.5px solid #E8D5A8;
+    border-bottom-right-radius:4px;
+  }
+  .mono{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:.92em;
+    background:rgba(0,0,0,.05);
+    padding:1px 5px;
+    border-radius:4px;
+    word-break:break-all;
+  }
+
+  /* ── 4層チェック ── */
+  .layers{display:flex;flex-direction:column;gap:12px;margin:22px 0;}
+  .layer{
+    background:var(--card);
+    border:1.5px solid var(--rule);
+    border-left:6px solid var(--layer-color,var(--ink));
+    border-radius:8px;
+    padding:12px 14px;
+  }
+  .layer .l-head{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .layer .l-name{font-weight:700;font-size:15px;}
+  .layer .l-scope{
+    font-size:11px;
+    font-weight:700;
+    color:var(--paper);
+    background:var(--layer-color,var(--ink));
+    border-radius:99px;
+    padding:1px 9px;
+  }
+  .layer .l-desc{font-size:13px;color:var(--sub);margin-top:4px;line-height:1.7;}
+  .layer .l-where{
+    font-size:12.5px;
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed var(--rule);
+  }
+  .layer .l-where b{font-weight:700;}
+
+  footer{
+    margin-top:72px;
+    padding-top:20px;
+    border-top:1px solid var(--rule);
+    font-size:12px;
+    color:var(--sub);
+    line-height:1.8;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">ネットワークのしくみ 図解 — 通販でわかる版</span>
+    <h1>自分の通信は、<br>どこを通っているのか</h1>
+    <p class="lede">Cloudflareの検証ループ事件で学んだことの総まとめ。ネットの通信は「お店(サイト)への注文と配達」だと思って読むと、全部つながります。</p>
+  </header>
+
+  <!-- 1. パケット = 荷物 -->
+  <section>
+    <div class="station-sign">
+      <div class="bar" style="background:var(--line-normal)"></div>
+      <div class="label">
+        <span class="no">その 1</span>
+        <h2>通信の正体は「伝票つきの荷物」</h2>
+      </div>
+    </div>
+    <p>ネットの通信はぜんぶ、<strong>宛先と送り元の住所が書かれた荷物(パケット)</strong>のやり取りです。Webサイトを見るのは、お店に「返送先住所つきの注文票」を送って、商品(ページ)を届けてもらうのと同じ構造。</p>
+    <div class="packet">
+      <div class="head">📦 荷物の伝票</div>
+      <table>
+        <tr><td class="k">宛先</td><td class="v"><span class="mono">104.16.124.96</span><small>お店(サイト)の住所 = IPアドレス</small></td></tr>
+        <tr><td class="k">送り元</td><td class="v"><span class="mono">126.78.xx.xx</span><small>自分の住所 = 自分のIPアドレス。ただし持ち家ではなく、回線会社(大家さん)から借りている部屋</small></td></tr>
+        <tr><td class="k">中身</td><td class="v">「このページください」</td></tr>
+      </table>
+    </div>
+    <p>大事なのは送り元の欄。この住所(IPアドレス)は、ドコモやソフトバンクなどの<strong>回線会社=大家さんから借りているもの</strong>です。だから住所を見れば「どこの国の・どの会社のマンションの住人か」がだいたい分かる。お店側はこの<strong>住所の素性</strong>を見て、まともなお客さんかどうかを判断しています。</p>
+  </section>
+
+  <!-- 2. DNS = 住所を調べる案内係 -->
+  <section>
+    <div class="station-sign">
+      <div class="bar" style="background:var(--line-dns)"></div>
+      <div class="label">
+        <span class="no">その 2</span>
+        <h2>DNS:お店の名前から住所を調べる案内係</h2>
+      </div>
+    </div>
+    <p>荷物は住所(IPアドレス)宛にしか送れません。でも私たちが知っているのは <span class="mono">dash.cloudflare.com</span> という<strong>お店の名前</strong>だけ。そこで毎回、注文の前にこんなやり取りが裏で走っています。</p>
+    <div class="dns-talk">
+      <div class="bubble q"><span class="who">あなたの端末</span>「<span class="mono">dash.cloudflare.com</span> ってお店、住所どこですか?」</div>
+      <div class="bubble a"><span class="who">案内係(DNS)</span>「<span class="mono">104.16.124.96</span> ですね、どうぞ」</div>
+    </div>
+    <p>この案内係、普段は<strong>マンション備え付けの係(=回線会社のDNS)</strong>に聞いています。ところがChromeの<strong>セキュアDNS</strong>をオンにすると、質問が盗み聞きされない封筒入りになる代わりに、聞く相手が<strong>Googleなど外部の案内サービス</strong>に変わることがあります。これが後で効いてきます。</p>
+  </section>
+
+  <!-- 3. 配送ルート切替 -->
+  <section>
+    <div class="station-sign">
+      <div class="bar" style="background:linear-gradient(90deg,var(--line-normal) 33%,var(--line-vpn) 33% 66%,var(--line-dns) 66%)"></div>
+      <div class="label">
+        <span class="no">その 3</span>
+        <h2>配送ルート図:3パターンを切り替えてみる</h2>
+      </div>
+    </div>
+    <p>同じお店に注文するのでも、設定しだいで荷物の通り道が変わります。タップして、<strong>お店側から自分がどう見えるか</strong>の違いを見てください。</p>
+
+    <div class="routemap">
+      <div class="mode-tabs" role="tablist">
+        <button type="button" aria-pressed="true" data-mode="normal">ふつう</button>
+        <button type="button" aria-pressed="false" data-mode="vpn">匿名配送(VPN)</button>
+        <button type="button" aria-pressed="false" data-mode="sdns">セキュアDNS</button>
+      </div>
+
+      <!-- ふつう -->
+      <div class="mode-pane active" id="pane-normal">
+        <ul class="route" style="--route-color:var(--line-normal)">
+          <li>
+            <div class="st-name">あなたの端末</div>
+            <div class="st-desc">マンション備え付けの案内係にお店の住所を聞いてから、注文の荷物を発送</div>
+          </li>
+          <li>
+            <div class="st-name">回線会社(大家さん)</div>
+            <div class="st-desc">ここで部屋つきの住所をもらってネットの世界へ。日本の普通の回線なら、素性のしっかりした住所</div>
+          </li>
+          <li>
+            <div class="st-name">お店(サイト)</div>
+            <div class="st-desc">注文到着。商品(ページ)は伝票の住所宛に返送される</div>
+          </li>
+        </ul>
+        <div class="verdict ok"><span class="mark">○</span><span>お店から見える姿:「ちゃんとした住所から、自然な手順で来た注文」。住所の素性も注文の手順も一致していて、すんなり通る。</span></div>
+      </div>
+
+      <!-- VPN = 匿名配送 -->
+      <div class="mode-pane" id="pane-vpn">
+        <ul class="route" style="--route-color:var(--line-vpn)">
+          <li>
+            <div class="st-name">あなたの端末</div>
+            <div class="st-desc">荷物を中身の見えない箱に入れて(暗号化して)発送</div>
+          </li>
+          <li class="detour">
+            <div class="st-name">中継倉庫(VPN業者) — 寄り道</div>
+            <div class="st-desc">メルカリの匿名配送と同じ仕組み。ここで伝票を貼り替え、送り元が「倉庫の住所」になる。あなたの本当の住所はお店に渡らない</div>
+          </li>
+          <li>
+            <div class="st-name">お店(サイト)</div>
+            <div class="st-desc">注文到着。ただし見えるのは中継倉庫の住所だけ</div>
+          </li>
+        </ul>
+        <div class="verdict ng"><span class="mark">△</span><span>お店から見える姿:「世界中の人が相乗りしている倉庫の住所」。同じ住所をいたずら注文の常習者や転売botも使うため<b>住所の評判が悪く</b>、利用者全員がまとめて疑われる。→ 検証ループの原因①</span></div>
+      </div>
+
+      <!-- セキュアDNS -->
+      <div class="mode-pane" id="pane-sdns">
+        <ul class="route" style="--route-color:var(--line-dns)">
+          <li>
+            <div class="st-name">あなたの端末</div>
+            <div class="st-desc">お店の住所を、備え付けの係ではなく外部の案内サービス(Googleなど)に聞く</div>
+          </li>
+          <li>
+            <div class="st-name">回線会社(大家さん)</div>
+            <div class="st-desc">荷物そのものはいつも通りここから発送。住所も普段の借り部屋のまま</div>
+          </li>
+          <li>
+            <div class="st-name">お店(サイト)</div>
+            <div class="st-desc">注文到着。でも「住所は新潟なのに、道案内だけ毎回東京の係に聞いてる」状態</div>
+          </li>
+        </ul>
+        <div class="verdict ng"><span class="mark">△</span><span>お店から見える姿:「住所と注文の手順がチグハグなお客さん」。悪い人ではないのに、普通のお客さんのパターンから外れていて不正注文チェックに引っかかる。→ 検証ループの原因②</span></div>
+      </div>
+    </div>
+
+    <p class="note">Cloudflareの検証は、お店の入口にある<strong>いたずら・不正注文チェック</strong>です。見ているのは「素性の一貫性」。住所の評判が悪い、または住所と手順がチグハグ──どちらかに当てはまると「botかも」と疑いを強め、あの確認画面を出してきます。</p>
+  </section>
+
+  <!-- 4. 4層 -->
+  <section>
+    <div class="station-sign">
+      <div class="bar" style="background:var(--line-alert)"></div>
+      <div class="label">
+        <span class="no">その 4</span>
+        <h2>端末に潜む「配送ルートをいじる4つの層」</h2>
+      </div>
+    </div>
+    <p>あなたのGalaxyには、荷物のルートや案内係を勝手に変える機能が<strong>4層</strong>あります。検証ループが出たら、上から順に「復活していないか」を疑えばほぼ当たります。</p>
+
+    <div class="layers">
+      <div class="layer" style="--layer-color:var(--line-vpn)">
+        <div class="l-head"><span class="l-name">① VPN</span><span class="l-scope">荷物ぜんぶ</span></div>
+        <div class="l-desc">すべての荷物を中継倉庫経由(匿名配送)にする。一番影響が大きい。「常時接続VPN」がオンだと、切っても勝手に復活する。</div>
+        <div class="l-where">📍 設定 → 接続 → その他の接続設定 → <b>VPN</b>(ステータスバーの🔑マークでも分かる)</div>
+      </div>
+      <div class="layer" style="--layer-color:var(--line-dns)">
+        <div class="l-head"><span class="l-name">② プライベートDNS</span><span class="l-scope">Android全体</span></div>
+        <div class="l-desc">端末全体の案内係を外部サービスに変える。Chromeだけでなく全アプリの注文に効く。</div>
+        <div class="l-where">📍 設定 → 接続 → その他の接続設定 → <b>プライベートDNS</b></div>
+      </div>
+      <div class="layer" style="--layer-color:var(--line-dns)">
+        <div class="l-head"><span class="l-name">③ セキュアDNS</span><span class="l-scope">Chromeだけ</span></div>
+        <div class="l-desc">Chromeの中だけ案内係を変える。今回の犯人。質問を封筒に入れる(暗号化)こと自体は良い機能だが、係が変わるのが引っかかりの元。</div>
+        <div class="l-where">📍 Chrome → 設定 → プライバシーとセキュリティ → <b>セキュアDNSを使用する</b></div>
+      </div>
+      <div class="layer" style="--layer-color:var(--line-vpn)">
+        <div class="l-head"><span class="l-name">④ セキュアWi-Fi</span><span class="l-scope">Galaxy独自</span></div>
+        <div class="l-desc">Samsungが裏で荷物を中継する、実質VPN。存在を忘れがちなのに影響は匿名配送並み。</div>
+        <div class="l-where">📍 設定アプリの検索で「<b>セキュアWi-Fi</b>」</div>
+      </div>
+    </div>
+
+    <p class="note">4つとも「プライバシーを守るための機能」で、悪者ではありません。ただし<strong>素性の一貫性を崩す</strong>という副作用があり、お店の不正注文チェックとは相性が悪い──というのが今回の事件の全体像です。家のWi-Fiやスマホ回線での日常使いなら、切っておいても実害はまずありません。</p>
+  </section>
+
+  <footer>
+    まとめ:検証ループに会ったら「🔑マーク → VPN → プライベートDNS → セキュアDNS → セキュアWi-Fi」の順で疑う。それでもダメならCookie削除、最後に回線切り替え(Wi-Fi⇄モバイル)で新しい住所をもらう。<br>
+    2026年6月版 / ハノイさんのCloudflare格闘記より
+  </footer>
+
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.mode-tabs button');
+  const panes = {
+    normal: document.getElementById('pane-normal'),
+    vpn: document.getElementById('pane-vpn'),
+    sdns: document.getElementById('pane-sdns')
+  };
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+      const mode = btn.dataset.mode;
+      Object.entries(panes).forEach(([k, el]) => {
+        el.classList.toggle('active', k === mode);
+      });
+    });
+  });
+</script>
+</body>
+</html>
