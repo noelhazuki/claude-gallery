@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>わたしの取説マップ</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+    background:#f4f1ea; color:#2e2a26; padding:20px 16px 60px;
+    line-height:1.6;
+  }
+  h1 { font-size:1.4rem; text-align:center; margin-bottom:4px; }
+  .sub { text-align:center; font-size:.8rem; color:#8a8278; margin-bottom:24px; }
+  .grid { display:flex; flex-direction:column; gap:14px; max-width:520px; margin:0 auto; }
+  .card {
+    border-radius:14px; padding:16px 18px; color:#fff;
+    box-shadow:0 3px 8px rgba(0,0,0,.12); position:relative;
+  }
+  .num {
+    position:absolute; top:14px; right:16px;
+    font-size:2.2rem; font-weight:800; opacity:.25;
+  }
+  .ttl { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+  .tags { font-size:.82rem; opacity:.95; }
+  .c1{background:#5b8c9e;} .c2{background:#c98b5e;}
+  .c3{background:#9e6b8c;} .c4{background:#6b8e6b;}
+  .c5{background:#8a7fb0;} .c6{background:#c2746a;}
+  .c7{background:#7a8c5b;} .c8{background:#9e8a5e;}
+  .flow {
+    max-width:520px; margin:24px auto 0; padding:14px 16px;
+    background:#fff; border-radius:12px; font-size:.85rem;
+    border:1px dashed #c9bfa8;
+  }
+  .flow b { color:#c2746a; }
+</style>
+</head>
+<body>
+  <h1>🗺 わたしの取説マップ</h1>
+  <div class="sub">困った時はここから「今どれ？」を指差す</div>
+  <div class="grid">
+    <div class="card c1"><div class="num">1</div><div class="ttl">脳のコンディション</div><div class="tags">やる気のムラ・眠気・午後型・ホルモン周期</div></div>
+    <div class="card c2"><div class="num">2</div><div class="ttl">刺激と興味</div><div class="tags">熱しやすく冷めやすい・感覚で選ぶ・ジプシー</div></div>
+    <div class="card c3"><div class="num">3</div><div class="ttl">記憶とワーキングメモリ</div><div class="tags">メメント問題・暗記苦手・顔と名前・爆発イライラ</div></div>
+    <div class="card c4"><div class="num">4</div><div class="ttl">思考のクセ</div><div class="tags">図解で考える・数字が苦手・空間認識</div></div>
+    <div class="card c5"><div class="num">5</div><div class="ttl">感覚過敏</div><div class="tags">におい・音・眠りの浅さ</div></div>
+    <div class="card c6"><div class="num">6</div><div class="ttl">行動と不安</div><div class="tags">即行動・つめが甘い・ビビり・モヤモヤ</div></div>
+    <div class="card c7"><div class="num">7</div><div class="ttl">片付けと環境</div><div class="tags">散らかる・風景化・見えなくなる</div></div>
+    <div class="card c8"><div class="num">8</div><div class="ttl">完璧主義と先延ばし</div><div class="tags">0か100・ハードル上げすぎ・結局やらない</div></div>
+  </div>
+  <div class="flow">
+    <b>爆発の川の流れ：</b> 散らかる（7）→ 処理しきれず風景化（7）→ 抱えきれず容量オーバー（3）→ パンクして爆発イライラ（3）。完璧主義（8）が入口のハードルを上げて、やる気のムラ（1）が引き金になる。
+  </div>
+</body>
+</html>
