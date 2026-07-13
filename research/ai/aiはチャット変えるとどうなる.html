@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クローン引き継ぎ図解</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0f1117;
+  color: #e2e8f0;
+  font-family: 'Hiragino Sans','Noto Sans JP',sans-serif;
+  padding: 20px 16px 60px;
+  font-size: 13px;
+}
+h1 { font-size: 15px; font-weight: 900; color: #7dd3fc; margin-bottom: 2px; }
+.sub { font-size: 11px; color: #475569; margin-bottom: 24px; }
+
+svg { width: 100%; height: auto; overflow: visible; }
+
+/* ノード共通 */
+.box-human   { fill: #1e2e28; stroke: #6abf8a; stroke-width: 1.5; rx: 10; }
+.box-box     { fill: #2a2210; stroke: #b8a060; stroke-width: 1.5; }
+.box-claude  { fill: #0f2033; stroke: #7dd3fc; stroke-width: 1.5; }
+.box-memory  { fill: #1e1a2e; stroke: #9a86b8; stroke-width: 1.5; stroke-dasharray: 4 2; }
+
+.label-human  { fill: #6abf8a; font-size: 11px; font-weight: 700; font-family: 'Hiragino Sans','Noto Sans JP',sans-serif; }
+.label-box    { fill: #b8a060; font-size: 11px; font-weight: 700; font-family: 'Hiragino Sans','Noto Sans JP',sans-serif; }
+.label-claude { fill: #7dd3fc; font-size: 11px; font-weight: 700; font-family: 'Hiragino Sans','Noto Sans JP',sans-serif; }
+.label-memory { fill: #9a86b8; font-size: 11px; font-weight: 700; font-family: 'Hiragino Sans','Noto Sans JP',sans-serif; }
+.label-sub    { fill: #64748b; font-size: 9.5px; font-family: 'Hiragino Sans','Noto Sans JP',sans-serif; }
+
+.arrow { stroke: #334155; stroke-width: 1.5; fill: none; marker-end: url(#arr); }
+.arrow-upload { stroke: #b8a060; stroke-width: 1.5; fill: none; marker-end: url(#arr-gold); stroke-dasharray: 4 2; }
+.arrow-read   { stroke: #7dd3fc; stroke-width: 1.5; fill: none; marker-end: url(#arr-cyan); stroke-dasharray: 4 2; }
+.arrow-memory { stroke: #9a86b8; stroke-width: 1.2; fill: none; marker-end: url(#arr-purple); stroke-dasharray: 3 2; }
+
+.step-circle { fill: #1e293b; stroke: #334155; stroke-width: 1; }
+.step-num { fill: #94a3b8; font-size: 10px; font-weight: 900; font-family: sans-serif; }
+
+.section-label { fill: #2e3336; font-size: 10px; font-weight: 800; letter-spacing: .1em; font-family: sans-serif; }
+</style>
+</head>
+<body>
+<h1>🔄 クローン引き継ぎ運用</h1>
+<p class="sub">チャットをまたいでコンテキストを維持する仕組み</p>
+
+<svg viewBox="0 0 340 580" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#334155"/>
+  </marker>
+  <marker id="arr-gold" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#b8a060"/>
+  </marker>
+  <marker id="arr-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#7dd3fc"/>
+  </marker>
+  <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#9a86b8"/>
+  </marker>
+</defs>
+
+<!-- ===== 凡例 ===== -->
+<rect x="8" y="4" width="10" height="10" fill="#1e2e28" stroke="#6abf8a" stroke-width="1.2" rx="2"/>
+<text x="22" y="13" fill="#6abf8a" font-size="9" font-family="sans-serif">自分</text>
+<rect x="60" y="4" width="10" height="10" fill="#2a2210" stroke="#b8a060" stroke-width="1.2" rx="2"/>
+<text x="74" y="13" fill="#b8a060" font-size="9" font-family="sans-serif">Box</text>
+<rect x="100" y="4" width="10" height="10" fill="#0f2033" stroke="#7dd3fc" stroke-width="1.2" rx="2"/>
+<text x="114" y="13" fill="#7dd3fc" font-size="9" font-family="sans-serif">Claude</text>
+<rect x="160" y="4" width="10" height="10" fill="#1e1a2e" stroke="#9a86b8" stroke-width="1.2" rx="2" stroke-dasharray="3 2"/>
+<text x="174" y="13" fill="#9a86b8" font-size="9" font-family="sans-serif">メモリ（全チャット共通）</text>
+
+<!-- ===== 【作業フェーズ】===== -->
+<text x="8" y="35" class="section-label" fill="#334155" font-size="9" font-weight="800" font-family="sans-serif" letter-spacing="1">▌ 作業中</text>
+
+<!-- 自分 -->
+<rect x="10" y="42" width="100" height="44" fill="#1e2e28" stroke="#6abf8a" stroke-width="1.5" rx="10"/>
+<text x="60" y="61" class="label-human" text-anchor="middle">👤 自分</text>
+<text x="60" y="76" class="label-sub" text-anchor="middle">アプリ開発・執筆など</text>
+
+<!-- 矢印：自分→Claude -->
+<line x1="110" y1="64" x2="148" y2="64" class="arrow"/>
+
+<!-- Claude（チャット中） -->
+<rect x="150" y="42" width="110" height="44" fill="#0f2033" stroke="#7dd3fc" stroke-width="1.5" rx="10"/>
+<text x="205" y="58" class="label-claude" text-anchor="middle">🤖 Claude（今のチャット）</text>
+<text x="205" y="71" class="label-sub" text-anchor="middle">コードを書く・提案する</text>
+<text x="205" y="81" class="label-sub" text-anchor="middle">※チャット終了で記憶消える</text>
+
+<!-- ===== 【チャット終了前】===== -->
+<text x="8" y="106" class="section-label" fill="#334155" font-size="9" font-weight="800" font-family="sans-serif" letter-spacing="1">▌ チャット終了前にやること</text>
+
+<!-- spec.json更新 -->
+<rect x="10" y="113" width="148" height="40" fill="#1e2e28" stroke="#6abf8a" stroke-width="1.5" rx="10"/>
+<text x="84" y="129" class="label-human" text-anchor="middle">📄 spec.json 作成／更新</text>
+<text x="84" y="143" class="label-sub" text-anchor="middle">アプリの仕様・現状を書く</text>
+
+<!-- dashboard更新 -->
+<rect x="172" y="113" width="148" height="40" fill="#1e2e28" stroke="#6abf8a" stroke-width="1.5" rx="10"/>
+<text x="246" y="129" class="label-human" text-anchor="middle">📊 ダッシュボード更新</text>
+<text x="246" y="143" class="label-sub" text-anchor="middle">→ backup.json エクスポート</text>
+
+<!-- 矢印：両方→Box -->
+<line x1="84" y1="153" x2="84" y2="168" class="arrow-upload"/>
+<line x1="246" y1="153" x2="246" y2="168" class="arrow-upload"/>
+<line x1="84" y1="168" x2="246" y2="168" stroke="#b8a060" stroke-width="1.5" fill="none"/>
+<line x1="165" y1="168" x2="165" y2="183" class="arrow-upload"/>
+
+<!-- Box -->
+<rect x="90" y="185" width="150" height="50" fill="#2a2210" stroke="#b8a060" stroke-width="1.5" rx="10"/>
+<text x="165" y="204" class="label-box" text-anchor="middle">📦 Box / Program/</text>
+<text x="165" y="217" class="label-sub" text-anchor="middle">spec.json　prompt.md</text>
+<text x="165" y="228" class="label-sub" text-anchor="middle">dashboard-backup.json</text>
+
+<!-- ===== 区切り ===== -->
+<line x1="10" y1="248" x2="330" y2="248" stroke="#1e293b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="170" y="260" fill="#334155" font-size="9" text-anchor="middle" font-family="sans-serif">↓ 新しいチャット開始</text>
+
+<!-- ===== 【次のチャット】===== -->
+<text x="8" y="278" class="section-label" fill="#334155" font-size="9" font-weight="800" font-family="sans-serif" letter-spacing="1">▌ 次のチャット</text>
+
+<!-- 自分（新チャット） -->
+<rect x="10" y="285" width="148" height="44" fill="#1e2e28" stroke="#6abf8a" stroke-width="1.5" rx="10"/>
+<text x="84" y="302" class="label-human" text-anchor="middle">👤 自分</text>
+<text x="84" y="315" class="label-sub" text-anchor="middle">「Boxの○○読んで</text>
+<text x="84" y="325" class="label-sub" text-anchor="middle">△△の作業したい」</text>
+
+<!-- 矢印：自分→クローン -->
+<line x1="158" y1="307" x2="196" y2="307" class="arrow"/>
+
+<!-- クローン -->
+<rect x="198" y="285" width="122" height="44" fill="#0f2033" stroke="#7dd3fc" stroke-width="1.5" rx="10"/>
+<text x="259" y="302" class="label-claude" text-anchor="middle">🤖 クローン召喚</text>
+<text x="259" y="315" class="label-sub" text-anchor="middle">同じ性格・スキル</text>
+<text x="259" y="325" class="label-sub" text-anchor="middle">記憶はゼロ</text>
+
+<!-- クローン→Boxを読む -->
+<line x1="259" y1="329" x2="259" y2="348" class="arrow-read"/>
+<line x1="165" y1="348" x2="259" y2="348" stroke="#7dd3fc" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
+<line x1="165" y1="235" x2="165" y2="348" stroke="#7dd3fc" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
+
+<!-- 読み込みラベル -->
+<text x="210" y="344" fill="#7dd3fc" font-size="9" font-family="sans-serif">読み込む</text>
+
+<!-- クローン（記憶復元後） -->
+<rect x="90" y="358" width="150" height="50" fill="#0f2033" stroke="#7dd3fc" stroke-width="2" rx="10"/>
+<text x="165" y="376" class="label-claude" text-anchor="middle">✅ コンテキスト復元完了</text>
+<text x="165" y="389" class="label-sub" text-anchor="middle">仕様・現状・作業内容を把握</text>
+<text x="165" y="400" class="label-sub" text-anchor="middle">→ 即作業再開！</text>
+
+<!-- ===== メモリ ===== -->
+<text x="8" y="428" class="section-label" fill="#334155" font-size="9" font-weight="800" font-family="sans-serif" letter-spacing="1">▌ 全チャット共通メモリ（自動引き継ぎ）</text>
+
+<rect x="10" y="436" width="310" height="64" fill="#1e1a2e" stroke="#9a86b8" stroke-width="1.2" rx="10" stroke-dasharray="4 2"/>
+<text x="20" y="452" class="label-memory">🧠 Claudeのメモリ</text>
+<text x="20" y="466" class="label-sub">📌 GalaxyはSDカードなし（内部ストレージのみ）</text>
+<text x="20" y="478" class="label-sub">📌 とりあえずやってみるスタイル・詰まったときだけ聞く</text>
+<text x="20" y="490" class="label-sub">📌 チャット前にspec.json更新→Box。prompt.mdに読み込み先明記。</text>
+
+<!-- メモリ→クローン矢印 -->
+<line x1="165" y1="436" x2="165" y2="408" class="arrow-memory"/>
+
+</svg>
+</body>
+</html>
