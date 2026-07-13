@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>引き継ぎフロー</title>
+<style>
+:root {
+  --bg: #111314;
+  --panel: #1e2124;
+  --panel2: #252a2d;
+  --line: #2e3336;
+  --line2: #3a4044;
+  --ink: #d8dde0;
+  --muted: #6b7478;
+  --green: #6abf8a;
+  --cyan: #7ab8c0;
+  --purple: #9a86b8;
+  --gold: #b8a060;
+  --blue: #7098b8;
+  --pink: #b87a8a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+  min-height: 100vh;
+  padding: 28px 16px 60px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+h1 {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--cyan);
+  letter-spacing: .08em;
+  margin-bottom: 4px;
+}
+.sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+/* ── フロー全体 ── */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* ── フェーズ見出し ── */
+.phase-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+/* ── ステップブロック ── */
+.step {
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+  margin-bottom: 0;
+}
+.step-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.step-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-body { flex: 1; }
+.step-title {
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.step-desc {
+  font-size: 13px;
+  color: #a0a8b0;
+  line-height: 1.65;
+}
+.step-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 20px;
+  margin-top: 7px;
+}
+
+/* カラーバリアント */
+.step.c-cyan  { border-color: rgba(122,184,192,.35); }
+.step.c-green { border-color: rgba(106,191,138,.35); }
+.step.c-gold  { border-color: rgba(184,160, 96,.35); }
+.step.c-purple{ border-color: rgba(154,134,184,.35); }
+.step.c-blue  { border-color: rgba(112,152,184,.35); }
+.step.c-pink  { border-color: rgba(184,122,138,.35); }
+
+.tag-cyan   { background: rgba(122,184,192,.12); border: 1px solid var(--cyan);   color: var(--cyan); }
+.tag-green  { background: rgba(106,191,138,.12); border: 1px solid var(--green);  color: var(--green); }
+.tag-gold   { background: rgba(184,160, 96,.12); border: 1px solid var(--gold);   color: var(--gold); }
+.tag-purple { background: rgba(154,134,184,.12); border: 1px solid var(--purple); color: var(--purple); }
+.tag-blue   { background: rgba(112,152,184,.12); border: 1px solid var(--blue);   color: var(--blue); }
+.tag-pink   { background: rgba(184,122,138,.12); border: 1px solid var(--pink);   color: var(--pink); }
+
+/* ── 矢印 ── */
+.arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  color: var(--line2);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.arrow.big { height: 40px; font-size: 22px; color: var(--muted); }
+
+/* ── 区切り ── */
+.phase-gap {
+  height: 24px;
+}
+
+/* ── 問題ボックス ── */
+.problem-box {
+  background: rgba(184,122,138,.07);
+  border: 1px solid rgba(184,122,138,.3);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 28px;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.problem-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--pink);
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+}
+.problem-item {
+  font-size: 13px;
+  color: #c0a0a8;
+  line-height: 1.75;
+  padding-left: 1em;
+  text-indent: -1em;
+}
+
+/* ── 現状 vs 改善 ── */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 560px;
+  margin: 0 auto 32px;
+}
+.compare-box {
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.compare-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+}
+.compare-label.now   { color: var(--pink); }
+.compare-label.after { color: var(--green); }
+.compare-item {
+  font-size: 12px;
+  color: #9098a0;
+  line-height: 1.8;
+  padding-left: 1em;
+  text-indent: -1em;
+}
+.compare-item.good { color: #90c0a0; }
+
+/* ── 提案ハイライト ── */
+.suggest {
+  background: rgba(106,191,138,.06);
+  border: 1px solid rgba(106,191,138,.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  max-width: 560px;
+  margin: 0 auto 12px;
+}
+.suggest-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.suggest-body {
+  font-size: 13px;
+  color: #a0b8a8;
+  line-height: 1.75;
+}
+.suggest-body code {
+  background: var(--panel2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--cyan);
+}
+</style>
+</head>
+<body>
+
+<h1>引き継ぎフロー 現状と問題</h1>
+<p class="sub">チャットをまたぐときに何が起きてるか</p>
+
+<!-- 問題サマリ -->
+<div class="problem-box">
+  <div class="problem-title">⚠ 現状の問題</div>
+  <div class="problem-item">・ クロウくんは新しいチャットでIDの一覧を知らない</div>
+  <div class="problem-item">・ プロフィールに「登録済みIDを使え」と書いてあるだけで一覧がない</div>
+  <div class="problem-item">・ 結果、<code style="font-family:monospace;font-size:12px;color:#d08080">youkaitask</code> など雰囲気で書いてしまう</div>
+  <div class="problem-item">・ IDがブレると取り込み時にエラーになる</div>
+</div>
+
+<!-- 現状 vs 改善後 -->
+<div class="compare">
+  <div class="compare-box">
+    <div class="compare-label now">▼ 現状フロー</div>
+    <div class="compare-item">作業終了</div>
+    <div class="compare-item">↓</div>
+    <div class="compare-item">クロウくんがJSON出力（IDは記憶頼り）</div>
+    <div class="compare-item">↓</div>
+    <div class="compare-item">新チャット開始</div>
+    <div class="compare-item">↓</div>
+    <div class="compare-item">引き継ぎプロンプト貼る</div>
+    <div class="compare-item">↓</div>
+    <div class="compare-item">❌ IDリストがないまま作業開始</div>
+    <div class="compare-item">↓</div>
+    <div class="compare-item">❌ JSONのappがブレる</div>
+  </div>
+  <div class="compare-box">
+    <div class="compare-label after">▲ 改善後フロー</div>
+    <div class="compare-item good">作業終了</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">クロウくんがJSON出力</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">ダッシュボードで「ID一覧コピー」</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">新チャット開始</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">引き継ぎ＋ID一覧を貼る</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">✅ IDを知った状態で作業開始</div>
+    <div class="compare-item good">↓</div>
+    <div class="compare-item good">✅ JSONのappが正確</div>
+  </div>
+</div>
+
+<!-- 改善後の詳細フロー -->
+<h1 style="margin-bottom:4px">改善後の詳細フロー</h1>
+<p class="sub" style="margin-bottom:24px">具体的に何をどの順番でやるか</p>
+
+<div class="flow">
+
+  <!-- PHASE 1 -->
+  <div class="phase-label">Phase 1 ── 作業中</div>
+  <div class="step c-cyan">
+    <div class="step-inner">
+      <div class="step-icon">💬</div>
+      <div class="step-body">
+        <div class="step-title">チャットで作業する</div>
+        <div class="step-desc">クロウくんと普通に作業。特に変わらない。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step c-gold">
+    <div class="step-inner">
+      <div class="step-icon">📋</div>
+      <div class="step-body">
+        <div class="step-title">クロウくんがJSONを出力</div>
+        <div class="step-desc">チャット末尾に進捗JSONが出てくる。この時点ではIDが合ってるかどうか不安定。</div>
+        <span class="step-tag tag-gold">現状もここまでは同じ</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow big">↓</div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-label">Phase 2 ── チャット終了前にやること（追加ステップ）</div>
+
+  <div class="step c-green">
+    <div class="step-inner">
+      <div class="step-icon">🗂</div>
+      <div class="step-body">
+        <div class="step-title">ダッシュボードを開く</div>
+        <div class="step-desc">JSONを貼って反映する。いつもの操作。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step c-green">
+    <div class="step-inner">
+      <div class="step-icon">🔑</div>
+      <div class="step-body">
+        <div class="step-title">「ID一覧をコピー」ボタンを押す</div>
+        <div class="step-desc">管理タブに新しく追加するボタン。押すだけでその時点の全ID対応表がクリップボードに入る。</div>
+        <span class="step-tag tag-green">★ここが新機能</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow big">↓</div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-label">Phase 3 ── 新しいチャットの開始</div>
+
+  <div class="step c-purple">
+    <div class="step-inner">
+      <div class="step-icon">🆕</div>
+      <div class="step-body">
+        <div class="step-title">新しいチャットを開く</div>
+        <div class="step-desc">いつも通り新規チャット。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step c-purple">
+    <div class="step-inner">
+      <div class="step-icon">📌</div>
+      <div class="step-body">
+        <div class="step-title">引き継ぎプロンプト ＋ ID一覧を貼る</div>
+        <div class="step-desc">引き継ぎ文の末尾に、さっきコピーしたID一覧をそのまま貼り付ける。2回ペーストするだけ。</div>
+        <span class="step-tag tag-purple">貼るだけ・手入力なし</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step c-blue">
+    <div class="step-inner">
+      <div class="step-icon">✅</div>
+      <div class="step-body">
+        <div class="step-title">クロウくんがIDを把握した状態で作業開始</div>
+        <div class="step-desc">プロンプトにID一覧があるので、JSONの <code style="font-family:monospace;font-size:12px;background:#252a2d;border-radius:3px;padding:1px 5px;color:#7ab8c0">"app"</code> フィールドをミスらない。</div>
+        <span class="step-tag tag-blue">IDブレ問題が解決</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 提案まとめ -->
+<div style="height:32px"></div>
+<div class="suggest">
+  <div class="suggest-title">💡 ダッシュボードに追加するもの（1箇所だけ）</div>
+  <div class="suggest-body">
+    管理タブの「進捗JSON取り込み」エリアの上あたりに<br>
+    <code>📋 ID一覧をコピー</code> ボタンを1個追加する。<br><br>
+    押すと <code>myplanner=マイプランナー, dashboard=ダッシュボード, keiba=競馬メモアプリ ...</code><br>
+    という形式でクリップボードに入る。プロフィール書き換え不要。
+  </div>
+</div>
+
+</body>
+</html>
