@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTGで分かる配列とポインタ</title>
+<style>
+  :root{
+    --bg:#fdf9f3;
+    --panel:#ffffff;
+    --text:#3d3428;
+    --sub:#8a7d68;
+    --accent:#e8935c;
+    --accent2:#7fb8a4;
+    --box:#fff3e6;
+    --boxline:#f0c9a0;
+    --tag:#e6f0fb;
+    --tagline:#a9c8ec;
+    --tagtext:#3a5a80;
+    --shadow:0 6px 18px rgba(120,90,50,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Hiragino Maru Gothic ProN','Hiragino Sans',sans-serif;
+    line-height:1.9;
+    padding:24px 16px 70px;
+    font-size:16px;
+  }
+  h1{font-size:1.4em;text-align:center;margin:0 0 6px;}
+  .sub{text-align:center;color:var(--sub);font-size:0.9em;margin-bottom:30px;}
+  section{
+    max-width:600px;margin:0 auto 26px;
+    background:var(--panel);border-radius:18px;
+    padding:22px 18px;box-shadow:var(--shadow);
+  }
+  section h2{font-size:1.05em;margin:0 0 14px;color:var(--accent);}
+  p{margin:0 0 12px;}
+  .story{
+    background:var(--box);border-radius:14px;padding:16px;
+    font-size:0.95em;color:#6b5a3f;
+  }
+  code.inline{background:var(--box);padding:2px 6px;border-radius:6px;font-size:0.9em;}
+
+  /* 手札(配列) */
+  .hand{
+    display:flex;gap:8px;overflow-x:auto;padding:16px 4px 8px;
+  }
+  .card{
+    flex:0 0 auto;min-width:74px;text-align:center;
+  }
+  .card .num{
+    font-size:0.68em;color:var(--accent);margin-bottom:4px;font-weight:600;
+  }
+  .card .face{
+    background:var(--box);border:2px solid var(--boxline);
+    border-radius:10px;padding:14px 6px;font-size:0.82em;color:#7a5a30;
+  }
+
+  /* デッキ+サイドボード(入れ子) */
+  .decks{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;padding:12px 4px;}
+  .deckblock{
+    background:var(--box);border:2px solid var(--boxline);
+    border-radius:14px;padding:12px;min-width:130px;text-align:center;
+  }
+  .deckblock .dlabel{font-size:0.78em;color:var(--accent);font-weight:700;margin-bottom:8px;}
+  .sideboard{
+    background:#fff;border:2px dashed var(--boxline);
+    border-radius:10px;padding:10px;margin-top:8px;font-size:0.8em;color:#7a5a30;
+  }
+
+  /* エンチャント(ポインタ) */
+  .board{
+    display:flex;gap:18px;align-items:flex-start;justify-content:center;
+    flex-wrap:wrap;padding:16px 4px;
+  }
+  .creature{
+    text-align:center;
+  }
+  .creature .face{
+    background:var(--box);border:2px solid var(--boxline);
+    border-radius:10px;padding:16px 14px;font-size:0.9em;color:#7a5a30;min-width:90px;
+  }
+  .creature .label{font-size:0.75em;color:var(--sub);margin-top:6px;}
+  .enchant{
+    text-align:center;
+  }
+  .enchant .face{
+    background:var(--tag);border:2px solid var(--tagline);
+    border-radius:10px;padding:16px 12px;font-size:0.8em;color:var(--tagtext);min-width:100px;
+  }
+  .enchant .label{font-size:0.75em;color:var(--sub);margin-top:6px;}
+  .arrow{font-size:1.4em;color:var(--accent2);align-self:center;margin-top:20px;}
+
+  .tap-demo{text-align:center;margin-top:10px;}
+  .tap-demo button{
+    background:var(--accent2);color:#fff;border:none;
+    border-radius:24px;padding:10px 18px;font-size:0.85em;margin:4px;
+  }
+  #result{margin-top:14px;font-size:0.95em;color:var(--sub);min-height:2.6em;}
+
+  .point{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .point .mark{color:var(--accent2);font-weight:700;flex:0 0 auto;}
+</style>
+</head>
+<body>
+
+<h1>MTGで分かる配列とポインタ</h1>
+<p class="sub">今まで話してきたことを、MTG目線でもう一回</p>
+
+<section>
+  <h2>配列 = 手札</h2>
+  <p class="story">
+    手札はカードが横に並んでて、それぞれに「何枚目」って位置があります。<br>
+    左から0枚目、1枚目、2枚目…って数えるのと、配列の番号（0番から始まる）はまったく同じ発想です。
+  </p>
+  <div class="hand">
+    <div class="card"><div class="num">0枚目</div><div class="face">島</div></div>
+    <div class="card"><div class="num">1枚目</div><div class="face">対抗呪文</div></div>
+    <div class="card"><div class="num">2枚目</div><div class="face">エンチャント</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>入れ子 = メインデッキの中にサイドボードが入ってる</h2>
+  <p class="story">
+    「メインデッキ」っていう大きい束の中に、「サイドボード」っていう小さい束がまるごと入ってるイメージです。<br>
+    外の束を開けたら、また別の束が出てくる。これがそのまま入れ子構造です。
+  </p>
+  <div class="decks">
+    <div class="deckblock">
+      <div class="dlabel">メインデッキ</div>
+      <div style="font-size:0.85em;">60枚</div>
+      <div class="sideboard">中にサイドボード<br>（15枚）が入ってる</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>ポインタ = エンチャント（クリーチャーにつくやつ）</h2>
+  <p class="story">
+    エンチャント（クリーチャー）って、それ自体はパワーもタフネスも持ってません。カードに書いてあるのは「どのクリーチャーに付いてるか」という参照先だけ。<br>
+    本当の能力値を知りたかったら、付いてる先のクリーチャー本体を見に行く必要があります。
+  </p>
+  <div class="board">
+    <div class="creature">
+      <div class="face">3/3<br>灰色熊</div>
+      <div class="label">クリーチャー本体</div>
+    </div>
+    <div class="arrow">←</div>
+    <div class="enchant">
+      <div class="face">「灰色熊に<br>付いてるで」</div>
+      <div class="label">エンチャント（参照だけ）</div>
+    </div>
+  </div>
+  <p style="font-size:0.88em;color:var(--sub);text-align:center;">
+    エンチャント自体を見てもパワーは分からない。付いてる先をたどって初めて「3/3」だと分かる
+  </p>
+</section>
+
+<section>
+  <h2>タップして確かめる</h2>
+  <p>まずエンチャントを見て、それから付いてる先のクリーチャーを見に行きましょう。</p>
+  <div class="tap-demo">
+    <button onclick="lookEnchant()">エンチャントを見る</button>
+    <button onclick="followTarget()" id="followBtn" disabled>付いてる先を見に行く</button>
+    <div id="result"></div>
+  </div>
+</section>
+
+<section>
+  <h2>まとめ</h2>
+  <div class="point"><span class="mark">・</span><span>配列＝手札。位置（番号）ごとにカードが並んでる</span></div>
+  <div class="point"><span class="mark">・</span><span>入れ子＝デッキの中にサイドボードがまるごと入ってる</span></div>
+  <div class="point"><span class="mark">・</span><span>ポインタ＝エンチャント。自分は中身を持たず、付いてる先を参照するだけ</span></div>
+</section>
+
+<script>
+let looked = false;
+function lookEnchant(){
+  looked = true;
+  document.getElementById('result').textContent = "エンチャントを見たら「灰色熊に付いてるで」とだけ書いてあった。パワーは分からない";
+  document.getElementById('followBtn').disabled = false;
+}
+function followTarget(){
+  if(!looked) return;
+  document.getElementById('result').textContent = "灰色熊を見に行ったら…3/3のクリーチャーでした！";
+}
+</script>
+
+</body>
+</html>
