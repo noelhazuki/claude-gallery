@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOX連携でできること</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Space+Grotesk:wght@500;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161922;
+    --card: #1e2330;
+    --border: #2a3040;
+    --box-blue: #0061d5;
+    --box-blue-light: #2488ff;
+    --accent-green: #00e5a0;
+    --accent-yellow: #ffcc00;
+    --accent-pink: #ff4f91;
+    --accent-purple: #a855f7;
+    --text: #e8eaf0;
+    --muted: #7c8496;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .header .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--box-blue-light);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--box-blue-light) 60%, var(--accent-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-section {
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .section-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    row-gap: 16px;
+  }
+
+  .flow-node {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-node.claude-node {
+    border-color: var(--box-blue);
+    background: linear-gradient(135deg, #0d1829 0%, #0a1f3d 100%);
+    box-shadow: 0 0 24px rgba(0,97,213,0.25);
+  }
+
+  .flow-node .node-icon {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .flow-node .node-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .flow-node .node-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    gap: 2px;
+  }
+
+  .flow-arrow .arrow-line {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--border), var(--box-blue-light));
+    position: relative;
+  }
+
+  .flow-arrow .arrow-line::after {
+    content: '▶';
+    position: absolute;
+    right: -6px;
+    top: -7px;
+    font-size: 10px;
+    color: var(--box-blue-light);
+  }
+
+  .flow-arrow .arrow-label {
+    font-size: 9px;
+    color: var(--muted);
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  /* ─── CAPABILITY GRID ─── */
+  .cap-section {
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .cap-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .cap-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--cap-accent, var(--box-blue));
+  }
+
+  .cap-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cap-accent, var(--box-blue));
+  }
+
+  .cap-card .cap-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .cap-card .cap-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .cap-card .cap-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .cap-card .cap-items {
+    list-style: none;
+  }
+
+  .cap-card .cap-items li {
+    font-size: 11px;
+    color: var(--text);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .cap-card .cap-items li:last-child { border-bottom: none; }
+
+  .cap-card .cap-items li::before {
+    content: '→';
+    color: var(--cap-accent, var(--box-blue-light));
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ─── USE CASE TABLE ─── */
+  .usecase-section {
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .usecase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .usecase-grid { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+
+  .usecase-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .usecase-row .uc-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .usecase-row .uc-body {}
+
+  .usecase-row .uc-ask {
+    font-size: 12px;
+    color: var(--accent-yellow);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .usecase-row .uc-do {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .usecase-row .uc-do strong {
+    color: var(--text);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer-note {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .footer-note p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .footer-note strong {
+    color: var(--box-blue-light);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,97,213,0.15);
+    border: 1px solid rgba(36,136,255,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    color: var(--box-blue-light);
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="eyebrow">Claude × BOX 連携ガイド</p>
+  <h1>BOXと繋ぐと<br>何ができるの？</h1>
+  <p>クロウくん（Claude）がBOXクラウドストレージと連携して、ファイル管理・AI分析・自動化ができるようになる</p>
+</div>
+
+<!-- FLOW -->
+<div class="flow-section">
+  <p class="section-label">データの流れ</p>
+
+  <div class="flow">
+    <div class="flow-node">
+      <span class="node-icon">🗂️</span>
+      <div class="node-label">BOX</div>
+      <div class="node-sub">クラウドストレージ</div>
+    </div>
+
+    <div class="flow-arrow">
+      <div class="arrow-line"></div>
+      <div class="arrow-label">MCP接続</div>
+    </div>
+
+    <div class="flow-node claude-node">
+      <span class="node-icon">🤖</span>
+      <div class="node-label">クロウくん</div>
+      <div class="node-sub">Claude (AI)</div>
+    </div>
+
+    <div class="flow-arrow">
+      <div class="arrow-line"></div>
+      <div class="arrow-label">操作・分析</div>
+    </div>
+
+    <div class="flow-node">
+      <span class="node-icon">✅</span>
+      <div class="node-label">結果</div>
+      <div class="node-sub">チャットに出力</div>
+    </div>
+  </div>
+
+  <p style="text-align:center; font-size:11px; color:var(--muted); margin-top:16px;">
+    接続済み：<strong style="color:var(--box-blue-light)">https://mcp.box.com</strong>
+  </p>
+</div>
+
+<!-- CAPABILITIES -->
+<div class="cap-section">
+  <p class="section-label">できること一覧</p>
+
+  <div class="cap-grid">
+
+    <!-- ファイル操作 -->
+    <div class="cap-card" style="--cap-accent: #2488ff;">
+      <span class="cap-icon">📁</span>
+      <div class="cap-title">ファイル・フォルダ管理</div>
+      <div class="cap-desc">BOX上のファイルを言葉で操作できる</div>
+      <ul class="cap-items">
+        <li>フォルダの中身を一覧表示する</li>
+        <li>ファイルを別フォルダに移動・コピー</li>
+        <li>フォルダを新しく作る</li>
+        <li>ファイルやフォルダの詳細情報を取得</li>
+        <li>ファイルのコメント一覧・作成</li>
+        <li>タスクを一覧で確認</li>
+      </ul>
+    </div>
+
+    <!-- 検索 -->
+    <div class="cap-card" style="--cap-accent: #00e5a0;">
+      <span class="cap-icon">🔍</span>
+      <div class="cap-title">検索・発見</div>
+      <div class="cap-desc">BOX全体からファイルを探し出す</div>
+      <ul class="cap-items">
+        <li>キーワードでファイルを横断検索</li>
+        <li>ファイル種類・拡張子で絞り込み</li>
+        <li>メタデータの条件でSQL的に検索</li>
+        <li>フォルダ名でフォルダを探す</li>
+        <li>共同作業者（コラボレーター）一覧</li>
+      </ul>
+    </div>
+
+    <!-- AI分析 -->
+    <div class="cap-card" style="--cap-accent: #a855f7;">
+      <span class="cap-icon">🧠</span>
+      <div class="cap-title">BOX AI 分析</div>
+      <div class="cap-desc">ファイルの中身をAIが読んで答えてくれる（ダウンロード不要）</div>
+      <ul class="cap-items">
+        <li>「この契約書のポイントは？」と質問</li>
+        <li>PDFや文書の要約を作る</li>
+        <li>複数ファイルをまたいで比較・分析</li>
+        <li>メタデータを構造的に抽出</li>
+        <li>リスク評価・レビューを自動化</li>
+      </ul>
+    </div>
+
+    <!-- メタデータ -->
+    <div class="cap-card" style="--cap-accent: #ffcc00;">
+      <span class="cap-icon">🏷️</span>
+      <div class="cap-title">メタデータ管理</div>
+      <div class="cap-desc">ファイルに情報タグを付けて整理・検索しやすくする</div>
+      <ul class="cap-items">
+        <li>メタデータテンプレートの一覧確認</li>
+        <li>テンプレートのスキーマを調べる</li>
+        <li>ファイル・フォルダにメタデータを書き込む</li>
+        <li>新しいテンプレートを作成</li>
+        <li>テンプレートを更新する</li>
+      </ul>
+    </div>
+
+    <!-- プレビュー -->
+    <div class="cap-card" style="--cap-accent: #ff4f91;">
+      <span class="cap-icon">👁️</span>
+      <div class="cap-title">プレビュー・閲覧</div>
+      <div class="cap-desc">ファイルをダウンロードせずにチャット内で確認</div>
+      <ul class="cap-items">
+        <li>PDF・画像・Officeファイルをその場で表示</li>
+        <li>特定ページを指定して確認</li>
+        <li>「この図どういう意味？」とすぐ質問</li>
+        <li>ファイルのテキスト内容を直接取得</li>
+      </ul>
+    </div>
+
+    <!-- アップロード -->
+    <div class="cap-card" style="--cap-accent: #f97316;">
+      <span class="cap-icon">⬆️</span>
+      <div class="cap-title">アップロード・更新</div>
+      <div class="cap-desc">クロウくんが作ったものをそのままBOXに保存</div>
+      <ul class="cap-items">
+        <li>新しいファイルをBOXにアップロード</li>
+        <li>既存ファイルを新バージョンで上書き</li>
+        <li>ファイルの名前・説明・タグを更新</li>
+        <li>フォルダの名前・説明を更新</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- USE CASES -->
+<div class="usecase-section">
+  <p class="section-label">実際にこんな使い方ができる</p>
+
+  <div class="usecase-grid">
+    <div class="usecase-row">
+      <span class="uc-icon">💬</span>
+      <div class="uc-body">
+        <div class="uc-ask">「プロジェクトXのフォルダ見せて」</div>
+        <div class="uc-do">→ BOXの中身を一覧で表示、<strong>ファイルをその場でプレビュー</strong></div>
+      </div>
+    </div>
+
+    <div class="usecase-row">
+      <span class="uc-icon">📄</span>
+      <div class="uc-body">
+        <div class="uc-ask">「この契約書で特殊な条件ない？」</div>
+        <div class="uc-do">→ BOX AIがPDFを読んで<strong>リスクや要点を抽出</strong></div>
+      </div>
+    </div>
+
+    <div class="usecase-row">
+      <span class="uc-icon">🔎</span>
+      <div class="uc-body">
+        <div class="uc-ask">「先月の請求書ファイル全部探して」</div>
+        <div class="uc-do">→ キーワード・メタデータ検索で<strong>一発で発見</strong></div>
+      </div>
+    </div>
+
+    <div class="usecase-row">
+      <span class="uc-icon">📂</span>
+      <div class="uc-body">
+        <div class="uc-ask">「2024年のファイルを年度別フォルダに整理して」</div>
+        <div class="uc-do">→ フォルダ作成＋ファイル移動を<strong>まとめて自動実行</strong></div>
+      </div>
+    </div>
+
+    <div class="usecase-row">
+      <span class="uc-icon">🏷️</span>
+      <div class="uc-body">
+        <div class="uc-ask">「このPDFに顧客名と日付タグをつけて」</div>
+        <div class="uc-do">→ メタデータを読み取って<strong>自動でタグ付け</strong></div>
+      </div>
+    </div>
+
+    <div class="usecase-row">
+      <span class="uc-icon">📊</span>
+      <div class="uc-body">
+        <div class="uc-ask">「クロウくんが作ったまとめをBOXに保存して」</div>
+        <div class="uc-do">→ 分析結果や文書を<strong>そのままBOXにアップ</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER NOTE -->
+<div class="footer-note">
+  <p>
+    <strong>今現在つながってる状態</strong>なので、このチャットで「BOXの〇〇フォルダ見せて」とか「このファイル探して」って話しかけるだけで動くよ。<br>
+    ダウンロード不要・BOX上で完結するから安全やし速い。
+  </p>
+</div>
+
+</body>
+</html>
