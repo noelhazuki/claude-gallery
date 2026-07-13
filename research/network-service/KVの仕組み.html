@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVってこういうもの</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#11161c;
+    --surface:#1b232c;
+    --locker:#242f3a;
+    --locker-edge:#2f3c48;
+    --tag:#ffb454;
+    --tag-dark:#caa066;
+    --value:#6fd3c7;
+    --text:#eceff3;
+    --muted:#8d99a6;
+    --bad:#e8748a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Noto Sans JP',sans-serif;
+    line-height:1.7;
+    padding:0 0 60px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 20px;}
+
+  header{
+    padding:36px 20px 28px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-size:13px;
+    color:var(--tag);
+    letter-spacing:.12em;
+    font-weight:700;
+  }
+  h1{
+    font-family:'M PLUS Rounded 1c',sans-serif;
+    font-weight:800;
+    font-size:28px;
+    margin:10px 0 6px;
+  }
+  .sub{color:var(--muted);font-size:14px;}
+
+  .section-title{
+    font-family:'M PLUS Rounded 1c',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    margin:40px 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-title::before{
+    content:"";
+    width:6px;height:18px;
+    background:var(--tag);
+    border-radius:3px;
+    display:inline-block;
+  }
+  p{color:#cfd6dd;font-size:15px;}
+  .muted{color:var(--muted);font-size:13px;}
+
+  /* ロッカー図解 */
+  .locker-row{
+    display:flex;
+    gap:10px;
+    margin:18px 0 10px;
+  }
+  .locker{
+    flex:1;
+    background:var(--locker);
+    border:1px solid var(--locker-edge);
+    border-radius:10px;
+    height:64px;
+    position:relative;
+  }
+  .locker.dim{opacity:.35;}
+  .locker .dot{
+    position:absolute;
+    top:8px;left:8px;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:#465563;
+  }
+
+  .open-locker{
+    background:var(--surface);
+    border:1px solid var(--locker-edge);
+    border-radius:16px;
+    padding:22px 18px 24px;
+    margin:18px 0 8px;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--tag);
+    color:#22160a;
+    font-weight:700;
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:20px 20px 4px 20px;
+    font-family:'M PLUS Rounded 1c',sans-serif;
+  }
+  .string{
+    width:2px;
+    height:18px;
+    background:var(--tag-dark);
+    margin:0 0 0 18px;
+  }
+  .value-box{
+    background:#0f1a1e;
+    border:1.5px dashed var(--value);
+    border-radius:12px;
+    padding:14px 16px;
+    color:var(--value);
+    font-family:monospace;
+    font-size:12.5px;
+    line-height:1.6;
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .arrow-label{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin:2px 0 4px 18px;
+  }
+
+  .key-value-explain{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .kv-card{
+    flex:1;
+    background:var(--surface);
+    border-radius:12px;
+    padding:14px 12px;
+    text-align:center;
+  }
+  .kv-card .label{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .kv-card .big{
+    font-family:'M PLUS Rounded 1c',sans-serif;
+    font-weight:700;
+    font-size:15px;
+  }
+  .kv-card.key .big{color:var(--tag);}
+  .kv-card.val .big{color:var(--value);}
+
+  /* できる/できないカード */
+  .compare{
+    display:grid;
+    gap:10px;
+    margin:18px 0 6px;
+  }
+  .compare-item{
+    background:var(--surface);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .compare-item .mark{
+    font-size:18px;
+    line-height:1;
+    margin-top:1px;
+  }
+  .compare-item.ok .mark{color:var(--value);}
+  .compare-item.no .mark{color:var(--bad);}
+  .compare-item .txt b{display:block;font-size:14.5px;margin-bottom:2px;}
+  .compare-item .txt span{font-size:13px;color:var(--muted);}
+
+  /* 今回の決定 */
+  .decision{
+    background:linear-gradient(160deg,#1b232c,#19222b 60%,#1c2630);
+    border:1px solid var(--locker-edge);
+    border-radius:16px;
+    padding:20px 18px;
+    margin-top:38px;
+  }
+  .decision .eyebrow{display:block;margin-bottom:6px;}
+  .decision .head-locker{
+    background:var(--locker);
+    border:1px solid var(--tag);
+    border-radius:14px;
+    padding:16px;
+    margin-top:14px;
+  }
+  .decision .key-name{
+    font-family:monospace;
+    background:#22160a;
+    color:var(--tag);
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:6px;
+    font-size:13px;
+    margin-bottom:10px;
+  }
+  .decision .blob{
+    font-size:13px;
+    color:#cfd6dd;
+  }
+  .decision .blob .item{
+    display:inline-block;
+    background:#0f1a1e;
+    color:var(--value);
+    border-radius:6px;
+    padding:3px 8px;
+    margin:3px 4px 3px 0;
+    font-size:12px;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:50px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">RES-011・Cloudflare KV設計メモ</div>
+    <h1>KVってこういうもの</h1>
+    <div class="sub">コインロッカーで考えるとわかりやすいで</div>
+  </header>
+
+  <!-- ロッカー並び -->
+  <div class="section-title">倉庫には、こういうロッカーがいっぱい並んでる</div>
+  <p>KV（Key-Value）は、ラベル付きのロッカーがずらっと並んでる倉庫みたいなもんやと思ってや。1個のロッカーには「ラベル（key）」と「中身（value）」がセットで入ってる。</p>
+
+  <div class="locker-row">
+    <div class="locker"><div class="dot"></div></div>
+    <div class="locker"><div class="dot"></div></div>
+    <div class="locker dim"><div class="dot"></div></div>
+    <div class="locker dim"><div class="dot"></div></div>
+    <div class="locker dim"><div class="dot"></div></div>
+  </div>
+  <p class="muted">ロッカーの数は増やせる。でも1個のロッカーの中で「さらに細かく仕分け検索する」みたいなことはできへん。</p>
+
+  <!-- 開いたロッカー -->
+  <div class="section-title">1個開けてみると</div>
+  <div class="open-locker">
+    <span class="tag">🏷 dev_dashboard_v2</span>
+    <div class="string"></div>
+    <div class="arrow-label">↓ このラベルで呼ぶと、中身が丸ごと出てくる</div>
+    <div class="value-box">{
+  "items": [ ... 全アプリのデータ ... ],
+  "logs": [ ... ]
+}</div>
+  </div>
+
+  <div class="key-value-explain">
+    <div class="kv-card key">
+      <div class="label">key</div>
+      <div class="big">ラベル（名前）</div>
+    </div>
+    <div class="kv-card val">
+      <div class="label">value</div>
+      <div class="big">中身（データ）</div>
+    </div>
+  </div>
+
+  <!-- できる/できない -->
+  <div class="section-title">データベースとは別物</div>
+  <p>「データを保存する」って聞くとデータベースっぽく感じるけど、KVでできることはかなりシンプルや。</p>
+
+  <div class="compare">
+    <div class="compare-item ok">
+      <div class="mark">○</div>
+      <div class="txt"><b>「このラベルの中身くれ」が一発でできる</b><span>get（読む）・put（書く）だけ。速くて単純</span></div>
+    </div>
+    <div class="compare-item no">
+      <div class="mark">×</div>
+      <div class="txt"><b>「中身を見て条件で探す」はできない</b><span>SQLの WHERE みたいな検索機能は無い</span></div>
+    </div>
+    <div class="compare-item no">
+      <div class="mark">×</div>
+      <div class="txt"><b>「ロッカー同士を紐付ける」もできない</b><span>JOINみたいな結合機能も無い</span></div>
+    </div>
+  </div>
+
+  <!-- 今回の決定 -->
+  <div class="decision">
+    <span class="eyebrow">📦 今回ダッシュボードで決めた形</span>
+    <p style="margin:8px 0 0;">同時に書き込みに来る人や仕組みが無いから、ロッカーは<b style="color:#fff;">1個だけ</b>にして、今のlocalStorageと同じ「全部入りJSON」をそのまま入れる方針やったな。</p>
+    <div class="head-locker">
+      <div class="key-name">dev_dashboard_v2</div>
+      <div class="blob">
+        <span class="item">アプリ一覧</span>
+        <span class="item">ステータス</span>
+        <span class="item">ログ</span>
+        <span class="item">優先度</span>
+        … これ全部、ひとまとめで1個のロッカーに入る
+      </div>
+    </div>
+  </div>
+
+  <footer>RES-011 / ADM-001・KV設計図解</footer>
+</div>
+</body>
+</html>

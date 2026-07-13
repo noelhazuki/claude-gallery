@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudflareの3部屋</title>
+<style>
+:root{
+  --bg:#0f1620;
+  --paper:#16202c;
+  --paper2:#1c2836;
+  --line:#2c3d4f;
+  --ink:#e4ecf2;
+  --muted:#7c93a3;
+  --blueprint:#4d9fce;
+  --pages:#5ba8d8;
+  --workers:#e0a458;
+  --kv:#6fbf8a;
+  --warn:#d87a7a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:28px 28px;
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:'Hiragino Sans','Noto Sans JP',system-ui,sans-serif;
+  padding:28px 18px 60px;
+  line-height:1.8;
+  font-size:16px;
+}
+.wrap{max-width:680px;margin:0 auto;}
+
+header{margin-bottom:32px;}
+.kicker{
+  font-size:12px;font-weight:800;color:var(--blueprint);
+  letter-spacing:.15em;margin-bottom:8px;
+}
+h1{
+  font-size:24px;font-weight:900;color:var(--ink);
+  letter-spacing:.02em;margin-bottom:10px;
+}
+.lede{color:var(--muted);font-size:15px;}
+
+.room-stage{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--paper);
+  padding:18px 14px 22px;
+  margin:28px 0;
+}
+.house-frame{
+  display:flex;flex-direction:column;gap:10px;
+}
+.room{
+  border:1.5px dashed var(--line);
+  border-radius:6px;
+  padding:14px;
+  position:relative;
+}
+.room::before{
+  content:attr(data-tag);
+  position:absolute; top:-10px; left:12px;
+  background:var(--paper); padding:0 8px;
+  font-size:11px; font-weight:800; letter-spacing:.08em;
+  font-family:'Courier New',monospace;
+}
+.room.pages{border-color:var(--pages);}
+.room.pages::before{color:var(--pages);}
+.room.workers{border-color:var(--workers);}
+.room.workers::before{color:var(--workers);}
+.room.kv{border-color:var(--kv);}
+.room.kv::before{color:var(--kv);}
+
+.room-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.room-icon{font-size:20px;}
+.room-name{font-size:15px;font-weight:900;}
+.room-eng{font-size:11px;color:var(--muted);font-family:'Courier New',monospace;}
+.room-desc{font-size:14px;color:#c2d2dc;}
+.room-metaphor{
+  margin-top:8px;font-size:13px;color:var(--muted);
+  border-top:1px dotted var(--line);padding-top:8px;
+}
+.room-metaphor b{color:var(--ink);font-weight:700;}
+
+.connector{
+  text-align:center;font-size:12px;color:var(--muted);
+  font-family:'Courier New',monospace;padding:2px 0;
+}
+
+.fit-badge{
+  display:inline-block;margin-top:10px;
+  background:rgba(91,168,216,.12); border:1px solid var(--pages);
+  color:var(--pages); font-size:12px; font-weight:800;
+  padding:4px 10px; border-radius:20px;
+}
+
+.section-title{
+  font-size:13px;font-weight:900;color:var(--blueprint);
+  letter-spacing:.1em;margin:36px 0 14px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--line);}
+
+.flow{display:flex;flex-direction:column;gap:0;}
+.flow-step{
+  background:var(--paper2);border:1px solid var(--line);
+  border-radius:8px;padding:14px;position:relative;
+}
+.flow-step .step-label{
+  font-size:11px;font-weight:800;color:var(--muted);
+  letter-spacing:.05em;margin-bottom:6px;
+}
+.flow-step .step-title{font-size:15px;font-weight:900;margin-bottom:6px;}
+.flow-step .step-body{font-size:13.5px;color:#c2d2dc;}
+.flow-arrow{
+  text-align:center;color:var(--muted);font-size:18px;
+  padding:6px 0;
+}
+.flow-step.now{border-left:3px solid var(--muted);}
+.flow-step.step1{border-left:3px solid var(--pages);}
+.flow-step.step2{border-left:3px solid var(--kv);}
+
+.tag-mini{
+  display:inline-block;font-size:10px;font-weight:800;
+  padding:2px 8px;border-radius:20px;margin-left:6px;
+  vertical-align:middle;
+}
+.tag-mini.shared{background:rgba(111,191,138,.15);color:var(--kv);border:1px solid var(--kv);}
+.tag-mini.separate{background:rgba(216,122,122,.15);color:var(--warn);border:1px solid var(--warn);}
+
+.callout{
+  background:rgba(216,122,122,.08); border:1px solid var(--warn);
+  border-radius:8px; padding:14px; margin-top:18px;
+  font-size:13.5px; color:#dcc;
+}
+.callout .callout-title{
+  font-weight:900;color:var(--warn);margin-bottom:6px;
+  font-size:13px;
+}
+
+.checklist{margin-top:14px;}
+.check-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 0;border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.check-item:last-child{border-bottom:none;}
+.check-num{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--paper2);border:1px solid var(--kv);color:var(--kv);
+  font-size:11px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;margin-top:2px;
+}
+.check-body b{display:block;margin-bottom:2px;}
+.check-body span{color:var(--muted);font-size:13px;}
+
+footer{margin-top:36px;font-size:12px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">CLOUDFLARE 構造図</div>
+  <h1>家でたとえる Cloudflare</h1>
+  <p class="lede">Pages・Workers・KV、3つとも「家」の中の役割で考えると、何が必要で何が不要かが見えてくるで。</p>
+</header>
+
+<div class="room-stage">
+  <div class="house-frame">
+
+    <div class="room pages" data-tag="PAGES">
+      <div class="room-head">
+        <span class="room-icon">🏠</span>
+        <span class="room-name">ショールーム部分</span>
+        <span class="room-eng">Cloudflare Pages</span>
+      </div>
+      <div class="room-desc">HTML・CSS・JSのファイルを置いて、誰でも見られる状態にする場所。家そのもの。</div>
+      <div class="room-metaphor"><b>たとえると：</b>家を建てて公開する。中に置いた家具（HTML内のJS）は動くけど、家自体は「見せるための場所」</div>
+    </div>
+
+    <div class="connector">↓ 何かを処理したい時だけ ↓</div>
+
+    <div class="room workers" data-tag="WORKERS">
+      <div class="room-head">
+        <span class="room-icon">🧑‍💼</span>
+        <span class="room-name">受付係</span>
+        <span class="room-eng">Cloudflare Workers</span>
+      </div>
+      <div class="room-desc">来客（リクエスト）が来るたびに、何か処理をして答えを返す係。プログラムを実行する場所。</div>
+      <div class="room-metaphor"><b>たとえると：</b>「これ計算して」「これ取ってきて」と頼まれたら動く受付さん。常駐してるわけやなく、頼まれた時だけ動く</div>
+    </div>
+
+    <div class="connector">↓ 預けたい物がある時だけ ↓</div>
+
+    <div class="room kv" data-tag="KV">
+      <div class="room-head">
+        <span class="room-icon">🗄️</span>
+        <span class="room-name">倉庫・ロッカー</span>
+        <span class="room-eng">Cloudflare KV</span>
+      </div>
+      <div class="room-desc">データを「key（ラベル）→value（内容）」の形で保管する場所。受付係が出し入れする。</div>
+      <div class="room-metaphor"><b>たとえると：</b>家のどこに置いても各部屋（端末）ごとに別になるけど、この倉庫に預けたものは「家全体の共有ロッカー」になる</div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;">
+    <span class="fit-badge">dashboard.html は今のところ「ショールーム」だけで成立してる</span>
+  </div>
+</div>
+
+<div class="section-title">データはどこに置かれてる？（3段階）</div>
+
+<div class="flow">
+
+  <div class="flow-step now">
+    <div class="step-label">STEP 0・今</div>
+    <div class="step-title">Boxにファイルだけある状態</div>
+    <div class="step-body">dashboard.htmlを開いた端末の<b>ブラウザの中</b>（localStorage）にデータが入ってる。<span class="tag-mini separate">端末ごとに別</span></div>
+  </div>
+
+  <div class="flow-arrow">↓</div>
+
+  <div class="flow-step step1">
+    <div class="step-label">STEP 1・今回の準備のゴール</div>
+    <div class="step-title">Pagesにファイルをアップロードしただけの状態</div>
+    <div class="step-body">URLができて、どこからでも「ファイルを開く」ことはできる。でもデータの保存場所は変わらず<b>各端末のブラウザの中</b>のまま。<span class="tag-mini separate">端末ごとに別</span></div>
+  </div>
+
+  <div class="flow-arrow">↓</div>
+
+  <div class="flow-step step2">
+    <div class="step-label">STEP 2・将来（複数端末で同じデータを見たくなったら）</div>
+    <div class="step-title">KVに保存先を引っ越す改修をした状態</div>
+    <div class="step-body">受付係（Workers）経由でKV（倉庫）にデータを出し入れするようにコードを書き換える。これで<b>スマホで見てもiPadで見ても同じデータ</b>になる。<span class="tag-mini shared">端末間で共有</span></div>
+  </div>
+
+</div>
+
+<div class="callout">
+  <div class="callout-title">⚠ 今回だけだと複数端末対応にはまだならん</div>
+  STEP1（ファイルをアップロードするだけ）は、URLが変わるだけで保存場所はそのまま。複数端末対応は「dashboardのCloudflare移行」の中でも<b>もう一段先の作業</b>（STEP2）になるで。今回の準備はまずSTEP1までを指してる、っていう前提合わせだけしとくな。
+</div>
+
+<div class="section-title">バックアップ、取っといた方がええ</div>
+<p style="font-size:14px;color:#c2d2dc;">アップロード作業自体でlocalStorageのデータが消えることはないけど、念のため「今の状態」をJSONで書き出しておくのが安全やで。</p>
+
+<div class="checklist">
+  <div class="check-item">
+    <div class="check-num">1</div>
+    <div class="check-body"><b>今のdashboard.htmlをブラウザで開く</b><span>スマホでもPCでも、今使ってる端末でOK</span></div>
+  </div>
+  <div class="check-item">
+    <div class="check-num">2</div>
+    <div class="check-body"><b>開発者ツール（または専用の書き出しボタンがあれば使う）でlocalStorageの中身を確認</b><span>キー名は dev_dashboard_v2。値（JSON文字列）をコピー</span></div>
+  </div>
+  <div class="check-item">
+    <div class="check-num">3</div>
+    <div class="check-body"><b>コピーした内容をBoxにテキストファイルとして保存</b><span>例：dev_dashboard_v2_backup_2026-06-28.json</span></div>
+  </div>
+</div>
+
+<footer>RES-011・Cloudflare移行準備メモ</footer>
+
+</div>
+</body>
+</html>
