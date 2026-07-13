@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSONの入れ子構造 ビジュアル辞書</title>
+<style>
+  :root{
+    --bg:#12141c;
+    --panel:#1b1f2b;
+    --text:#e8e8f0;
+    --sub:#9aa0b4;
+    --depth0:#4dc9ff;
+    --depth1:#ff7ab8;
+    --depth2:#ffd166;
+    --depth3:#7ee787;
+    --depth4:#c792ea;
+    --key:#7ec8ff;
+    --str:#a8e6a1;
+    --num:#ffb86c;
+    --bool:#ff8fa3;
+    --null:#8b8fa3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Hiragino Sans','Segoe UI',sans-serif;
+    line-height:1.7;
+    padding:20px 14px 60px;
+  }
+  h1{
+    font-size:1.3em;
+    text-align:center;
+    margin-bottom:4px;
+  }
+  .sub{
+    text-align:center;
+    color:var(--sub);
+    font-size:0.85em;
+    margin-bottom:28px;
+  }
+  section{
+    max-width:640px;
+    margin:0 auto 34px;
+    background:var(--panel);
+    border-radius:14px;
+    padding:18px 16px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.3);
+  }
+  section h2{
+    font-size:1em;
+    margin:0 0 12px;
+    color:#fff;
+    border-left:4px solid var(--depth0);
+    padding-left:10px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .chip{
+    font-size:0.78em;
+    padding:4px 10px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.06);
+  }
+  .chip b{font-weight:600;}
+  /* ネスト構造の箱 */
+  .box{
+    border:2px solid;
+    border-radius:10px;
+    padding:10px 12px;
+    margin:8px 0;
+    position:relative;
+  }
+  .box .label{
+    position:absolute;
+    top:-11px;
+    left:8px;
+    font-size:0.68em;
+    background:var(--panel);
+    padding:0 6px;
+    font-weight:600;
+  }
+  .d0{border-color:var(--depth0);} .d0>.label{color:var(--depth0);}
+  .d1{border-color:var(--depth1);} .d1>.label{color:var(--depth1);}
+  .d2{border-color:var(--depth2);} .d2>.label{color:var(--depth2);}
+  .d3{border-color:var(--depth3);} .d3>.label{color:var(--depth3);}
+  .d4{border-color:var(--depth4);} .d4>.label{color:var(--depth4);}
+
+  .row{
+    display:flex;
+    gap:6px;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-size:0.92em;
+    margin:4px 0;
+  }
+  .k{color:var(--key);}
+  .s{color:var(--str);}
+  .n{color:var(--num);}
+  .b{color:var(--bool);}
+  .nu{color:var(--null);}
+  .arr-item{
+    display:block;
+    margin:3px 0;
+  }
+  code.inline{
+    background:rgba(255,255,255,0.07);
+    padding:1px 5px;
+    border-radius:4px;
+  }
+  .note{
+    font-size:0.85em;
+    color:var(--sub);
+    margin-top:10px;
+    border-top:1px dashed rgba(255,255,255,0.12);
+    padding-top:10px;
+  }
+  details{
+    margin-top:14px;
+  }
+  summary{
+    cursor:pointer;
+    font-size:0.9em;
+    color:var(--depth0);
+  }
+  .raw{
+    font-family:monospace;
+    font-size:0.82em;
+    white-space:pre;
+    overflow-x:auto;
+    background:#0e0f16;
+    padding:12px;
+    border-radius:8px;
+    margin-top:10px;
+    line-height:1.6;
+  }
+  .raw .d0{color:var(--depth0);}
+  .raw .d1{color:var(--depth1);}
+  .raw .d2{color:var(--depth2);}
+  .raw .d3{color:var(--depth3);}
+  .raw .k{color:var(--key);}
+  .raw .s{color:var(--str);}
+  .raw .n{color:var(--num);}
+  .raw .b{color:var(--bool);}
+</style>
+</head>
+<body>
+
+<h1>JSONの入れ子構造 ビジュアル辞書</h1>
+<div class="sub">枠の色 = 深さ（ネストのレベル）／文字の色 = データの種類</div>
+
+<section>
+  <h2>① まず種類の見分け方</h2>
+  <div class="legend">
+    <span class="chip">🔑 <b class="k">キー</b>（項目名・必ず文字列）</span>
+    <span class="chip">📝 <b class="s">"文字列"</b></span>
+    <span class="chip">🔢 <b class="n">数値</b></span>
+    <span class="chip">✅ <b class="b">true/false</b></span>
+    <span class="chip">🚫 <b class="nu">null</b>（値なし）</span>
+  </div>
+  <div class="row">
+    <span class="k">"名前"</span>:
+    <span class="s">"ゲゲゲ"</span>,
+    <span class="k">"レベル"</span>:
+    <span class="n">3</span>,
+    <span class="k">"討伐済み"</span>:
+    <span class="b">false</span>
+  </div>
+  <div class="note">
+    { } の中に「キー: 値」がコロンで並んでるのが object（オブジェクト）。<br>
+    キーは絶対に文字列やけど、値はどの種類でもOK。
+  </div>
+</section>
+
+<section>
+  <h2>② { } と [ ] の違い</h2>
+  <div class="box d0">
+    <span class="label">object { } = 「名前付きの箱」</span>
+    <div class="row"><span class="k">"名前"</span>: <span class="s">"アズキ"</span></div>
+    <div class="row"><span class="k">"種類"</span>: <span class="s">"犬"</span></div>
+  </div>
+  <div class="box d1">
+    <span class="label">array [ ] = 「順番に並んだ箱」</span>
+    <span class="arr-item"><span class="s">"タスク1"</span></span>
+    <span class="arr-item"><span class="s">"タスク2"</span></span>
+    <span class="arr-item"><span class="s">"タスク3"</span></span>
+  </div>
+  <div class="note">
+    object は「名前で取り出す」（"名前"って聞いたら"アズキ"が出る）。<br>
+    array は「順番で取り出す」（1番目・2番目...で管理、名前はない）。
+  </div>
+</section>
+
+<section>
+  <h2>③ 入れ子（ネスト）＝箱の中に箱</h2>
+  <div class="box d0">
+    <span class="label">深さ0：一番外側</span>
+    <div class="row"><span class="k">"妖怪"</span>: ↓</div>
+    <div class="box d1">
+      <span class="label">深さ1：妖怪オブジェクト</span>
+      <div class="row"><span class="k">"名前"</span>: <span class="s">"締切妖"</span></div>
+      <div class="row"><span class="k">"タグ"</span>: ↓</div>
+      <div class="box d2">
+        <span class="label">深さ2：タグの配列</span>
+        <span class="arr-item"><span class="s">"緊急"</span></span>
+        <span class="arr-item"><span class="s">"仕事"</span></span>
+      </div>
+      <div class="row"><span class="k">"ルーティン"</span>: ↓</div>
+      <div class="box d2">
+        <span class="label">深さ2：ルーティン情報</span>
+        <div class="row"><span class="k">"周期"</span>: <span class="s">"毎日"</span></div>
+        <div class="row"><span class="k">"次回"</span>: <span class="s">"2026-07-05"</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    枠の色が変わるたびに「1段深くなった」って意味。<br>
+    外の箱の中に、また { } や [ ] が入ってるのが入れ子。何段でも重ねられる。
+  </div>
+
+  <details>
+    <summary>▶ これを生のJSONで見るとこうなる</summary>
+    <div class="raw"><span class="d0">{</span>
+  <span class="k">"妖怪"</span>: <span class="d1">{</span>
+    <span class="k">"名前"</span>: <span class="s">"締切妖"</span>,
+    <span class="k">"タグ"</span>: <span class="d2">[</span><span class="s">"緊急"</span>, <span class="s">"仕事"</span><span class="d2">]</span>,
+    <span class="k">"ルーティン"</span>: <span class="d2">{</span>
+      <span class="k">"周期"</span>: <span class="s">"毎日"</span>,
+      <span class="k">"次回"</span>: <span class="s">"2026-07-05"</span>
+    <span class="d2">}</span>
+  <span class="d1">}</span>
+<span class="d0">}</span></div>
+  </details>
+</section>
+
+<section>
+  <h2>④ 配列の中にオブジェクトが並ぶパターン（一番よく使う）</h2>
+  <div class="box d0">
+    <span class="label">深さ0："タスク一覧"の配列</span>
+    <div class="box d1">
+      <span class="label">配列の1番目</span>
+      <div class="row"><span class="k">"id"</span>: <span class="n">1</span></div>
+      <div class="row"><span class="k">"タイトル"</span>: <span class="s">"買い物"</span></div>
+      <div class="row"><span class="k">"完了"</span>: <span class="b">false</span></div>
+    </div>
+    <div class="box d1">
+      <span class="label">配列の2番目</span>
+      <div class="row"><span class="k">"id"</span>: <span class="n">2</span></div>
+      <div class="row"><span class="k">"タイトル"</span>: <span class="s">"通院"</span></div>
+      <div class="row"><span class="k">"完了"</span>: <span class="b">true</span></div>
+    </div>
+  </div>
+  <div class="note">
+    これが「タスクを配列で持って、1件ずつがオブジェクト」の形。<br>
+    妖怪プランナーみたいに「同じ形のデータがたくさん並ぶ」場合は、だいたいこのパターンになる。
+  </div>
+</section>
+
+<section>
+  <h2>⑤ 迷子にならんためのコツ</h2>
+  <div class="row" style="display:block;">
+    <p>・{ } の数と [ ] の数は必ずペア（開いたら必ず閉じる）</p>
+    <p>・エディタで見るとき、閉じ括弧がどのキーに対応してるか分からんくなったら → 上のような色付き枠を頭の中で想像する</p>
+    <p>・「このカンマは何と何を区切ってる？」がわかれば、だいたい構造は読める</p>
+    <p>・深さが3段以上になってきたら、そもそも構造を分割した方がええサインかも</p>
+  </div>
+</section>
+
+<section>
+  <h2>⑥ 書き方の基本ルール</h2>
+
+  <div class="row" style="display:block;">
+    <p>①キーは必ず<code class="inline">"ダブルクォート"</code>で囲む（シングルクォート不可）</p>
+  </div>
+  <div class="box d0">
+    <div class="row"><span class="k">"名前"</span>: <span class="s">"OK"</span></div>
+  </div>
+  <div class="raw"><span class="nu">'名前'</span>: <span class="s">"NG（シングルクォートは無効）"</span></div>
+
+  <div class="row" style="display:block; margin-top:16px;">
+    <p>②最後の項目の後にカンマを付けない（末尾カンマ＝トレイリングカンマはエラー）</p>
+  </div>
+  <div class="raw"><span class="k">"a"</span>: <span class="n">1</span>,
+<span class="k">"b"</span>: <span class="n">2</span>,  <span class="nu">← これがNG（bの後にカンマ不要）</span></div>
+
+  <div class="row" style="display:block; margin-top:16px;">
+    <p>③コメントは書けない（<code class="inline">// メモ</code> みたいなのはJSONでは無効。JSに埋め込む時だけコード側でコメント可）</p>
+  </div>
+
+  <div class="row" style="display:block; margin-top:16px;">
+    <p>④文字列の中で特殊文字を使う時はバックスラッシュでエスケープする</p>
+  </div>
+  <div class="row"><span class="k">"セリフ"</span>: <span class="s">"彼は\"やめとけ\"と言った"</span></div>
+  <div class="row"><span class="k">"改行入り"</span>: <span class="s">"1行目\n2行目"</span></div>
+
+  <div class="row" style="display:block; margin-top:16px;">
+    <p>⑤数値には引用符を付けない（つけると文字列になり計算できなくなる）</p>
+  </div>
+  <div class="row"><span class="k">"レベル"</span>: <span class="n">3</span> <span class="nu">← OK（数値として扱われる）</span></div>
+  <div class="row"><span class="k">"レベル"</span>: <span class="s">"3"</span> <span class="nu">← 一応動くけど文字列扱いなので計算に使えない</span></div>
+
+  <div class="row" style="display:block; margin-top:16px;">
+    <p>⑥キーの命名は好きに決められる（JSON自体に決まりはない）が、プロジェクト内で統一するのが大事：キャメルケース<code class="inline">taskName</code> かスネークケース<code class="inline">task_name</code>、どちらかに揃える</p>
+  </div>
+
+  <div class="note">
+    JSONファイル単体は「データを表すためだけの形式」。<br>
+    ロジック（if文とか計算）は書けへんから、変わりうる値はJSON、書き方・ロジックはコード側、という分担になる。
+  </div>
+</section>
+
+</body>
+</html>

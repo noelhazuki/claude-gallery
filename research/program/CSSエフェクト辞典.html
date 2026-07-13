@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CSSエフェクト逆引き辞典</title>
+<style>
+  :root{
+    --bg:#0f1117;
+    --panel:#181b24;
+    --panel2:#20242f;
+    --border:#2c3140;
+    --text:#e8eaf0;
+    --sub:#8992a8;
+    --accent:#5b8cff;
+    --accent2:#9b6bff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:24px 16px 60px;
+  }
+  h1{
+    font-size:1.3rem;
+    margin:0 0 4px;
+  }
+  .lead{
+    color:var(--sub);
+    font-size:0.85rem;
+    margin:0 0 20px;
+  }
+  #search{
+    width:100%;
+    padding:14px 16px;
+    font-size:1rem;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--text);
+    outline:none;
+  }
+  #search:focus{border-color:var(--accent);}
+  #tagRow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:12px 0 22px;
+  }
+  .tagBtn{
+    font-size:0.75rem;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--panel2);
+    color:var(--sub);
+    cursor:pointer;
+  }
+  .tagBtn.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  #count{
+    color:var(--sub);
+    font-size:0.8rem;
+    margin-bottom:10px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  @media(min-width:720px){
+    .grid{grid-template-columns:1fr 1fr;}
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+  }
+  .vague{
+    font-size:0.78rem;
+    color:var(--accent2);
+    margin:0 0 4px;
+  }
+  .formal{
+    font-size:1.05rem;
+    font-weight:700;
+    margin:0 0 2px;
+  }
+  .prop{
+    font-size:0.78rem;
+    color:var(--sub);
+    margin:0 0 12px;
+    font-family:monospace;
+  }
+  .demoBox{
+    height:90px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#2a2e3a;
+    margin-bottom:10px;
+    overflow:hidden;
+    position:relative;
+  }
+  .demoInner{
+    width:60px;
+    height:60px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-radius:12px;
+  }
+  pre{
+    background:#12141c;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:0.72rem;
+    line-height:1.5;
+    overflow-x:auto;
+    margin:0 0 8px;
+    white-space:pre-wrap;
+    word-break:break-all;
+  }
+  .copyBtn{
+    font-size:0.72rem;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--sub);
+    border-radius:6px;
+    padding:5px 10px;
+    cursor:pointer;
+  }
+  .copyBtn.done{color:var(--accent);border-color:var(--accent);}
+  .empty{
+    color:var(--sub);
+    font-size:0.85rem;
+    padding:30px 0;
+    text-align:center;
+  }
+
+  /* ==== 各エフェクト定義 ==== */
+  .fx-blur .demoInner{filter:blur(3px);}
+  .fx-glass{background:linear-gradient(135deg,#2a3550,#1a1e2c);}
+  .fx-glass .demoInner{
+    width:70px;height:70px;background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.25);
+  }
+  .fx-shadow .demoInner{box-shadow:0 10px 24px rgba(0,0,0,0.5);}
+  .fx-softshadow .demoInner{box-shadow:0 6px 20px rgba(91,140,255,0.35);}
+  .fx-neon .demoInner{
+    background:#0f1117;
+    box-shadow:0 0 8px #5b8cff,0 0 20px #5b8cff,0 0 32px #9b6bff;
+  }
+  .fx-neumorph{background:#1e222c;}
+  .fx-neumorph .demoInner{
+    background:#1e222c;
+    box-shadow:6px 6px 14px #14161d,-6px -6px 14px #282d3a;
+  }
+  .fx-skew .demoInner{transform:skew(-10deg,0deg);}
+  .fx-scaleHover .demoInner{animation:scalePulse 1.6s ease-in-out infinite;}
+  @keyframes scalePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+  .fx-shake .demoInner{animation:shake 0.5s ease-in-out infinite;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    75%{transform:translateX(4px);}
+  }
+  .fx-fadein .demoInner{animation:fadeIn 1.8s ease-in-out infinite;}
+  @keyframes fadeIn{0%,100%{opacity:0.15;}50%{opacity:1;}}
+  .fx-blink .demoInner{animation:blink 1s steps(1) infinite;}
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0.1;}}
+  .fx-gradientMove{overflow:hidden;}
+  .fx-gradientMove .demoInner{
+    width:100%;height:100%;border-radius:0;
+    background:linear-gradient(270deg,var(--accent),var(--accent2),var(--accent));
+    background-size:200% 200%;
+    animation:gradMove 3s ease infinite;
+  }
+  @keyframes gradMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  .fx-3d{perspective:300px;}
+  .fx-3d .demoInner{animation:rot3d 3s linear infinite;}
+  @keyframes rot3d{
+    0%{transform:rotateY(0deg);}
+    100%{transform:rotateY(360deg);}
+  }
+  .fx-maskEdge{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-mask-image:linear-gradient(to right,transparent,black 30%,black 70%,transparent);
+            mask-image:linear-gradient(to right,transparent,black 30%,black 70%,transparent);
+  }
+  .fx-maskEdge .demoInner{background:transparent;}
+  .fx-clip .demoInner{
+    clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);
+  }
+  .fx-grain{position:relative;background:#20242f;}
+  .fx-grain .demoInner{
+    background:repeating-conic-gradient(#2a2e3a 0% 25%,#333849 0% 50%) 0 0/4px 4px;
+  }
+  .fx-float .demoInner{animation:floaty 2.4s ease-in-out infinite;}
+  @keyframes floaty{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+  }
+
+  .fx-gray .demoInner{filter:grayscale(1);}
+  .fx-sepia .demoInner{filter:sepia(0.8);}
+  .fx-invert .demoInner{filter:invert(1);}
+  .fx-saturate .demoInner{filter:saturate(3);}
+  .fx-hue .demoInner{animation:hueSpin 3s linear infinite;}
+  @keyframes hueSpin{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);}}
+  .fx-contrast .demoInner{filter:contrast(2);}
+
+  .fx-vignette .demoInner{
+    background:
+      radial-gradient(circle,transparent 40%,rgba(0,0,0,0.75) 100%),
+      linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+  .fx-scanline .demoInner{
+    background:
+      repeating-linear-gradient(to bottom,rgba(0,0,0,0.25) 0px,rgba(0,0,0,0.25) 1px,transparent 1px,transparent 3px),
+      linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+  .fx-glitch .demoInner{animation:glitch 1.6s steps(2,end) infinite;}
+  @keyframes glitch{
+    0%,100%{clip-path:inset(0 0 0 0);transform:translate(0);}
+    20%{clip-path:inset(10% 0 60% 0);transform:translate(-3px,0);}
+    40%{clip-path:inset(50% 0 20% 0);transform:translate(3px,0);}
+    60%{clip-path:inset(20% 0 40% 0);transform:translate(-2px,0);}
+    80%{clip-path:inset(0 0 0 0);transform:translate(2px,0);}
+  }
+  .fx-chroma .demoInner{
+    box-shadow:-3px 0 0 rgba(255,0,80,0.6),3px 0 0 rgba(0,180,255,0.6);
+  }
+  .fx-duotone .demoInner{
+    background:linear-gradient(135deg,#ff5b8c,#5b8cff);
+    filter:grayscale(1);
+    mix-blend-mode:color;
+  }
+  .fx-emboss .demoInner{
+    box-shadow:inset 3px 3px 4px rgba(0,0,0,0.5),inset -3px -3px 4px rgba(255,255,255,0.25);
+  }
+  .fx-grain2 .demoInner{
+    background:
+      repeating-conic-gradient(rgba(255,255,255,0.06) 0% 25%,rgba(0,0,0,0.06) 0% 50%) 0 0/3px 3px,
+      linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+  .fx-hatch .demoInner{
+    background:
+      repeating-linear-gradient(45deg,#000 0 1px,transparent 1px 6px),
+      repeating-linear-gradient(-45deg,#000 0 1px,transparent 1px 6px),
+      linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+  .fx-lightleak .demoInner{
+    background:
+      radial-gradient(circle at 20% 20%,rgba(255,255,255,0.6),transparent 40%),
+      linear-gradient(135deg,var(--accent),var(--accent2));
+    background-blend-mode:screen;
+  }
+  .fx-holo .demoInner{
+    background:conic-gradient(from 180deg,#ff5b8c,#ffd75b,#5bff8c,#5bd7ff,#9b6bff,#ff5b8c);
+    mix-blend-mode:screen;
+  }
+</style>
+</head>
+<body>
+
+<h1>CSSエフェクト逆引き辞典</h1>
+<p class="lead">「もやっと」「ふわっと」みたいな曖昧な言葉で検索すると、正式名称とコードが出てくるやつ</p>
+
+<input id="search" type="text" placeholder="例：もやっと、浮く、ガラス、光る、揺れる…">
+
+<div id="tagRow"></div>
+<div id="count"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const effects = [
+  {
+    vague: "もやっとぼかしたい",
+    tags: ["ぼかし","もやっと","かすみ","ピンぼけ"],
+    formal: "ブラー（blur）",
+    prop: "filter: blur()",
+    demoClass: "fx-blur",
+    code: `.element {
+  filter: blur(3px);
+}`
+  },
+  {
+    vague: "背景が透けてすりガラスっぽい",
+    tags: ["ガラス","すりガラス","透ける","グラスモーフィズム"],
+    formal: "グラスモーフィズム（Glassmorphism）",
+    prop: "backdrop-filter + rgba背景",
+    demoClass: "fx-glass",
+    code: `.glass {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.25);
+}`
+  },
+  {
+    vague: "くっきり浮き上がらせたい",
+    tags: ["浮き上がる","立体感","影","エレベーション"],
+    formal: "ドロップシャドウ（box-shadow / エレベーション）",
+    prop: "box-shadow",
+    demoClass: "fx-shadow",
+    code: `.card {
+  box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+}`
+  },
+  {
+    vague: "ふわっと優しい影をつけたい",
+    tags: ["ふわっと","柔らかい影","優しい"],
+    formal: "ソフトシャドウ",
+    prop: "box-shadow（色付き・拡散大）",
+    demoClass: "fx-softshadow",
+    code: `.soft {
+  box-shadow: 0 6px 20px rgba(91,140,255,0.35);
+}`
+  },
+  {
+    vague: "ネオンみたいに光らせたい",
+    tags: ["光る","ネオン","発光","サイバー"],
+    formal: "ネオングロー（Neon Glow）",
+    prop: "box-shadow / text-shadow の多重指定",
+    demoClass: "fx-neon",
+    code: `.neon {
+  box-shadow:
+    0 0 8px #5b8cff,
+    0 0 20px #5b8cff,
+    0 0 32px #9b6bff;
+}`
+  },
+  {
+    vague: "ぷにっと押せそうな質感にしたい",
+    tags: ["ぷにっと","質感","押せそう","柔らかい"],
+    formal: "ニューモーフィズム（Neumorphism）",
+    prop: "box-shadow（内向き外向き二重）",
+    demoClass: "fx-neumorph",
+    code: `.neu {
+  background: #1e222c;
+  box-shadow:
+    6px 6px 14px #14161d,
+    -6px -6px 14px #282d3a;
+}`
+  },
+  {
+    vague: "ぐにゃっと斜めに歪ませたい",
+    tags: ["歪む","斜め","ぐにゃっと","傾き"],
+    formal: "スキュー変形（skew）",
+    prop: "transform: skew()",
+    demoClass: "fx-skew",
+    code: `.skew {
+  transform: skew(-10deg, 0deg);
+}`
+  },
+  {
+    vague: "にゅっと大きくなる",
+    tags: ["拡大","にゅっと","ぷくっと","脈打つ"],
+    formal: "スケールパルス（Scale Pulse）",
+    prop: "transform: scale() + animation",
+    demoClass: "fx-scaleHover",
+    code: `@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.15); }
+}
+.el { animation: pulse 1.6s ease-in-out infinite; }`
+  },
+  {
+    vague: "プルプル小刻みに揺れる",
+    tags: ["揺れる","震える","プルプル","シェイク"],
+    formal: "シェイクアニメーション（Shake）",
+    prop: "transform: translateX() + animation",
+    demoClass: "fx-shake",
+    code: `@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%     { transform: translateX(-4px); }
+  75%     { transform: translateX(4px); }
+}
+.el { animation: shake 0.5s ease-in-out infinite; }`
+  },
+  {
+    vague: "ふわっと現れたり消えたりする",
+    tags: ["フェード","ふわっと","現れる","消える"],
+    formal: "フェードイン・アウト（Fade）",
+    prop: "opacity + animation / transition",
+    demoClass: "fx-fadein",
+    code: `@keyframes fadeIn {
+  0%,100% { opacity: 0.15; }
+  50%     { opacity: 1; }
+}
+.el { animation: fadeIn 1.8s ease-in-out infinite; }`
+  },
+  {
+    vague: "チカチカ点滅する",
+    tags: ["点滅","チカチカ","警告","blink"],
+    formal: "ブリンクアニメーション（Blink）",
+    prop: "opacity + steps() アニメーション",
+    demoClass: "fx-blink",
+    code: `@keyframes blink {
+  0%,49%  { opacity: 1; }
+  50%,100%{ opacity: 0.1; }
+}
+.el { animation: blink 1s steps(1) infinite; }`
+  },
+  {
+    vague: "グラデーションがゆらゆら動く",
+    tags: ["グラデーション","動く光","ゆらゆら","流れる"],
+    formal: "アニメーテッドグラデーション（Animated Gradient）",
+    prop: "background-size + background-position",
+    demoClass: "fx-gradientMove",
+    code: `.el {
+  background: linear-gradient(270deg, #5b8cff, #9b6bff, #5b8cff);
+  background-size: 200% 200%;
+  animation: gradMove 3s ease infinite;
+}
+@keyframes gradMove {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}`
+  },
+  {
+    vague: "くるっと立体的に回転させたい",
+    tags: ["立体","3D","回転","くるっと"],
+    formal: "3D回転（perspective + rotateY）",
+    prop: "perspective / transform: rotateY()",
+    demoClass: "fx-3d",
+    code: `.wrap { perspective: 300px; }
+.el {
+  animation: rot3d 3s linear infinite;
+}
+@keyframes rot3d {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}`
+  },
+  {
+    vague: "縁がふわっと透明に消えていく",
+    tags: ["縁がぼやける","端が消える","グラデーションマスク"],
+    formal: "グラデーションマスク（mask-image）",
+    prop: "mask-image: linear-gradient()",
+    demoClass: "fx-maskEdge",
+    code: `.el {
+  -webkit-mask-image: linear-gradient(
+    to right, transparent, black 30%, black 70%, transparent
+  );
+  mask-image: linear-gradient(
+    to right, transparent, black 30%, black 70%, transparent
+  );
+}`
+  },
+  {
+    vague: "六角形とか星型に切り抜きたい",
+    tags: ["切り抜き","図形","六角形","マスク型"],
+    formal: "クリップパス（clip-path）",
+    prop: "clip-path: polygon()",
+    demoClass: "fx-clip",
+    code: `.el {
+  clip-path: polygon(
+    50% 0%, 100% 38%, 82% 100%,
+    18% 100%, 0% 38%
+  );
+}`
+  },
+  {
+    vague: "ふわふわ上下に浮遊してる感じ",
+    tags: ["浮遊","上下に動く","ふわふわ","フロート"],
+    formal: "フロートアニメーション（Float）",
+    prop: "transform: translateY() + animation",
+    demoClass: "fx-float",
+    code: `@keyframes floaty {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-10px); }
+}
+.el { animation: floaty 2.4s ease-in-out infinite; }`
+  },
+  {
+    vague: "モノクロ写真っぽくしたい",
+    tags: ["モノクロ","白黒","グレースケール"],
+    formal: "グレースケール（Grayscale）",
+    prop: "filter: grayscale()",
+    demoClass: "fx-gray",
+    code: `.el {
+  filter: grayscale(1);
+}`
+  },
+  {
+    vague: "古い写真っぽい茶色っぽい色にしたい",
+    tags: ["セピア","レトロ","古い写真","茶色"],
+    formal: "セピア（Sepia）",
+    prop: "filter: sepia()",
+    demoClass: "fx-sepia",
+    code: `.el {
+  filter: sepia(0.8);
+}`
+  },
+  {
+    vague: "色を反転させたい",
+    tags: ["色反転","ネガ","反転"],
+    formal: "インバート（Invert）",
+    prop: "filter: invert()",
+    demoClass: "fx-invert",
+    code: `.el {
+  filter: invert(1);
+}`
+  },
+  {
+    vague: "ビビッドで鮮やかにしたい",
+    tags: ["鮮やか","ビビッド","彩度","濃い色"],
+    formal: "サチュレーション（Saturate）",
+    prop: "filter: saturate()",
+    demoClass: "fx-saturate",
+    code: `.el {
+  filter: saturate(3);
+}`
+  },
+  {
+    vague: "色がぐるぐる変わっていく",
+    tags: ["色相","虹色","色がまわる","レインボー"],
+    formal: "色相回転（Hue Rotate）",
+    prop: "filter: hue-rotate() + animation",
+    demoClass: "fx-hue",
+    code: `@keyframes hueSpin {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(360deg); }
+}
+.el { animation: hueSpin 3s linear infinite; }`
+  },
+  {
+    vague: "コントラストくっきりメリハリつけたい",
+    tags: ["コントラスト","メリハリ","くっきり"],
+    formal: "コントラスト（Contrast）",
+    prop: "filter: contrast()",
+    demoClass: "fx-contrast",
+    code: `.el {
+  filter: contrast(2);
+}`
+  },
+  {
+    vague: "四隅を暗く落としたい写真の枠っぽい",
+    tags: ["ヴィネット","四隅暗い","写真っぽい枠"],
+    formal: "ヴィネット（Vignette）",
+    prop: "radial-gradient を重ねる",
+    demoClass: "fx-vignette",
+    code: `.el {
+  background:
+    radial-gradient(circle, transparent 40%, rgba(0,0,0,0.75) 100%),
+    linear-gradient(135deg,#5b8cff,#9b6bff);
+}`
+  },
+  {
+    vague: "テレビの走査線っぽい線を入れたい",
+    tags: ["走査線","スキャンライン","ブラウン管","レトロ画面"],
+    formal: "スキャンライン（Scanlines）",
+    prop: "repeating-linear-gradient",
+    demoClass: "fx-scanline",
+    code: `.el {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.25) 0px,
+      rgba(0,0,0,0.25) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(135deg,#5b8cff,#9b6bff);
+}`
+  },
+  {
+    vague: "画面が乱れるバグったみたいな見た目にしたい",
+    tags: ["グリッチ","バグる","乱れる","ノイズ映像"],
+    formal: "グリッチエフェクト（Glitch）",
+    prop: "clip-path + transform を高速切替",
+    demoClass: "fx-glitch",
+    code: `@keyframes glitch {
+  0%,100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  20%     { clip-path: inset(10% 0 60% 0); transform: translate(-3px,0); }
+  40%     { clip-path: inset(50% 0 20% 0); transform: translate(3px,0); }
+  60%     { clip-path: inset(20% 0 40% 0); transform: translate(-2px,0); }
+  80%     { clip-path: inset(0 0 0 0); transform: translate(2px,0); }
+}
+.el { animation: glitch 1.6s steps(2,end) infinite; }`
+  },
+  {
+    vague: "画面の色がズレて滲んでる感じ",
+    tags: ["色収差","色ズレ","RGBシフト","滲み"],
+    formal: "色収差（Chromatic Aberration）",
+    prop: "box-shadow の色ズレ二重掛け",
+    demoClass: "fx-chroma",
+    code: `.el {
+  box-shadow:
+    -3px 0 0 rgba(255,0,80,0.6),
+     3px 0 0 rgba(0,180,255,0.6);
+}`
+  },
+  {
+    vague: "写真を二色だけで塗り分けたい",
+    tags: ["デュオトーン","二色","ポスター風"],
+    formal: "デュオトーン（Duotone）",
+    prop: "grayscale + linear-gradient（mix-blend-mode）",
+    demoClass: "fx-duotone",
+    code: `.el {
+  background: linear-gradient(135deg,#ff5b8c,#5b8cff);
+  filter: grayscale(1);
+  mix-blend-mode: color;
+}`
+  },
+  {
+    vague: "彫刻みたいに凹凸をつけたい",
+    tags: ["エンボス","浮き彫り","彫刻","凹凸"],
+    formal: "エンボス（Emboss）",
+    prop: "box-shadow の斜め二重（明暗）",
+    demoClass: "fx-emboss",
+    code: `.el {
+  box-shadow:
+    inset 3px 3px 4px rgba(0,0,0,0.5),
+    inset -3px -3px 4px rgba(255,255,255,0.25);
+}`
+  },
+  {
+    vague: "フィルムのザラザラした粒子感",
+    tags: ["ノイズ","粒子感","ザラザラ","フィルム"],
+    formal: "フィルムグレイン（Film Grain）",
+    prop: "repeating-conic-gradient で疑似ノイズ",
+    demoClass: "fx-grain2",
+    code: `.el {
+  background:
+    repeating-conic-gradient(
+      rgba(255,255,255,0.06) 0% 25%,
+      rgba(0,0,0,0.06) 0% 50%
+    ) 0 0/3px 3px,
+    linear-gradient(135deg,#5b8cff,#9b6bff);
+}`
+  },
+  {
+    vague: "斜めの線でハッチングした線画っぽい質感",
+    tags: ["クロスハッチ","線画","ハッチング","スケッチ風"],
+    formal: "クロスハッチング（Cross-hatch）",
+    prop: "repeating-linear-gradient 二方向",
+    demoClass: "fx-hatch",
+    code: `.el {
+  background:
+    repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(-45deg, #000 0 1px, transparent 1px 6px),
+    linear-gradient(135deg,#5b8cff,#9b6bff);
+}`
+  },
+  {
+    vague: "光がふわっと差し込んでる感じ",
+    tags: ["光漏れ","光が差す","レンズフレア","光の演出"],
+    formal: "ライトリーク（Light Leak）",
+    prop: "radial-gradient を screen 合成",
+    demoClass: "fx-lightleak",
+    code: `.el {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.6), transparent 40%),
+    linear-gradient(135deg,#5b8cff,#9b6bff);
+  background-blend-mode: screen;
+}`
+  },
+  {
+    vague: "虹色のホログラムっぽい光沢",
+    tags: ["ホログラム","虹色光沢","レインボー箔"],
+    formal: "ホログラフィックグラデーション（Holographic）",
+    prop: "conic-gradient + mix-blend-mode",
+    demoClass: "fx-holo",
+    code: `.el {
+  background: conic-gradient(
+    from 180deg,
+    #ff5b8c, #ffd75b, #5bff8c, #5bd7ff, #9b6bff, #ff5b8c
+  );
+  mix-blend-mode: screen;
+}`
+  }
+];
+
+const grid = document.getElementById('grid');
+const search = document.getElementById('search');
+const countEl = document.getElementById('count');
+const tagRow = document.getElementById('tagRow');
+
+// タグ一覧をユニーク化
+const allTags = [...new Set(effects.flatMap(e => e.tags))];
+let activeTag = null;
+
+function renderTags(){
+  tagRow.innerHTML = '';
+  allTags.forEach(tag=>{
+    const btn = document.createElement('button');
+    btn.className = 'tagBtn' + (activeTag===tag ? ' active' : '');
+    btn.textContent = tag;
+    btn.onclick = ()=>{
+      activeTag = (activeTag===tag) ? null : tag;
+      renderTags();
+      render();
+    };
+    tagRow.appendChild(btn);
+  });
+}
+
+function render(){
+  const q = search.value.trim().toLowerCase();
+  const filtered = effects.filter(e=>{
+    const hay = (e.vague + e.formal + e.tags.join(' ')).toLowerCase();
+    const matchQ = q === '' || hay.includes(q);
+    const matchTag = !activeTag || e.tags.includes(activeTag);
+    return matchQ && matchTag;
+  });
+
+  countEl.textContent = filtered.length + '件';
+  grid.innerHTML = '';
+
+  if(filtered.length === 0){
+    grid.innerHTML = '<div class="empty">見つからんかった…別の言葉で試してみて</div>';
+    return;
+  }
+
+  filtered.forEach((e,i)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <p class="vague">${e.vague}</p>
+      <p class="formal">${e.formal}</p>
+      <p class="prop">${e.prop}</p>
+      <div class="demoBox ${e.demoClass}"><div class="demoInner"></div></div>
+      <pre>${e.code}</pre>
+      <button class="copyBtn" data-idx="${i}">コードをコピー</button>
+    `;
+    grid.appendChild(card);
+
+    card.querySelector('.copyBtn').onclick = (ev)=>{
+      navigator.clipboard.writeText(e.code).then(()=>{
+        ev.target.textContent = 'コピーした！';
+        ev.target.classList.add('done');
+        setTimeout(()=>{
+          ev.target.textContent = 'コードをコピー';
+          ev.target.classList.remove('done');
+        },1500);
+      });
+    };
+  });
+}
+
+search.addEventListener('input', render);
+renderTags();
+render();
+</script>
+</body>
+</html>

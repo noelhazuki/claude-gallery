@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIレイアウトパターン辞書</title>
+<style>
+  :root{
+    --bg:#E9EDF2;
+    --card:#FFFFFF;
+    --ink:#16212E;
+    --sub:#5A6B7D;
+    --line:#D4DBE3;
+    --accent:#0E7C7B;
+    --accent-soft:#DCEFEE;
+    --warn:#C7502E;
+    --demo-bg:#F4F7FA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink);
+    padding-bottom:80px;
+  }
+  header{
+    background:var(--ink); color:#fff;
+    padding:20px 16px 16px;
+    position:sticky; top:0; z-index:50;
+  }
+  header h1{font-size:18px; letter-spacing:.05em;}
+  header h1 small{display:block;font-size:11px;font-weight:normal;color:#9FB0C1;margin-top:2px;letter-spacing:.15em;}
+  .note{
+    background:#243447; color:#C7D3DE; font-size:11.5px;
+    padding:10px 12px; border-radius:8px; margin-top:12px; line-height:1.6;
+  }
+  .searchwrap{margin-top:10px; position:relative;}
+  .searchwrap input{
+    width:100%; padding:10px 12px 10px 36px;
+    border-radius:8px; border:none; font-size:15px;
+    background:#243447; color:#fff; outline:none;
+  }
+  .searchwrap input::placeholder{color:#7E93A8;}
+  .searchwrap::before{
+    content:"🔍"; position:absolute; left:10px; top:50%;
+    transform:translateY(-50%); font-size:14px; opacity:.7;
+  }
+  .cat{ padding:24px 16px 4px; }
+  .cat h2{
+    font-size:13px; color:var(--sub); letter-spacing:.2em;
+    border-bottom:2px solid var(--ink); padding-bottom:6px;
+  }
+  .cat p{font-size:11.5px;color:var(--sub);margin-top:6px;line-height:1.6;}
+  .grid{ display:grid; gap:14px; padding:12px 16px; grid-template-columns:1fr; }
+  @media(min-width:640px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media(min-width:1000px){ .grid{grid-template-columns:1fr 1fr 1fr;} }
+
+  .item{ background:var(--card); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+  .demo{
+    background:var(--demo-bg);
+    min-height:130px; display:flex; align-items:center; justify-content:center;
+    padding:16px; border-bottom:1px dashed var(--line);
+  }
+  .plate{padding:12px 14px 14px;}
+  .plate h3{font-size:16px;}
+  .plate h3 .en{font-family:"Courier New",monospace; letter-spacing:.02em;}
+  .plate h3 .jp{font-size:12px; color:var(--accent); font-weight:normal; margin-left:6px;}
+  .alias{font-size:11px; color:var(--sub); margin-top:4px;}
+  .alias b{color:var(--ink); font-weight:600;}
+  .desc{font-size:12.5px; color:var(--ink); margin-top:6px; line-height:1.6;}
+  .use{font-size:11.5px;color:var(--accent);margin-top:6px;background:var(--accent-soft);padding:6px 8px;border-radius:6px;}
+  .hidden{display:none;}
+  .nohit{padding:40px 16px; text-align:center; color:var(--sub); font-size:14px; display:none;}
+
+  /* ===== ワイヤーフレーム(模式図)パーツ ===== */
+  .wf{width:100%;max-width:230px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:9px;color:var(--sub);}
+  .wf-bar{background:var(--ink);color:#fff;padding:7px 9px;font-size:9.5px;letter-spacing:.03em;}
+  .wf-row{display:flex;}
+  .wf-side{background:var(--demo-bg);padding:7px;width:36%;border-right:1px solid var(--line);}
+  .wf-main{padding:7px;flex:1;min-width:0;}
+  .wf-block{background:var(--demo-bg);border-radius:4px;padding:6px;font-size:9px;}
+  .wf-block.accent{background:var(--accent-soft);color:var(--accent);font-weight:700;}
+  .wf-line{height:6px;background:#E2E8EE;border-radius:3px;margin-bottom:5px;}
+  .wf-line.short{width:55%;}
+  .wf-chk{transform:scale(.75);vertical-align:middle;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>UIレイアウトパターン辞書 <small>LAYOUT PATTERN DICTIONARY</small></h1>
+  <div class="note">パーツ辞書の続編。こっちは部品単体やなくて「画面全体をどう組むか」の型集やから、模式図（ワイヤーフレーム）で表現してるで。</div>
+  <div class="searchwrap">
+    <input type="search" id="q" placeholder="パターン名・別名で検索（例: 一覧詳細）">
+  </div>
+</header>
+
+<div class="nohit" id="nohit">見つからへんかった…別の言葉で試してみてな</div>
+
+<!-- ============ 画面構成パターン ============ -->
+<section class="cat" data-cat>
+  <h2>画面構成パターン</h2>
+  <p>ページ全体をどう区切って配置するかの型。</p>
+</section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="dashboard layout ダッシュボードレイアウト ウィジェット配置 管理画面 kpi画面 サマリー画面">
+    <div class="demo">
+      <div class="wf">
+        <div class="wf-bar">ダッシュボード</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;">
+          <div class="wf-block accent">合計タスク<br><b style="font-size:13px;">24件</b></div>
+          <div class="wf-block">完了率<br><b style="font-size:13px;">72%</b></div>
+          <div class="wf-block" style="grid-column:span 2;height:30px;display:flex;align-items:center;justify-content:center;">📈 推移グラフ</div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Dashboard Layout</span><span class="jp">ダッシュボードレイアウト</span></h3>
+      <p class="alias">別名: <b>ウィジェットグリッド / サマリー画面</b></p>
+      <p class="desc">数値カードやグラフを格子状に並べて、状況を一目で把握できるようにする画面構成。</p>
+      <p class="use">使いどころ: 統計・進捗・KPIをまとめて見せたい時</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="master detail マスタディテール 一覧詳細 リスト詳細 左メール風 二画面連動">
+    <div class="demo">
+      <div class="wf">
+        <div class="wf-bar">受信トレイ</div>
+        <div class="wf-row" style="height:96px;">
+          <div class="wf-side">
+            <div class="wf-block accent" style="padding:5px;margin-bottom:4px;">田中さん</div>
+            <div class="wf-block" style="padding:5px;margin-bottom:4px;">佐藤さん</div>
+            <div class="wf-block" style="padding:5px;">鈴木さん</div>
+          </div>
+          <div class="wf-main">
+            <div class="wf-line"></div><div class="wf-line"></div><div class="wf-line short"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Master-Detail</span><span class="jp">マスタディテール</span></h3>
+      <p class="alias">別名: <b>一覧詳細ビュー / リスト詳細</b></p>
+      <p class="desc">左に一覧（細め）、右に選んだ項目の詳細（広め）を出す不均等な2分割。メールアプリの定番。</p>
+      <p class="use">使いどころ: 項目数が多く、選んだものを詳しく見せたい時</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="split view スプリットビュー 分割表示 左右均等パネル エディタプレビュー 二分割画面">
+    <div class="demo">
+      <div class="wf">
+        <div class="wf-row" style="height:96px;">
+          <div class="wf-main" style="border-right:1px solid var(--line);">コード<div class="wf-line" style="margin-top:6px;"></div><div class="wf-line"></div></div>
+          <div class="wf-main">プレビュー<div class="wf-block accent" style="height:36px;margin-top:6px;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Split View</span><span class="jp">スプリットビュー</span></h3>
+      <p class="alias">別名: <b>分割ビュー / 左右均等パネル</b></p>
+      <p class="desc">左右をほぼ同じ幅で分ける2分割。マスタディテールと違い、両方が対等な独立コンテンツ。</p>
+      <p class="use">使いどころ: 編集と結果を同時に見せたい時（コードとプレビューなど）</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="kanban board カンバンボード タスクボード todo doing done 列管理 ボードビュー">
+    <div class="demo">
+      <div class="wf">
+        <div class="wf-row" style="padding:8px;gap:6px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;color:var(--ink);margin-bottom:4px;font-size:9px;">To Do</div>
+            <div class="wf-block" style="padding:5px;margin-bottom:4px;">討伐A</div>
+            <div class="wf-block" style="padding:5px;">討伐B</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:700;color:var(--ink);margin-bottom:4px;font-size:9px;">Doing</div>
+            <div class="wf-block accent" style="padding:5px;">討伐C</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:700;color:var(--ink);margin-bottom:4px;font-size:9px;">Done</div>
+            <div class="wf-block" style="padding:5px;opacity:.5;">討伐D</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Kanban Board</span><span class="jp">カンバンボード</span></h3>
+      <p class="alias">別名: <b>タスクボード / ボードビュー</b></p>
+      <p class="desc">縦の列でステータスを分け、カードをドラッグで移動させる。Trelloが有名にした構成。</p>
+      <p class="use">使いどころ: 進行状況で管理したいタスク・案件</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="masonry メイソンリー カードグリッド 段違いグリッド pinterest風 タイル配置 レンガ状">
+    <div class="demo">
+      <div class="wf" style="padding:8px;">
+        <div style="columns:2;column-gap:6px;">
+          <div class="wf-block accent" style="height:32px;margin-bottom:6px;"></div>
+          <div class="wf-block" style="height:52px;margin-bottom:6px;"></div>
+          <div class="wf-block" style="height:38px;margin-bottom:6px;"></div>
+          <div class="wf-block accent" style="height:26px;margin-bottom:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Masonry / Card Grid</span><span class="jp">メイソンリー・カードグリッド</span></h3>
+      <p class="alias">別名: <b>Pinterest風グリッド / タイル配置</b></p>
+      <p class="desc">高さの違うカードを、隙間なくレンガ状に詰めて並べる配置。石積み（masonry）が語源。</p>
+      <p class="use">使いどころ: 画像や写真など、縦横比がバラバラなコンテンツ一覧</p>
+    </div>
+  </article>
+
+</div>
+
+<!-- ============ ナビゲーション行動パターン ============ -->
+<section class="cat" data-cat>
+  <h2>ナビゲーション行動パターン</h2>
+  <p>スクロールや操作にあわせてUIがどう振る舞うかの型。</p>
+</section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="sticky header スティッキーヘッダー 固定ヘッダー 追従ヘッダー スクロール追従">
+    <div class="demo">
+      <div class="wf" style="height:112px;overflow:hidden;position:relative;">
+        <div class="wf-bar" style="position:sticky;top:0;box-shadow:0 2px 5px rgba(0,0,0,.18);">ヘッダー（貼りつく）</div>
+        <div style="padding:8px;">
+          <div class="wf-line"></div><div class="wf-line"></div><div class="wf-line"></div><div class="wf-line short"></div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Sticky Header</span><span class="jp">スティッキーヘッダー</span></h3>
+      <p class="alias">別名: <b>固定ヘッダー / 追従ヘッダー</b></p>
+      <p class="desc">下にスクロールしてもヘッダーだけ画面上部に貼りついたまま残る。検索やナビへすぐ戻れる。</p>
+      <p class="use">使いどころ: 長いページで常に検索・ナビを出しておきたい時</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="back to top button トップに戻るボタン 上に戻る 矢印ボタン ページ先頭に戻る">
+    <div class="demo">
+      <div class="wf" style="height:100px;position:relative;padding:8px;">
+        <div class="wf-line"></div><div class="wf-line"></div><div class="wf-line"></div><div class="wf-line short"></div>
+        <div style="position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 8px rgba(0,0,0,.25);">↑</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Back to Top Button</span><span class="jp">トップに戻るボタン</span></h3>
+      <p class="alias">別名: <b>上に戻るボタン / スクロールトップ</b></p>
+      <p class="desc">ある程度スクロールすると出てくる、画面先頭に一気に戻るボタン。長い一覧ページで重宝する。</p>
+      <p class="use">使いどころ: 縦に長い一覧・記事ページ</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="floating toolbar フローティングツールバー 選択時ツールバー コンテキストツールバー テキスト選択メニュー">
+    <div class="demo">
+      <div class="wf" style="padding:20px 8px 8px;position:relative;">
+        <div style="position:absolute;top:6px;left:26%;background:var(--ink);color:#fff;border-radius:8px;padding:5px 10px;display:flex;gap:8px;font-size:10px;box-shadow:0 4px 10px rgba(0,0,0,.22);">
+          <b>B</b><i>I</i><span>🔗</span>
+        </div>
+        <div class="wf-line"></div>
+        <span style="background:var(--accent-soft);padding:1px 3px;border-radius:3px;">選択中のテキスト</span>
+        <div class="wf-line short" style="margin-top:5px;"></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Floating Toolbar</span><span class="jp">フローティングツールバー</span></h3>
+      <p class="alias">別名: <b>選択時ツールバー / コンテキストツールバー</b></p>
+      <p class="desc">テキストなどを選択した瞬間、その近くに操作アイコンがふわっと出る。Googleドキュメントでおなじみ。</p>
+      <p class="use">使いどころ: 選択した対象にだけ関係する操作をまとめたい時</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="filter sidebar フィルターサイドバー 絞り込みパネル ファセット検索 検索条件パネル 検索結果絞り込み">
+    <div class="demo">
+      <div class="wf">
+        <div class="wf-row" style="height:100px;">
+          <div class="wf-side">
+            <div style="font-weight:700;color:var(--ink);margin-bottom:5px;">絞り込み</div>
+            <label style="display:block;margin-bottom:3px;"><input type="checkbox" class="wf-chk" checked> 和食</label>
+            <label style="display:block;"><input type="checkbox" class="wf-chk"> 洋食</label>
+          </div>
+          <div class="wf-main" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            <div class="wf-block" style="height:22px;"></div><div class="wf-block" style="height:22px;"></div>
+            <div class="wf-block" style="height:22px;"></div><div class="wf-block" style="height:22px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Filter Sidebar</span><span class="jp">フィルターサイドバー</span></h3>
+      <p class="alias">別名: <b>絞り込みパネル / ファセット検索</b></p>
+      <p class="desc">左に条件（カテゴリ・価格帯など）、右に結果一覧。ECサイトの検索結果画面の定番構成。</p>
+      <p class="use">使いどころ: 件数が多く、条件をかけ合わせて絞りたい一覧</p>
+    </div>
+  </article>
+
+</div>
+
+<!-- ============ コンテンツ表示パターン ============ -->
+<section class="cat" data-cat>
+  <h2>コンテンツ表示パターン</h2>
+  <p>情報や入力の流れをどう見せて進めるかの型。</p>
+</section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="hero section ヒーローセクション ファーストビュー トップビジュアル メインビジュアル 大きい画像とキャッチコピー">
+    <div class="demo">
+      <div class="wf">
+        <div style="background:linear-gradient(135deg,var(--ink),#0E7C7B);color:#fff;padding:22px 12px;text-align:center;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px;">妖怪プランナー</div>
+          <div style="font-size:9px;opacity:.85;margin-bottom:10px;">タスクを討伐する新感覚アプリ</div>
+          <div style="display:inline-block;background:#fff;color:var(--ink);padding:5px 14px;border-radius:6px;font-size:10px;font-weight:700;">はじめる</div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Hero Section</span><span class="jp">ヒーローセクション</span></h3>
+      <p class="alias">別名: <b>ファーストビュー / メインビジュアル</b></p>
+      <p class="desc">ページ最上部にドンと置く、大きなビジュアル＋キャッチコピー＋主要ボタンのかたまり。第一印象を決める。</p>
+      <p class="use">使いどころ: LP・ポータルサイトのトップページ冒頭</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="infinite scroll 無限スクロール 自動読み込み もっと見る 追加読み込み スクロールで追加表示">
+    <div class="demo">
+      <div class="wf" style="padding:8px;">
+        <div class="wf-block" style="height:18px;margin-bottom:5px;"></div>
+        <div class="wf-block" style="height:18px;margin-bottom:5px;"></div>
+        <div class="wf-block" style="height:18px;margin-bottom:5px;opacity:.5;"></div>
+        <div style="text-align:center;font-size:9px;color:var(--sub);">⟳ 読み込み中…</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Infinite Scroll</span><span class="jp">無限スクロール</span></h3>
+      <p class="alias">別名: <b>自動読み込み / 追加読み込み</b></p>
+      <p class="desc">下までスクロールすると自動で次の項目が読み込まれ続ける。ページネーションの代替として使われる。</p>
+      <p class="use">使いどころ: SNSタイムラインなど「区切りなく流し見」したい一覧</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="wizard form ウィザードフォーム 複数ステップフォーム 入力フロー 多段階入力 ステップフォーム">
+    <div class="demo">
+      <div class="wf" style="padding:12px 8px;">
+        <div style="display:flex;justify-content:center;gap:14px;margin-bottom:10px;font-size:9px;">
+          <span style="color:var(--accent);font-weight:700;">①基本情報</span><span style="color:var(--sub);">②確認</span><span style="color:var(--sub);">③完了</span>
+        </div>
+        <div class="wf-line"></div><div class="wf-line short"></div>
+        <div style="text-align:right;margin-top:8px;"><span style="background:var(--accent);color:#fff;padding:4px 12px;border-radius:6px;font-size:10px;">次へ</span></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Wizard Form</span><span class="jp">ウィザードフォーム</span></h3>
+      <p class="alias">別名: <b>複数ステップフォーム / 多段階入力</b></p>
+      <p class="desc">長い入力を複数画面に分割し、1画面あたりの負担を減らす。上部の進行表示は「ステップインジケーター」という部品を使う。</p>
+      <p class="use">使いどころ: 会員登録・購入手続きなど入力項目が多いフォーム</p>
+    </div>
+  </article>
+
+</div>
+
+<script>
+  const q = document.getElementById('q');
+  const items = document.querySelectorAll('.item');
+  const cats = document.querySelectorAll('[data-cat]');
+  const grids = document.querySelectorAll('[data-grid]');
+  const nohit = document.getElementById('nohit');
+
+  q.addEventListener('input', () => {
+    const kw = q.value.trim().toLowerCase();
+    let hit = 0;
+    items.forEach(it => {
+      const ok = !kw || it.dataset.k.toLowerCase().includes(kw) || it.textContent.toLowerCase().includes(kw);
+      it.classList.toggle('hidden', !ok);
+      if(ok) hit++;
+    });
+    grids.forEach((g,i) => {
+      const anyVisible = g.querySelector('.item:not(.hidden)');
+      g.classList.toggle('hidden', !anyVisible);
+      cats[i].classList.toggle('hidden', !anyVisible);
+    });
+    nohit.style.display = hit ? 'none' : 'block';
+  });
+</script>
+
+</body>
+</html>

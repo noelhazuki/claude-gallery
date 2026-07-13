@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIパーツ逆引き辞書</title>
+<style>
+  :root{
+    --bg:#E9EDF2;
+    --card:#FFFFFF;
+    --ink:#16212E;
+    --sub:#5A6B7D;
+    --line:#D4DBE3;
+    --accent:#0E7C7B;
+    --accent-soft:#DCEFEE;
+    --warn:#C7502E;
+    --demo-bg:#F4F7FA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink);
+    padding-bottom:80px;
+  }
+  header{
+    background:var(--ink); color:#fff;
+    padding:20px 16px 16px;
+    position:sticky; top:0; z-index:50;
+  }
+  header h1{font-size:18px; letter-spacing:.05em;}
+  header h1 small{display:block;font-size:11px;font-weight:normal;color:#9FB0C1;margin-top:2px;letter-spacing:.15em;}
+  .searchwrap{margin-top:12px; position:relative;}
+  .searchwrap input{
+    width:100%; padding:10px 12px 10px 36px;
+    border-radius:8px; border:none; font-size:15px;
+    background:#243447; color:#fff; outline:none;
+  }
+  .searchwrap input::placeholder{color:#7E93A8;}
+  .searchwrap::before{
+    content:"🔍"; position:absolute; left:10px; top:50%;
+    transform:translateY(-50%); font-size:14px; opacity:.7;
+  }
+  .cat{
+    padding:24px 16px 4px;
+  }
+  .cat h2{
+    font-size:13px; color:var(--sub); letter-spacing:.2em;
+    border-bottom:2px solid var(--ink); padding-bottom:6px;
+  }
+  .grid{
+    display:grid; gap:14px; padding:12px 16px;
+    grid-template-columns:1fr;
+  }
+  @media(min-width:640px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media(min-width:1000px){ .grid{grid-template-columns:1fr 1fr 1fr;} }
+
+  .item{
+    background:var(--card); border-radius:12px; overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .demo{
+    background:var(--demo-bg);
+    min-height:110px; display:flex; align-items:center; justify-content:center;
+    padding:20px 16px; border-bottom:1px dashed var(--line);
+    position:relative; overflow:hidden;
+  }
+  .plate{padding:12px 14px 14px;}
+  .plate h3{font-size:16px;}
+  .plate h3 .en{font-family:"Courier New",monospace; letter-spacing:.02em;}
+  .plate h3 .jp{font-size:12px; color:var(--accent); font-weight:normal; margin-left:6px;}
+  .alias{font-size:11px; color:var(--sub); margin-top:4px;}
+  .alias b{color:var(--ink); font-weight:600;}
+  .desc{font-size:12.5px; color:var(--ink); margin-top:6px; line-height:1.6;}
+  .hidden{display:none;}
+  .nohit{padding:40px 16px; text-align:center; color:var(--sub); font-size:14px; display:none;}
+
+  /* ===== サンプル部品スタイル ===== */
+  .s-btn{background:var(--accent); color:#fff; border:none; padding:10px 22px; border-radius:8px; font-size:14px; font-weight:600;}
+  .s-btn.ghost{background:transparent; color:var(--accent); border:1.5px solid var(--accent);}
+  .s-fab{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:26px;box-shadow:0 4px 10px rgba(0,0,0,.25);}
+  .s-toggle{width:48px;height:28px;border-radius:14px;background:#C4CDD6;border:none;position:relative;transition:.2s;}
+  .s-toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .s-toggle.on{background:var(--accent);}
+  .s-toggle.on::after{left:23px;}
+  .s-check{display:flex;gap:14px;font-size:14px;}
+  .s-check label{display:flex;align-items:center;gap:5px;}
+  .s-field{display:flex;flex-direction:column;gap:4px;width:100%;max-width:220px;}
+  .s-field label{font-size:11px;color:var(--sub);}
+  .s-field input{padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;background:#fff;}
+  .s-field input:focus{border-color:var(--accent);outline:none;}
+  .s-select{padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;background:#fff;width:100%;max-width:200px;}
+  .s-slider{width:80%;accent-color:var(--accent);}
+  .s-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:8px 14px;width:100%;max-width:230px;font-size:14px;color:var(--sub);}
+  .s-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .s-chip{padding:6px 14px;border-radius:16px;font-size:13px;border:1.5px solid var(--line);background:#fff;}
+  .s-chip.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;}
+  .s-seg{display:flex;border:1.5px solid var(--accent);border-radius:8px;overflow:hidden;}
+  .s-seg button{border:none;background:#fff;color:var(--accent);padding:8px 16px;font-size:13px;}
+  .s-seg button.act{background:var(--accent);color:#fff;}
+  .s-stepper{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;}
+  .s-stepper button{border:none;background:#fff;width:38px;height:38px;font-size:18px;color:var(--accent);}
+  .s-stepper span{width:44px;text-align:center;font-size:15px;border-left:1px solid var(--line);border-right:1px solid var(--line);}
+
+  .s-tabs{width:100%;max-width:240px;}
+  .s-tabbar{display:flex;border-bottom:2px solid var(--line);}
+  .s-tabbar button{flex:1;border:none;background:none;padding:8px 4px;font-size:13px;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;}
+  .s-tabbar button.act{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+  .s-tabbody{font-size:12px;padding:10px 4px;color:var(--sub);}
+  .s-crumb{font-size:12.5px;color:var(--sub);}
+  .s-crumb a{color:var(--accent);text-decoration:none;}
+  .s-pager{display:flex;gap:6px;}
+  .s-pager button{width:32px;height:32px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:13px;}
+  .s-pager button.act{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .s-hamb{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;}
+  .s-hamb i{display:block;width:20px;height:2px;background:var(--ink);}
+  .s-bottomnav{display:flex;width:100%;max-width:260px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .s-bottomnav div{flex:1;text-align:center;padding:8px 0;font-size:10px;color:var(--sub);}
+  .s-bottomnav div span{display:block;font-size:18px;}
+  .s-bottomnav div.act{color:var(--accent);font-weight:600;}
+  .s-drawerbox{width:100%;max-width:230px;height:110px;background:#fff;border:1px solid var(--line);border-radius:8px;position:relative;overflow:hidden;}
+  .s-drawer{position:absolute;top:0;left:0;bottom:0;width:60%;background:var(--ink);color:#fff;padding:12px;font-size:11px;line-height:2.1;}
+  .s-drawermain{position:absolute;top:0;right:0;bottom:0;width:40%;background:rgba(0,0,0,.15);}
+
+  .s-card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:100%;max-width:200px;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+  .s-card .thumb{height:60px;background:linear-gradient(120deg,#0E7C7B,#16212E);}
+  .s-card .body{padding:10px;font-size:12px;}
+  .s-card .body b{display:block;font-size:13px;margin-bottom:2px;}
+  .s-acc{width:100%;max-width:230px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .s-acc button{width:100%;border:none;background:#fff;padding:10px 12px;font-size:13px;text-align:left;display:flex;justify-content:space-between;align-items:center;}
+  .s-acc .accbody{max-height:0;overflow:hidden;transition:.25s;font-size:11.5px;color:var(--sub);padding:0 12px;}
+  .s-acc.open .accbody{max-height:80px;padding:0 12px 10px;}
+  .s-acc .arrow{transition:.25s;}
+  .s-acc.open .arrow{transform:rotate(180deg);}
+  .s-badgebox{position:relative;width:44px;height:44px;background:#fff;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .s-badge{position:absolute;top:-6px;right:-6px;background:var(--warn);color:#fff;font-size:10px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;}
+  .s-avatars{display:flex;}
+  .s-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;border:2px solid #fff;}
+  .s-avatar+.s-avatar{margin-left:-10px;}
+  .s-carousel{width:100%;max-width:220px;}
+  .s-caroview{display:flex;gap:8px;overflow:hidden;}
+  .s-caroview div{min-width:70%;height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
+  .s-dots{display:flex;gap:5px;justify-content:center;margin-top:8px;}
+  .s-dots i{width:6px;height:6px;border-radius:50%;background:#C4CDD6;}
+  .s-dots i.act{background:var(--accent);width:16px;border-radius:3px;}
+  .s-list{width:100%;max-width:230px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px;}
+  .s-list div{padding:10px 12px;display:flex;justify-content:space-between;color:var(--ink);}
+  .s-list div+div{border-top:1px solid var(--line);}
+  .s-list span{color:#B7C2CC;}
+  .s-empty{text-align:center;color:var(--sub);font-size:12px;}
+  .s-empty .ico{font-size:30px;opacity:.5;}
+
+  .s-modalbox{width:100%;max-width:230px;height:120px;background:rgba(22,33,46,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+  .s-modal{background:#fff;border-radius:10px;padding:14px;width:80%;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+  .s-modal b{display:block;font-size:13px;margin-bottom:4px;}
+  .s-modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;}
+  .s-modal .row button{border:none;padding:6px 12px;border-radius:6px;font-size:11px;}
+  .s-toast{background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;}
+  .s-tooltipbox{position:relative;display:inline-block;}
+  .s-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;padding:5px 10px;border-radius:6px;white-space:nowrap;}
+  .s-tooltip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ink);}
+  .s-progress{width:80%;height:8px;background:#D4DBE3;border-radius:4px;overflow:hidden;}
+  .s-progress i{display:block;width:62%;height:100%;background:var(--accent);border-radius:4px;}
+  .s-spinner{width:34px;height:34px;border:4px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .s-skel{width:100%;max-width:210px;}
+  .s-skel i{display:block;border-radius:6px;background:linear-gradient(90deg,#E2E8EE 25%,#F2F6F9 50%,#E2E8EE 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{to{background-position:-200% 0;}}
+  .s-banner{width:100%;max-width:240px;background:#FDF0EC;border:1px solid #F0C4B4;border-left:4px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:12px;color:#8A3A20;display:flex;gap:8px;}
+  .s-snack{background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;font-size:12.5px;display:flex;gap:14px;align-items:center;width:100%;max-width:230px;justify-content:space-between;}
+  .s-snack button{background:none;border:none;color:#5FD4D2;font-weight:700;font-size:12px;}
+  .s-divider{width:80%;display:flex;align-items:center;gap:10px;color:var(--sub);font-size:11px;}
+  .s-divider::before,.s-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  /* ===== 追加パーツ ===== */
+  .s-rating{font-size:24px;letter-spacing:4px;}
+  .s-rating .on{color:#F2A93B;}
+  .s-rating .off{color:#D4DBE3;}
+  .s-datepicker{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;width:180px;font-size:10px;}
+  .s-datepicker .dphead{display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:6px;padding:0 2px;}
+  .s-datepicker .dpgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;}
+  .s-datepicker .dpgrid span{padding:3px 0;border-radius:50%;}
+  .s-datepicker .dpgrid .wd{color:var(--sub);}
+  .s-datepicker .dpgrid .sel{background:var(--accent);color:#fff;font-weight:700;}
+  .s-ptr{width:100%;max-width:210px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .s-ptr .pull{text-align:center;padding:8px;font-size:11px;color:var(--accent);background:var(--accent-soft);}
+  .s-ptr .row{padding:9px 12px;font-size:12px;border-top:1px solid var(--line);}
+  .s-swipe{width:100%;max-width:220px;border-radius:10px;overflow:hidden;position:relative;border:1px solid var(--line);}
+  .s-swipe .del{position:absolute;top:0;right:0;bottom:0;width:76px;background:var(--warn);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .s-swipe .row{position:relative;background:#fff;padding:13px 12px;font-size:13px;transform:translateX(-76px);border-radius:0;}
+  .s-kebab{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+  .s-kebab i{width:4px;height:4px;border-radius:50%;background:var(--ink);display:block;}
+  .s-stepind{display:flex;align-items:center;font-size:10px;color:var(--sub);}
+  .s-stepind .st{display:flex;flex-direction:column;align-items:center;gap:3px;width:56px;}
+  .s-stepind .st i{width:24px;height:24px;border-radius:50%;background:#D4DBE3;color:#fff;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .s-stepind .st.done i{background:var(--accent);}
+  .s-stepind .st.now i{background:var(--ink);}
+  .s-stepind .bar{width:24px;height:2px;background:#D4DBE3;margin-bottom:14px;}
+  .s-stepind .bar.done{background:var(--accent);}
+  .s-tablewrap{width:100%;max-width:230px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .s-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .s-table th{background:#EEF2F6;color:var(--sub);font-weight:600;text-align:left;padding:7px 10px;}
+  .s-table td{padding:7px 10px;border-top:1px solid var(--line);}
+  .s-lightbox{width:100%;max-width:220px;height:120px;background:#0B121B;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;}
+  .s-lightbox .pic{width:65%;height:70%;border-radius:6px;background:linear-gradient(135deg,#0E7C7B,#5FD4D2);}
+  .s-lightbox .close{position:absolute;top:8px;right:10px;color:#fff;font-size:14px;opacity:.8;}
+  .s-sheetbox{width:100%;max-width:220px;height:120px;background:rgba(22,33,46,.45);border-radius:8px;position:relative;overflow:hidden;}
+  .s-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:14px 14px 0 0;padding:8px 12px 12px;font-size:11px;}
+  .s-sheet .handle{width:34px;height:4px;border-radius:2px;background:#C4CDD6;margin:0 auto 8px;}
+  .s-sheet .row{padding:6px 2px;border-top:1px solid var(--line);}
+  .s-actsheet{position:absolute;left:8px;right:8px;bottom:8px;font-size:12px;}
+  .s-actsheet .grp{background:rgba(255,255,255,.95);border-radius:12px;overflow:hidden;margin-bottom:6px;text-align:center;}
+  .s-actsheet .grp div{padding:9px;color:var(--accent);}
+  .s-actsheet .grp div+div{border-top:1px solid var(--line);}
+  .s-actsheet .grp .danger{color:var(--warn);}
+  .s-actsheet .cancel{background:#fff;border-radius:12px;text-align:center;padding:9px;font-weight:700;color:var(--accent);}
+  .s-popbox{position:relative;display:inline-block;}
+  .s-popover{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:8px;font-size:11.5px;white-space:nowrap;}
+  .s-popover div{padding:5px 10px;border-radius:6px;}
+  .s-popover div:first-child{background:var(--accent-soft);color:var(--accent);}
+  .s-popover::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff;}
+  .s-coachbox{width:100%;max-width:220px;height:120px;background:rgba(11,18,27,.75);border-radius:8px;position:relative;}
+  .s-coachbox .spot{position:absolute;bottom:12px;right:14px;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 5px rgba(255,255,255,.25);}
+  .s-coachbox .balloon{position:absolute;top:14px;left:12px;right:60px;background:#fff;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.5;}
+  .s-coachbox .balloon::after{content:"";position:absolute;top:100%;right:20px;border:7px solid transparent;border-top-color:#fff;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>UIパーツ逆引き辞書 <small>UI COMPONENT DICTIONARY</small></h1>
+  <div class="searchwrap">
+    <input type="search" id="q" placeholder="名前・別名・見た目で検索（例: ポップアップ）">
+  </div>
+</header>
+
+<div class="nohit" id="nohit">見つからへんかった…別の言葉で試してみてな</div>
+
+<!-- ============ 入力・操作系 ============ -->
+<section class="cat" data-cat><h2>入力・操作系</h2></section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="button ボタン btn 押す cta プッシュボタン アウトライン ゴースト">
+    <div class="demo"><div style="display:flex;gap:10px;"><button class="s-btn">保存する</button><button class="s-btn ghost">キャンセル</button></div></div>
+    <div class="plate">
+      <h3><span class="en">Button</span><span class="jp">ボタン</span></h3>
+      <p class="alias">別名: <b>CTAボタン / ゴーストボタン</b>（枠線だけのやつ）</p>
+      <p class="desc">押すと何かが起きる基本パーツ。塗りつぶし＝主役の操作、枠線だけ＝控えめな操作、という使い分けが定番。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="fab フローティングアクションボタン 丸ボタン 右下 プラスボタン 追加ボタン floating action">
+    <div class="demo"><button class="s-fab">＋</button></div>
+    <div class="plate">
+      <h3><span class="en">FAB</span><span class="jp">フローティングアクションボタン</span></h3>
+      <p class="alias">別名: <b>フロートボタン / 右下の丸いやつ</b></p>
+      <p class="desc">画面の右下に浮いてる丸ボタン。「新規追加」みたいな、その画面で一番よく使う操作を1個だけ置く。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="toggle switch トグルスイッチ オンオフ 切り替え スイッチ">
+    <div class="demo"><button class="s-toggle on" onclick="this.classList.toggle('on')" aria-label="切り替え"></button></div>
+    <div class="plate">
+      <h3><span class="en">Toggle Switch</span><span class="jp">トグルスイッチ</span></h3>
+      <p class="alias">別名: <b>スイッチ / オンオフ切替</b>（タップで動くで）</p>
+      <p class="desc">ON/OFFを即時に切り替えるやつ。チェックボックスと違って「押した瞬間に反映される」設定向き。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="checkbox チェックボックス radio ラジオボタン 複数選択 単一選択 丸ぽち">
+    <div class="demo">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="s-check"><label><input type="checkbox" checked>牛乳</label><label><input type="checkbox">卵</label></div>
+        <div class="s-check"><label><input type="radio" name="r1" checked>朝</label><label><input type="radio" name="r1">夜</label></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Checkbox / Radio</span><span class="jp">チェックボックス / ラジオボタン</span></h3>
+      <p class="alias">別名: <b>ラジオ＝丸ぽち</b></p>
+      <p class="desc">四角＝複数選べる、丸＝どれか1つだけ。この使い分けはUIの世界共通ルール。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="text field テキストフィールド 入力欄 インプット フォーム input textbox テキストボックス">
+    <div class="demo"><div class="s-field"><label>ユーザー名</label><input type="text" placeholder="hanoi"></div></div>
+    <div class="plate">
+      <h3><span class="en">Text Field</span><span class="jp">テキストフィールド</span></h3>
+      <p class="alias">別名: <b>入力欄 / インプット / テキストボックス</b></p>
+      <p class="desc">文字を打ち込む欄。上の小さい文字は「ラベル」、薄く入ってる例文は「プレースホルダー」って呼ぶ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="select dropdown セレクトボックス ドロップダウン プルダウン 選択肢 リスト選択">
+    <div class="demo"><select class="s-select"><option>新潟県</option><option>大阪府</option></select></div>
+    <div class="plate">
+      <h3><span class="en">Select / Dropdown</span><span class="jp">セレクトボックス</span></h3>
+      <p class="alias">別名: <b>プルダウン / ドロップダウンメニュー</b></p>
+      <p class="desc">タップすると選択肢のリストが垂れ下がってくる。選択肢が多い時にラジオボタンの代わりに使う。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="slider スライダー つまみ 音量 range レンジ">
+    <div class="demo"><input type="range" class="s-slider" value="60"></div>
+    <div class="plate">
+      <h3><span class="en">Slider</span><span class="jp">スライダー</span></h3>
+      <p class="alias">別名: <b>レンジ / つまみ</b></p>
+      <p class="desc">つまみをドラッグして数値を調整。音量や明るさみたいに「だいたいこのへん」で決める値に向いてる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="search bar 検索バー サーチバー 検索窓 検索ボックス 虫眼鏡">
+    <div class="demo"><div class="s-search">🔍 <span>妖怪を検索…</span></div></div>
+    <div class="plate">
+      <h3><span class="en">Search Bar</span><span class="jp">検索バー</span></h3>
+      <p class="alias">別名: <b>検索窓 / 検索ボックス</b></p>
+      <p class="desc">丸っこい形＋虫眼鏡アイコンが定番の型。このページの上にあるやつもこれ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="chip チップ タグ フィルター 絞り込み 選択 丸いラベル">
+    <div class="demo"><div class="s-chips"><span class="s-chip sel">和食</span><span class="s-chip">洋食</span><span class="s-chip">中華</span></div></div>
+    <div class="plate">
+      <h3><span class="en">Chip</span><span class="jp">チップ</span></h3>
+      <p class="alias">別名: <b>タグ / フィルターチップ</b></p>
+      <p class="desc">小さい丸角のラベル。タップで選択して絞り込みに使うことが多い。表示専用のものは「タグ」と呼ばれがち。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="segmented control セグメンテッドコントロール 切り替えボタン 排他 セグメント">
+    <div class="demo"><div class="s-seg"><button class="act">週</button><button>月</button><button>年</button></div></div>
+    <div class="plate">
+      <h3><span class="en">Segmented Control</span><span class="jp">セグメンテッドコントロール</span></h3>
+      <p class="alias">別名: <b>セグメント切替 / 表示切替ボタン</b></p>
+      <p class="desc">くっついたボタン群からどれか1つを選ぶ。タブより軽い「表示モードの切り替え」に使う。iOS出身のパーツ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="stepper ステッパー 数量 プラスマイナス カウンター 個数">
+    <div class="demo"><div class="s-stepper"><button>−</button><span>2</span><button>＋</button></div></div>
+    <div class="plate">
+      <h3><span class="en">Stepper</span><span class="jp">ステッパー</span></h3>
+      <p class="alias">別名: <b>数量セレクター / カウンター</b></p>
+      <p class="desc">＋−で数を1ずつ増減する。ECサイトの個数指定でおなじみ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="date picker デートピッカー カレンダー 日付選択 datepicker 日付入力">
+    <div class="demo">
+      <div class="s-datepicker">
+        <div class="dphead"><span>‹</span>2026年7月<span>›</span></div>
+        <div class="dpgrid">
+          <span class="wd">日</span><span class="wd">月</span><span class="wd">火</span><span class="wd">水</span><span class="wd">木</span><span class="wd">金</span><span class="wd">土</span>
+          <span></span><span></span><span></span><span>1</span><span>2</span><span class="sel">3</span><span>4</span>
+          <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Date Picker</span><span class="jp">デートピッカー</span></h3>
+      <p class="alias">別名: <b>カレンダーピッカー / 日付選択</b></p>
+      <p class="desc">カレンダーから日付を選ぶ入力パーツ。手打ちより入力ミスが減る。時刻版は「タイムピッカー」。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="rating レーティング 星 評価 星5つ レビュー star">
+    <div class="demo"><div class="s-rating"><span class="on">★★★★</span><span class="off">★</span></div></div>
+    <div class="plate">
+      <h3><span class="en">Rating</span><span class="jp">レーティング</span></h3>
+      <p class="alias">別名: <b>星評価 / スター評価</b></p>
+      <p class="desc">星の数で評価を入力・表示する。5段階が定番。表示専用と入力可能の両方の使い方がある。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="pull to refresh プルトゥリフレッシュ 引っ張って更新 下に引っ張る リロード 再読み込み">
+    <div class="demo">
+      <div class="s-ptr">
+        <div class="pull">↓ 引っ張って更新</div>
+        <div class="row">新着タスク</div>
+        <div class="row">昨日のタスク</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Pull to Refresh</span><span class="jp">プルトゥリフレッシュ</span></h3>
+      <p class="alias">別名: <b>引っ張って更新</b></p>
+      <p class="desc">一覧を下に引っ張ると最新に更新される操作。Twitter発祥で今やスマホの常識。PWAでも実装できる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="swipe action スワイプアクション 横スワイプ 削除 スライド削除 スワイプ削除">
+    <div class="demo">
+      <div class="s-swipe">
+        <div class="del">削除</div>
+        <div class="row">一反もめん討伐</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Swipe Action</span><span class="jp">スワイプアクション</span></h3>
+      <p class="alias">別名: <b>スワイプ削除 / スワイプメニュー</b></p>
+      <p class="desc">リストの行を横にスワイプすると削除や完了ボタンが現れる。メールアプリでおなじみの操作。</p>
+    </div>
+  </article>
+
+</div>
+
+<!-- ============ ナビゲーション系 ============ -->
+<section class="cat" data-cat><h2>ナビゲーション系</h2></section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="tab タブ 切り替え 見出し切替">
+    <div class="demo">
+      <div class="s-tabs">
+        <div class="s-tabbar">
+          <button class="act" onclick="tabSel(this,'今日のタスクが並ぶ')">今日</button>
+          <button onclick="tabSel(this,'明日の予定が並ぶ')">明日</button>
+          <button onclick="tabSel(this,'完了済みの一覧')">完了</button>
+        </div>
+        <div class="s-tabbody" id="tabbody">今日のタスクが並ぶ</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Tabs</span><span class="jp">タブ</span></h3>
+      <p class="alias">別名: <b>タブバー / タブ切り替え</b>（タップで動くで）</p>
+      <p class="desc">同じ画面の中でコンテンツを切り替える。選択中は下線や色で示すのが定番。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="hamburger ハンバーガーメニュー 三本線 メニューボタン ナビ">
+    <div class="demo"><div class="s-hamb"><i></i><i></i><i></i></div></div>
+    <div class="plate">
+      <h3><span class="en">Hamburger Menu</span><span class="jp">ハンバーガーメニュー</span></h3>
+      <p class="alias">別名: <b>三本線 / メニューアイコン</b></p>
+      <p class="desc">三本線がハンバーガーに見えるからこの名前。押すと横からドロワーが出てくる組み合わせが多い。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="drawer ドロワー サイドメニュー 横から出るメニュー スライドメニュー ナビゲーションドロワー">
+    <div class="demo">
+      <div class="s-drawerbox">
+        <div class="s-drawer">🏠 ホーム<br>⚙️ 設定<br>📊 統計</div>
+        <div class="s-drawermain"></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Drawer</span><span class="jp">ドロワー</span></h3>
+      <p class="alias">別名: <b>サイドメニュー / スライドメニュー</b></p>
+      <p class="desc">画面の横からスライドして出てくるメニュー。引き出し（drawer）が語源。奥の画面は半透明の黒で暗くする。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="bottom navigation ボトムナビゲーション 下部メニュー タブバー フッターメニュー アプリの下のやつ">
+    <div class="demo">
+      <div class="s-bottomnav">
+        <div class="act"><span>🏠</span>ホーム</div>
+        <div><span>🔍</span>探す</div>
+        <div><span>👤</span>マイページ</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Bottom Navigation</span><span class="jp">ボトムナビゲーション</span></h3>
+      <p class="alias">別名: <b>ボトムナビ / 下タブ / タブバー(iOS)</b></p>
+      <p class="desc">スマホアプリの画面下に固定される主要メニュー。3〜5個が適正。親指で届く位置なのがミソ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="breadcrumb パンくずリスト 現在地 階層 ぱんくず">
+    <div class="demo"><div class="s-crumb"><a>ホーム</a> › <a>プログラム</a> › <b>React入門</b></div></div>
+    <div class="plate">
+      <h3><span class="en">Breadcrumb</span><span class="jp">パンくずリスト</span></h3>
+      <p class="alias">別名: <b>パンくず</b></p>
+      <p class="desc">今どの階層にいるかを示す道しるべ。ヘンゼルとグレーテルのパンくずが由来。ポータルサイトと相性◎。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="pagination ページネーション ページ送り ページ番号 次へ">
+    <div class="demo"><div class="s-pager"><button>‹</button><button class="act">1</button><button>2</button><button>3</button><button>›</button></div></div>
+    <div class="plate">
+      <h3><span class="en">Pagination</span><span class="jp">ページネーション</span></h3>
+      <p class="alias">別名: <b>ページ送り / ページャー</b></p>
+      <p class="desc">一覧を複数ページに分けて移動する。スマホでは代わりに「無限スクロール」を使うことも多い。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="kebab menu ケバブメニュー 縦三点 三点リーダー その他 オーバーフローメニュー ミートボール">
+    <div class="demo"><div class="s-kebab"><i></i><i></i><i></i></div></div>
+    <div class="plate">
+      <h3><span class="en">Kebab Menu</span><span class="jp">ケバブメニュー</span></h3>
+      <p class="alias">別名: <b>縦三点 / オーバーフローメニュー</b>（横並び「…」は<b>ミートボールメニュー</b>）</p>
+      <p class="desc">「⋮」を押すと補助メニューが出る。串刺しのケバブに見えるのが由来。よく使わへん操作の隠し場所。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="step indicator ステップインジケーター 進行状況 ウィザード 手順表示 1 2 3 ステップ表示">
+    <div class="demo">
+      <div class="s-stepind">
+        <div class="st done"><i>✓</i>入力</div><div class="bar done"></div>
+        <div class="st now"><i>2</i>確認</div><div class="bar"></div>
+        <div class="st"><i>3</i>完了</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Step Indicator</span><span class="jp">ステップインジケーター</span></h3>
+      <p class="alias">別名: <b>プログレストラッカー / ウィザードステップ</b></p>
+      <p class="desc">「入力→確認→完了」みたいな複数画面の手続きで、今どこかを示す。数量の＋−（ステッパー）とは別物なので注意。</p>
+    </div>
+  </article>
+
+</div>
+
+<!-- ============ 表示・コンテンツ系 ============ -->
+<section class="cat" data-cat><h2>表示・コンテンツ系</h2></section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="card カード 枠 タイル パネル">
+    <div class="demo">
+      <div class="s-card"><div class="thumb"></div><div class="body"><b>一反もめん</b>放置3日目・討伐推奨</div></div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Card</span><span class="jp">カード</span></h3>
+      <p class="alias">別名: <b>タイル / パネル</b></p>
+      <p class="desc">画像＋テキストを1枚にまとめた枠。角丸＋薄い影が定番。妖怪プランナーのタスク表示もこれやね。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="accordion アコーディオン 開閉 折りたたみ よくある質問 faq 展開">
+    <div class="demo">
+      <div class="s-acc" onclick="this.classList.toggle('open')">
+        <button>よくある質問 <span class="arrow">▾</span></button>
+        <div class="accbody">タップで開いたり閉じたりする。楽器のアコーディオンが由来。</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Accordion</span><span class="jp">アコーディオン</span></h3>
+      <p class="alias">別名: <b>折りたたみ / 開閉パネル</b>（タップで動くで）</p>
+      <p class="desc">見出しをタップすると中身が展開する。FAQや詳細設定みたいに「普段は隠しときたい」情報に使う。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="carousel カルーセル スライダー スライドショー 横スクロール バナー回転">
+    <div class="demo">
+      <div class="s-carousel">
+        <div class="s-caroview"><div style="background:#0E7C7B;">スライド1</div><div style="background:#16212E;">2</div></div>
+        <div class="s-dots"><i class="act"></i><i></i><i></i></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Carousel</span><span class="jp">カルーセル</span></h3>
+      <p class="alias">別名: <b>スライダー / スライドショー</b>（回転木馬が語源）</p>
+      <p class="desc">横にスワイプして複数の画像を見せる。下の点々は「インジケーター」または「ドット」と呼ぶ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="badge バッジ 通知 赤丸 未読 数字 notification">
+    <div class="demo"><div class="s-badgebox">🔔<span class="s-badge">3</span></div></div>
+    <div class="plate">
+      <h3><span class="en">Badge</span><span class="jp">バッジ</span></h3>
+      <p class="alias">別名: <b>通知バッジ / 赤丸 / 未読数</b></p>
+      <p class="desc">アイコンの右上に乗る小さい数字や点。未読・未処理の件数を知らせる。緊急度の色分けにも応用できる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="avatar アバター プロフィール画像 丸アイコン ユーザーアイコン 顔">
+    <div class="demo">
+      <div class="s-avatars">
+        <div class="s-avatar" style="background:#0E7C7B;">ハ</div>
+        <div class="s-avatar" style="background:#C7502E;">ク</div>
+        <div class="s-avatar" style="background:#5A6B7D;">+3</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Avatar</span><span class="jp">アバター</span></h3>
+      <p class="alias">別名: <b>プロフィールアイコン / ユーザーアイコン</b></p>
+      <p class="desc">ユーザーを表す丸画像。重ねて並べるのは「アバターグループ」と呼び、参加者が多い時に使う。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="list リスト 一覧 行 セル テーブル">
+    <div class="demo">
+      <div class="s-list">
+        <div>プロフィール<span>›</span></div>
+        <div>通知設定<span>›</span></div>
+        <div>ヘルプ<span>›</span></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">List</span><span class="jp">リスト</span></h3>
+      <p class="alias">別名: <b>一覧 / リストビュー</b>（1行分は「リストアイテム」や「セル」）</p>
+      <p class="desc">設定画面でおなじみの縦並び。右端の「›」は「シェブロン」と呼び、先に画面が続くサイン。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="empty state エンプティステート 空 何もない ゼロ件 データなし">
+    <div class="demo"><div class="s-empty"><div class="ico">📭</div>まだタスクがありません<br>＋ボタンから追加してな</div></div>
+    <div class="plate">
+      <h3><span class="en">Empty State</span><span class="jp">エンプティステート</span></h3>
+      <p class="alias">別名: <b>空状態 / ゼロ件表示</b></p>
+      <p class="desc">データが0件の時に出す案内。「何もない」で終わらせず、次にやることを誘導するのが良い設計。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="divider ディバイダー 区切り線 セパレーター 罫線">
+    <div class="demo"><div class="s-divider">または</div></div>
+    <div class="plate">
+      <h3><span class="en">Divider</span><span class="jp">ディバイダー</span></h3>
+      <p class="alias">別名: <b>区切り線 / セパレーター</b></p>
+      <p class="desc">コンテンツの切れ目を示す線。文字入りのものはログイン画面の「または」でよく見る。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="table テーブル データグリッド 表 一覧表 grid 表組み">
+    <div class="demo">
+      <div class="s-tablewrap">
+        <table class="s-table">
+          <tr><th>妖怪</th><th>経過</th><th>状態</th></tr>
+          <tr><td>一反もめん</td><td>3日</td><td>劣化中</td></tr>
+          <tr><td>ぬりかべ</td><td>1日</td><td>新規</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Table / Data Grid</span><span class="jp">テーブル</span></h3>
+      <p class="alias">別名: <b>表 / データグリッド</b>（並べ替えや編集ができる高機能版がデータグリッド）</p>
+      <p class="desc">行と列でデータを見せる基本形。スマホでは横に入りきらんので、カード表示に変換する設計も多い。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="lightbox ライトボックス 画像拡大 全画面表示 写真ビューア 画像ビューア">
+    <div class="demo">
+      <div class="s-lightbox"><span class="close">✕</span><div class="pic"></div></div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Lightbox</span><span class="jp">ライトボックス</span></h3>
+      <p class="alias">別名: <b>画像ビューア / フォトビューア</b></p>
+      <p class="desc">サムネイルをタップすると、暗い背景の上に画像がドーンと拡大表示される。ピンチ拡大とセットが定番。</p>
+    </div>
+  </article>
+
+</div>
+
+<!-- ============ フィードバック・状態系 ============ -->
+<section class="cat" data-cat><h2>フィードバック・状態系</h2></section>
+<div class="grid" data-grid>
+
+  <article class="item" data-k="modal モーダル ダイアログ ポップアップ 確認画面 アラート dialog">
+    <div class="demo">
+      <div class="s-modalbox">
+        <div class="s-modal"><b>削除しますか？</b>この操作は取り消せません。
+          <div class="row"><button style="background:#EEF1F4;">やめる</button><button style="background:#C7502E;color:#fff;">削除</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Modal</span><span class="jp">モーダル</span></h3>
+      <p class="alias">別名: <b>ダイアログ / ポップアップ / 確認画面</b></p>
+      <p class="desc">画面の中央に被さって、答えるまで他の操作をブロックする窓。背後の暗い部分は「オーバーレイ」。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="toast トースト 通知 下から出る メッセージ 一時表示 完了しました">
+    <div class="demo"><div class="s-toast">✅ 保存しました</div></div>
+    <div class="plate">
+      <h3><span class="en">Toast</span><span class="jp">トースト</span></h3>
+      <p class="alias">別名: <b>トースト通知</b>（トースターから飛び出すイメージ）</p>
+      <p class="desc">画面の端にポンと出て、数秒で勝手に消える通知。操作を邪魔しないのがモーダルとの違い。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="snackbar スナックバー 取り消し undo アクション付き通知">
+    <div class="demo"><div class="s-snack">1件削除しました<button>元に戻す</button></div></div>
+    <div class="plate">
+      <h3><span class="en">Snackbar</span><span class="jp">スナックバー</span></h3>
+      <p class="alias">別名: <b>アクション付きトースト</b>（Android/Material用語）</p>
+      <p class="desc">トーストに「元に戻す」みたいなボタンが付いたやつ。削除の取り消し導線として超定番。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="tooltip ツールチップ 吹き出し ヒント ホバー 補足">
+    <div class="demo">
+      <div class="s-tooltipbox"><div class="s-tooltip">設定を開きます</div><button class="s-btn ghost">⚙️</button></div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Tooltip</span><span class="jp">ツールチップ</span></h3>
+      <p class="alias">別名: <b>吹き出しヒント / ホバーヒント</b></p>
+      <p class="desc">アイコンに触れると出る小さな補足。PCのホバー前提なので、スマホでは長押しか別の手段に置き換える。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="progress bar プログレスバー 進捗 バー 読み込み 何パーセント">
+    <div class="demo"><div class="s-progress"><i></i></div></div>
+    <div class="plate">
+      <h3><span class="en">Progress Bar</span><span class="jp">プログレスバー</span></h3>
+      <p class="alias">別名: <b>進捗バー / ローディングバー</b></p>
+      <p class="desc">進み具合を横棒で見せる。残り時間の見当がつく処理に使う。円形のものは「プログレスリング」。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="spinner スピナー ローディング くるくる 読み込み中 インジケーター loading">
+    <div class="demo"><div class="s-spinner"></div></div>
+    <div class="plate">
+      <h3><span class="en">Spinner</span><span class="jp">スピナー</span></h3>
+      <p class="alias">別名: <b>くるくる / ローディングインジケーター</b></p>
+      <p class="desc">「待っててな」のくるくる。終わりが読めない処理に使う。読めるならプログレスバーの方が親切。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="skeleton スケルトン スケルトンスクリーン 読み込み前 灰色 プレースホルダー ちらつき防止">
+    <div class="demo">
+      <div class="s-skel">
+        <i style="height:14px;width:60%;margin-bottom:8px;"></i>
+        <i style="height:10px;width:100%;margin-bottom:6px;"></i>
+        <i style="height:10px;width:85%;"></i>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Skeleton Screen</span><span class="jp">スケルトンスクリーン</span></h3>
+      <p class="alias">別名: <b>スケルトン / 骨組み表示</b></p>
+      <p class="desc">読み込み中にコンテンツの形だけ灰色で先に見せる手法。スピナーより体感待ち時間が短くなる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="banner バナー アラート 警告 お知らせ 帯 注意 alert">
+    <div class="demo"><div class="s-banner">⚠️ <span>ネットワークに接続できません</span></div></div>
+    <div class="plate">
+      <h3><span class="en">Banner / Alert</span><span class="jp">バナー / アラート</span></h3>
+      <p class="alias">別名: <b>お知らせ帯 / 警告表示</b></p>
+      <p class="desc">画面の上部などに帯状で出る通知。トーストと違って消えずに残り、対応が必要な状態を知らせる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="bottom sheet ボトムシート 下から出るパネル ハーフモーダル シート 引き上げ">
+    <div class="demo">
+      <div class="s-sheetbox">
+        <div class="s-sheet">
+          <div class="handle"></div>
+          <div class="row">📋 詳細を見る</div>
+          <div class="row">✏️ 編集する</div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Bottom Sheet</span><span class="jp">ボトムシート</span></h3>
+      <p class="alias">別名: <b>ハーフモーダル / 下から出るパネル</b>（上の横棒は「グラバー」「ハンドル」）</p>
+      <p class="desc">画面の下からせり上がるパネル。上に引っ張ると全画面まで広がるタイプもある。地図アプリでおなじみ。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="action sheet アクションシート 選択肢 下から出るメニュー ios 削除確認 共有メニュー">
+    <div class="demo">
+      <div class="s-sheetbox">
+        <div class="s-actsheet">
+          <div class="grp"><div>共有する</div><div class="danger">削除する</div></div>
+          <div class="cancel">キャンセル</div>
+        </div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Action Sheet</span><span class="jp">アクションシート</span></h3>
+      <p class="alias">別名: <b>アクションメニュー</b>（iOS用語。Androidではボトムシートで代用）</p>
+      <p class="desc">下から出てくる操作の選択肢リスト。危険な操作は赤字、キャンセルは分離して置くのがiOSの流儀。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="popover ポップオーバー 小窓 メニュー 吹き出しメニュー コンテキストメニュー">
+    <div class="demo" style="padding-top:56px;">
+      <div class="s-popbox">
+        <div class="s-popover"><div>📌 ピン留め</div><div>🗑 削除</div></div>
+        <button class="s-btn ghost">⋯</button>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Popover</span><span class="jp">ポップオーバー</span></h3>
+      <p class="alias">別名: <b>吹き出しメニュー / コンテキストメニュー</b></p>
+      <p class="desc">押した要素のそばに出る小窓。ツールチップと違ってボタンなどの操作を入れられる。外をタップすると閉じる。</p>
+    </div>
+  </article>
+
+  <article class="item" data-k="coach mark コーチマーク チュートリアル オンボーディング 初回説明 使い方ガイド スポットライト">
+    <div class="demo">
+      <div class="s-coachbox">
+        <div class="balloon">ここから新しいタスクを追加できるで！</div>
+        <div class="spot">＋</div>
+      </div>
+    </div>
+    <div class="plate">
+      <h3><span class="en">Coach Mark</span><span class="jp">コーチマーク</span></h3>
+      <p class="alias">別名: <b>スポットライトチュートリアル / オンボーディングガイド</b></p>
+      <p class="desc">初回起動時に画面を暗くして「ここ押してな」と教えるやつ。しつこいと嫌われるので1〜3個が限度。</p>
+    </div>
+  </article>
+
+</div>
+
+<script>
+  // タブのデモ
+  function tabSel(btn, text){
+    btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('act'));
+    btn.classList.add('act');
+    document.getElementById('tabbody').textContent = text;
+  }
+
+  // 検索フィルター
+  const q = document.getElementById('q');
+  const items = document.querySelectorAll('.item');
+  const cats = document.querySelectorAll('[data-cat]');
+  const grids = document.querySelectorAll('[data-grid]');
+  const nohit = document.getElementById('nohit');
+
+  q.addEventListener('input', () => {
+    const kw = q.value.trim().toLowerCase();
+    let hit = 0;
+    items.forEach(it => {
+      const ok = !kw || it.dataset.k.toLowerCase().includes(kw) || it.textContent.toLowerCase().includes(kw);
+      it.classList.toggle('hidden', !ok);
+      if(ok) hit++;
+    });
+    // 中身が全部消えたカテゴリは見出しごと隠す
+    grids.forEach((g,i) => {
+      const anyVisible = g.querySelector('.item:not(.hidden)');
+      g.classList.toggle('hidden', !anyVisible);
+      cats[i].classList.toggle('hidden', !anyVisible);
+    });
+    nohit.style.display = hit ? 'none' : 'block';
+  });
+</script>
+
+</body>
+</html>
