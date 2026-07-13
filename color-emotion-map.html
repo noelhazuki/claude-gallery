@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色 × 感情マップ</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --paper:#f7f5f0;
+    --line:#d8d3c8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.7;
+    padding:20px 16px 48px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:560px;margin:0 auto;}
+  header{margin-bottom:24px;}
+  .eyebrow{
+    font-size:11px;letter-spacing:.25em;
+    color:#9a9384;font-weight:700;margin-bottom:8px;
+  }
+  h1{
+    font-size:27px;font-weight:800;letter-spacing:.02em;
+    line-height:1.3;
+  }
+  h1 .accent{
+    background:linear-gradient(transparent 62%,#ffd84d 62%);
+  }
+  .lead{font-size:13.5px;color:#5c574d;margin-top:12px;}
+
+  .card{
+    border-radius:16px;
+    overflow:hidden;
+    margin-bottom:14px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+    background:#fff;
+  }
+  .swatch{
+    padding:16px 18px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .swatch .name{
+    font-size:19px;font-weight:800;
+  }
+  .swatch .hex{
+    font-size:11px;font-family:ui-monospace,monospace;
+    opacity:.75;letter-spacing:.05em;
+  }
+  .body{padding:14px 18px 16px;}
+  .feel{
+    display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;
+  }
+  .tag{
+    font-size:12px;font-weight:700;
+    padding:4px 10px;border-radius:999px;
+    background:#f0ece3;color:#3d3a33;
+  }
+  .tag.warn{background:#fbe4e2;color:#9a3b33;}
+  .desc{font-size:13px;color:#4a463d;}
+  .use{
+    font-size:11.5px;color:#7a7468;margin-top:8px;
+    padding-top:8px;border-top:1px solid var(--line);
+  }
+  .use b{color:#4a463d;}
+
+  /* 温度バー */
+  .scale{
+    margin:28px 0 20px;
+  }
+  .scale-title{
+    font-size:12px;font-weight:700;color:#7a7468;
+    letter-spacing:.1em;margin-bottom:8px;
+  }
+  .bar{
+    height:14px;border-radius:999px;
+    background:linear-gradient(90deg,#e63b2e,#ff9233,#ffd84d,#4caf6e,#3f7fd1,#7a5bb5);
+  }
+  .bar-labels{
+    display:flex;justify-content:space-between;
+    font-size:11px;color:#9a9384;margin-top:6px;
+  }
+  footer{
+    font-size:11px;color:#9a9384;text-align:center;
+    margin-top:28px;line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">COLOR × EMOTION</div>
+    <h1>色が運ぶ<span class="accent">感情</span>マップ</h1>
+    <p class="lead">色の印象には文化や個人差があるけど、ある程度共通する傾向をまとめたで。Webアプリの配色を決めるときの目安にも使えるはず。</p>
+  </header>
+
+  <div class="scale">
+    <div class="scale-title">温度感のグラデーション</div>
+    <div class="bar"></div>
+    <div class="bar-labels"><span>暖（興奮・活発）</span><span>寒（鎮静・冷静）</span></div>
+  </div>
+
+  <!-- 赤 -->
+  <div class="card">
+    <div class="swatch" style="background:#e63b2e;color:#fff;">
+      <span class="name">赤</span><span class="hex">#E63B2E</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">情熱</span><span class="tag">興奮</span>
+        <span class="tag warn">緊張</span><span class="tag warn">警戒</span>
+      </div>
+      <p class="desc">心拍が上がるとも言われる強い色。食欲を刺激するからファストフードに多い。注意・危険のサインにも。</p>
+      <p class="use"><b>使いどころ：</b>CTAボタン、セール表示。広い面積は疲れるので差し色で。</p>
+    </div>
+  </div>
+
+  <!-- オレンジ -->
+  <div class="card">
+    <div class="swatch" style="background:#ff9233;color:#fff;">
+      <span class="name">オレンジ</span><span class="hex">#FF9233</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">親しみ</span><span class="tag">活力</span>
+        <span class="tag">温かさ</span>
+      </div>
+      <p class="desc">赤ほど強くなくてフレンドリー。元気でカジュアルな印象を出したいときに。</p>
+      <p class="use"><b>使いどころ：</b>コミュニティ系、子ども向け、ポジティブな通知。</p>
+    </div>
+  </div>
+
+  <!-- 黄 -->
+  <div class="card">
+    <div class="swatch" style="background:#ffd84d;color:#5c4a00;">
+      <span class="name">黄</span><span class="hex">#FFD84D</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">明るさ</span><span class="tag">楽しさ</span>
+        <span class="tag warn">注意</span><span class="tag warn">落ち着かなさ</span>
+      </div>
+      <p class="desc">元気が出る色やけど、面積が広いと不安や疲れを感じることも。視認性が高く警告にも使われる。</p>
+      <p class="use"><b>使いどころ：</b>ハイライト、マーカー、注意喚起。背景一面はしんどい。</p>
+    </div>
+  </div>
+
+  <!-- 緑 -->
+  <div class="card">
+    <div class="swatch" style="background:#4caf6e;color:#fff;">
+      <span class="name">緑</span><span class="hex">#4CAF6E</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">安心</span><span class="tag">自然</span>
+        <span class="tag">調和</span><span class="tag">癒し</span>
+      </div>
+      <p class="desc">目に優しくストレスを下げると言われる。バランス感があり「成功・OK」のサインにも。</p>
+      <p class="use"><b>使いどころ：</b>完了通知、ヘルスケア、長く見る画面のベース。</p>
+    </div>
+  </div>
+
+  <!-- 青 -->
+  <div class="card">
+    <div class="swatch" style="background:#3f7fd1;color:#fff;">
+      <span class="name">青</span><span class="hex">#3F7FD1</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">信頼</span><span class="tag">冷静</span>
+        <span class="tag">集中</span><span class="tag warn">寂しさ</span>
+      </div>
+      <p class="desc">落ち着きと信頼感の定番。IT・金融のロゴに多いのは「安心して任せられる」印象を狙ってるから。</p>
+      <p class="use"><b>使いどころ：</b>業務系アプリ、企業サイト、リンクや基本操作。</p>
+    </div>
+  </div>
+
+  <!-- 紫 -->
+  <div class="card">
+    <div class="swatch" style="background:#7a5bb5;color:#fff;">
+      <span class="name">紫</span><span class="hex">#7A5BB5</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">高貴</span><span class="tag">神秘</span>
+        <span class="tag">創造性</span>
+      </div>
+      <p class="desc">昔は染料が高価やったため「特別・高級」のイメージが定着。独創的・スピリチュアルな雰囲気も。</p>
+      <p class="use"><b>使いどころ：</b>クリエイティブ系、プレミアムプラン、占い・美容。</p>
+    </div>
+  </div>
+
+  <!-- 白 -->
+  <div class="card">
+    <div class="swatch" style="background:#ffffff;color:#1a1a1a;border-bottom:1px solid var(--line);">
+      <span class="name">白</span><span class="hex">#FFFFFF</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">清潔</span><span class="tag">純粋</span>
+        <span class="tag">余白</span><span class="tag warn">冷たさ</span>
+      </div>
+      <p class="desc">開放感と清潔感。余白として使うと他の色が引き立つ。広すぎると素っ気なく感じることも。</p>
+      <p class="use"><b>使いどころ：</b>背景、余白設計。情報を整理して見せたいとき。</p>
+    </div>
+  </div>
+
+  <!-- 黒 -->
+  <div class="card">
+    <div class="swatch" style="background:#1a1a1a;color:#fff;">
+      <span class="name">黒</span><span class="hex">#1A1A1A</span>
+    </div>
+    <div class="body">
+      <div class="feel">
+        <span class="tag">高級</span><span class="tag">重厚</span>
+        <span class="tag">力強さ</span><span class="tag warn">重さ</span>
+      </div>
+      <p class="desc">引き締まった高級感と強さ。一方で重さや圧迫感も。文字色やラグジュアリー系の主役に。</p>
+      <p class="use"><b>使いどころ：</b>ハイブランド、ダークモード、文字。</p>
+    </div>
+  </div>
+
+  <footer>
+    ※色の感情効果は文化・経験で変わります。あくまで傾向の目安として。<br>
+    クロウくん作・色×感情マップ
+  </footer>
+</div>
+</body>
+</html>
