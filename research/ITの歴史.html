@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web・ネットワーク・AI インフラの歴史まとめ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #f78166;
+    --accent3: #3fb950;
+    --accent4: #d2a8ff;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Noto Sans JP', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 24px 16px 64px;
+  }
+
+  header {
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    margin-bottom: 40px;
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+  }
+
+  header h1 {
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 40px;
+  }
+
+  .toc h2 {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .toc a {
+    display: block;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 3px 0;
+  }
+
+  .toc a:hover { text-decoration: underline; }
+
+  section {
+    margin-bottom: 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  h2 {
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 15px;
+    color: var(--accent2);
+    margin: 20px 0 10px;
+  }
+
+  p { margin-bottom: 12px; color: var(--text); }
+
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 12px 0 20px;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text);
+  }
+
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .arrow { color: var(--accent); }
+  .code-block .label { color: var(--accent3); }
+  .code-block .warn { color: var(--accent2); }
+  .code-block .purple { color: var(--accent4); }
+
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .timeline-year {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .timeline-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+  }
+
+  .timeline-content strong {
+    color: var(--accent3);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+
+  .timeline-content p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 600px) {
+    .card-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent4);
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  th {
+    background: var(--surface);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: #0d1117aa; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 2px;
+  }
+
+  .tag-blue { background: #1f3a5f; color: var(--accent); }
+  .tag-green { background: #1a3a2a; color: var(--accent3); }
+  .tag-red { background: #3a1a1a; color: var(--accent2); }
+  .tag-purple { background: #2a1a3a; color: var(--accent4); }
+
+  .note {
+    background: #1a2a1a;
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Web・ネットワーク・AIインフラ 歴史まとめ</h1>
+  <p>// generated: 2026-06-17 | source: Claude調査メモ</p>
+</header>
+
+<nav class="toc">
+  <h2>// CONTENTS</h2>
+  <a href="#s1">01. フロントエンド10年の変化（2014〜2024）</a>
+  <a href="#s2">02. インフラの進化（エッジ・CDN・サーバーレス）</a>
+  <a href="#s3">03. APIとJSONの関係</a>
+  <a href="#s4">04. Flashの終焉とHTML5</a>
+  <a href="#s5">05. Pythonが台頭した理由</a>
+  <a href="#s6">06. AIインフラ争奪戦（2023〜）</a>
+  <a href="#s7">07. 日本企業の現在地</a>
+  <a href="#s8">08. 主要用語まとめ</a>
+</nav>
+
+<!-- Section 1 -->
+<section id="s1">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2>フロントエンド10年の変化（2014〜2024）</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">〜2013年</div>
+      <div class="timeline-content">
+        <strong>jQuery時代</strong>
+        <p>HTML+CSS+jQueryで「ページを動かす」。サーバーがHTMLを生成してブラウザに返すのが主流。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2013〜2016年</div>
+      <div class="timeline-content">
+        <strong>React登場・普及期</strong>
+        <p>FacebookがReactを2013年に公開。コンポーネント単位でUIを組み立てる概念が広まる。2016年頃から業界標準に。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2015〜2018年</div>
+      <div class="timeline-content">
+        <strong>Node.js・npmの爆発</strong>
+        <p>JavaScriptがサーバーサイドでも動作可能に。npmで「部品を組み合わせる」文化が定着。Webpackによるバンドルが当たり前に。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2018〜2022年</div>
+      <div class="timeline-content">
+        <strong>JAMstack・API駆動</strong>
+        <p>フロントとバックが完全分離（APIでつなぐ）。Cloudflare PagesなどCDN・エッジで動く時代に。ViteがWebpackを置き換え始める。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2023年〜現在</div>
+      <div class="timeline-content">
+        <strong>AI統合時代</strong>
+        <p>GPT-4・Claude・GeminiのAPIが公開。フロントエンドから直接LLMを叩けるように。「AIをパーツとして組み込む」開発が標準化。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block"><span class="comment">// HTMLを「誰が作るか」の変化</span>
+
+<span class="warn">Perl時代</span>
+  サーバーがHTMLを生成 → ブラウザは受け取るだけ
+
+<span class="label">React時代</span>
+  サーバーはJSONだけ返す
+  ブラウザ側のJSがHTMLを生成する
+
+<span class="comment">// これが「フロントとバックの分離」の正体</span></div>
+</section>
+
+<!-- Section 2 -->
+<section id="s2">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2>インフラの進化（エッジ・CDN・サーバーレス）</h2>
+  </div>
+
+  <h3>速さの2つの要因</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">① 回線速度（光・5G）</div>
+      <p>データの「転送速度」。パイプの太さ。光回線で解決できる。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">② 物理的な距離（レイテンシ）</div>
+      <p>データの「往復時間」。パイプの長さ。光速でも距離は縮まらない。東京↔NYで最低150ms。</p>
+    </div>
+  </div>
+
+  <h3>エッジとは</h3>
+  <div class="code-block"><span class="warn">従来</span>
+  大阪のユーザー → 東京のサーバー（往復500km）
+
+<span class="label">エッジ</span>
+  大阪のユーザー → 大阪のエッジ（ほぼゼロ距離）
+
+<span class="comment">// Cloudflareは世界300都市以上にサーバーを設置
+// 日本：東京・大阪・福岡・沖縄の4拠点（2025年時点）</span></div>
+
+  <h3>サーバーレスとは</h3>
+  <div class="code-block"><span class="comment">// サーバーがなくなったわけではない</span>
+
+<span class="warn">従来</span>
+  自分でサーバーを借りて管理する
+  （電気代・メンテ・スペック選定…）
+
+<span class="label">サーバーレス</span>
+  Cloudflare等のサーバーを間借り
+  コードだけ置けばあとは向こうがやってくれる</div>
+
+  <h3>JAMstackとは</h3>
+  <p><strong style="color:var(--accent4)">J</strong>avaScript + <strong style="color:var(--accent4)">A</strong>PI + <strong style="color:var(--accent4)">M</strong>arkup の略。</p>
+  <div class="code-block"><span class="warn">従来のWordPress等</span>
+  ブラウザ → サーバー → DB問い合わせ → HTML生成 → 返す
+  ※毎回サーバーが動く・遅い
+
+<span class="label">JAMstack（Cloudflare Pages等）</span>
+  ビルド時にHTMLを全部作っておく
+  ブラウザ → CDN（世界中に配置）→ 爆速
+  動的な部分だけAPIを叩く</div>
+</section>
+
+<!-- Section 3 -->
+<section id="s3">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2>APIとJSONの関係</h2>
+  </div>
+
+  <div class="code-block"><span class="comment">// サーバーとAPIの関係</span>
+
+  サーバー ＝ 建物（実行する場所）
+  API     ＝ 窓口（話しかけるルール）
+
+<span class="comment">// サーバーの中にAPIがある</span>
+
+<span class="label">フロント（React）</span>
+  ↓ APIを叩く（HTTPリクエスト）
+<span class="label">サーバー</span>
+  ├── APIの窓口 ← リクエストを受け取る
+  ├── 処理する
+  └── DBに問い合わせ・計算
+  ↓
+<span class="label">JSONを返す</span>
+  { "name": "花子", "age": 5 }</div>
+
+  <h3>REST APIのルール</h3>
+  <table>
+    <tr><th>メソッド</th><th>意味</th><th>例</th></tr>
+    <tr><td>GET</td><td>取得</td><td>GET /users/123</td></tr>
+    <tr><td>POST</td><td>送信・作成</td><td>POST /users</td></tr>
+    <tr><td>PUT</td><td>更新</td><td>PUT /users/123</td></tr>
+    <tr><td>DELETE</td><td>削除</td><td>DELETE /users/123</td></tr>
+  </table>
+
+  <h3>JSONとは</h3>
+  <div class="code-block"><span class="comment">// CSSとの比較</span>
+CSS  → 見た目の設定を外部に書く
+JSON → データの構造を外部に書く
+
+<span class="comment">// JSONの例</span>
+{
+  "name": "花子",
+  "age": 5,
+  "hobbies": ["お絵かき", "ねんど"]
+}
+
+<span class="comment">// JavaScriptが読んでいる</span>
+const user = JSON.parse(response)
+return &lt;p&gt;{user.name}&lt;/p&gt;  ← 画面に表示</div>
+
+  <div class="note">
+    JSONはXML（2000年代の重い形式）の代替として普及。JavaScriptのオブジェクト記法がそのままデータ形式になった。Perl時代には存在しなかった文化。
+  </div>
+</section>
+
+<!-- Section 4 -->
+<section id="s4">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2>Flashの終焉とHTML5</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">2010年</div>
+      <div class="timeline-content">
+        <strong>ジョブズの宣言</strong>
+        <p>「iPhoneにFlashは載せない」。理由：バッテリー消費・クラッシュ・セキュリティ穴。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2010〜2020年</div>
+      <div class="timeline-content">
+        <strong>HTML5による置き換え</strong>
+        <p>動画・アニメーション・インタラクションがFlashなしで実現可能に。スマホ普及でFlash非対応端末が多数派に。</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2020年12月31日</div>
+      <div class="timeline-content">
+        <strong>Adobe、公式サポート終了</strong>
+        <p>2021年1月12日にFlash Player自体がFlashコンテンツの実行をブロック。文字通り「自分で自分を殺した」。</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Flashがやっていたことの行き先</h3>
+  <table>
+    <tr><th>Flash時代</th><th>現在</th></tr>
+    <tr><td>Flashアニメ</td><td>CSS animation・WebGL・Three.js</td></tr>
+    <tr><td>Flashゲーム</td><td>WebGL・Unity WebExport</td></tr>
+    <tr><td>動画プレイヤー</td><td>HTML5のvideoタグ</td></tr>
+    <tr><td>インタラクティブ広告</td><td>JavaScriptアニメーション</td></tr>
+  </table>
+
+  <div class="note">
+    Flashは技術者からは「すごい」表現力を持っていたが、ユーザーには「邪魔・重い・クラッシュする」だった。技術の優秀さとユーザー体験は別物という教訓。
+  </div>
+</section>
+
+<!-- Section 5 -->
+<section id="s5">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2>Pythonが台頭した理由</h2>
+  </div>
+
+  <div class="code-block"><span class="warn">〜2016年</span>
+  データ分析・統計 → Pythonが得意
+  Web開発         → JavaScript/Ruby/PHPの領域
+
+<span class="label">2016〜2022年</span>
+  機械学習ライブラリ（TensorFlow・PyTorch）が
+  ぜんぶPython製
+  → AIやるならPython一択に
+
+<span class="arrow">2023年〜現在</span>
+  LLM（ChatGPT等）のAPIが公開
+  → Pythonでサクッと繋げる
+  → データ加工・プロンプト管理・複数AI連携の
+    道具が全部Pythonに集中</div>
+
+  <h3>LLM関連用語</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">LLM（Large Language Model）</div>
+      <p>ChatGPT・Claude等の「大規模言語モデル」の総称。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">RAG（Retrieval-Augmented Generation）</div>
+      <p>自分のデータをAIに読ませて答えさせる仕組み。質問→関連ドキュメント検索→LLMに渡す→回答。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">LangChain</div>
+      <p>API呼び出し→加工→別のAPIに渡す…を簡単に書けるフレームワーク。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">LangGraph</div>
+      <p>AIが「考えながらループして判断する」エージェント向けフレームワーク。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Section 6 -->
+<section id="s6">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2>AIインフラ争奪戦（2023〜）</h2>
+  </div>
+
+  <div class="code-block"><span class="comment">// なぜ巨額投資が必要か</span>
+
+生成AIを動かす
+  ↓
+膨大なGPUが必要
+  ↓
+GPUを置くデータセンターが必要
+  ↓
+データセンターには電力・土地・冷却が必要
+  ↓
+兆円単位の投資が必要</div>
+
+  <h3>各プレイヤーの戦略</h3>
+  <table>
+    <tr><th>プレイヤー</th><th>戦略</th><th>規模感</th></tr>
+    <tr>
+      <td><span class="tag tag-blue">ソフトバンク</span></td>
+      <td>OpenAIに出資＋土地・電力インフラを提供。「Stargate Project」でAI列車の座席を押さえた。</td>
+      <td>4年間で5000億ドル（約77兆円）</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">SpaceX / xAI</span></td>
+      <td>Starlinkの衛星にGPUを搭載する「宇宙データセンター」構想。Anthropic・Googleと契約済み。</td>
+      <td>最大100万基の衛星構想</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Microsoft</span></td>
+      <td>OpenAIに出資＋Azureクラウドで提供。「ゲームパス」と同じ「土俵ごと変える」戦略の一貫。</td>
+      <td>Azure経由で提供</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-purple">Cloudflare</span></td>
+      <td>エッジで配信側を押さえる。Workers AIでモデルをエッジで実行可能に。</td>
+      <td>世界310都市展開</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    ゲーム機戦争との類比：プラットフォームを制した者がソフトも制す。ソフトバンク＝AIの「座席」、NTT＝AIが走る「線路」（IOWN）、富士通・NEC＝「車内サービス係」に専念。
+  </div>
+</section>
+
+<!-- Section 7 -->
+<section id="s7">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2>日本企業の現在地（2026年）</h2>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">攻め側</div>
+      <p><strong style="color:var(--accent)">ソフトバンク</strong>：OpenAIへの巨額出資＋インフラ提供。主役戦略。堺市にAIデータセンター構築中。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">長期戦</div>
+      <p><strong style="color:var(--accent3)">NTT</strong>：IOWN（次世代光ネットワーク）開発中。電力消費を大幅削減できるインフラ。AIが普及するほど価値が上がる「線路」戦略。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">生活インフラ固め</div>
+      <p><strong style="color:var(--accent4)">KDDI</strong>：ローソン・金融サービスで解約率を下げつつ、データセンター事業に参入。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">支援側に転換</div>
+      <p><strong style="color:var(--accent2)">富士通・NEC・日立</strong>：AI開発より「企業のAI導入支援」側に専念。セガのハード撤退→ソフト専業と同じ構図。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Section 8 -->
+<section id="s8">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2>主要用語まとめ</h2>
+  </div>
+
+  <table>
+    <tr><th>用語</th><th>一言説明</th></tr>
+    <tr><td>npm</td><td>部品の宅配便。node_modulesに自動ダウンロード。</td></tr>
+    <tr><td>Vite</td><td>ReactのJSXをブラウザが読めるJSに変換する高速ツール。WebPackの後継。</td></tr>
+    <tr><td>API</td><td>サーバーへの窓口・話しかけるルール。サーバーの中にある。</td></tr>
+    <tr><td>REST</td><td>APIの設計ルール。GET/POST/PUT/DELETEでURLに命令する形式。</td></tr>
+    <tr><td>JSON</td><td>データ構造を表すテキスト形式。XMLの後継。JSが読む。</td></tr>
+    <tr><td>JAMstack</td><td>JavaScript+API+Markup。フロントとバックを分離した構成。</td></tr>
+    <tr><td>エッジ</td><td>世界中に分散したサーバー。近い場所から返すので速い。</td></tr>
+    <tr><td>CDN</td><td>静的ファイルを世界中に配置する仕組み。エッジの一種。</td></tr>
+    <tr><td>サーバーレス</td><td>サーバーを自分で管理しなくていい形式。サーバーはある。</td></tr>
+    <tr><td>CORS</td><td>異なるドメインからの直接アクセスを弾くブラウザの仕組み。「裏口お断り」。</td></tr>
+    <tr><td>LLM</td><td>ChatGPT・Claude等の大規模言語モデルの総称。</td></tr>
+    <tr><td>RAG</td><td>自分のデータをAIに読ませて答えさせる仕組み。</td></tr>
+    <tr><td>LangChain</td><td>複数のAI処理をつなげるPythonフレームワーク。</td></tr>
+    <tr><td>IOWN</td><td>NTTが開発中の次世代光ネットワーク。電力消費大幅削減が売り。</td></tr>
+    <tr><td>Stargate</td><td>ソフトバンク・OpenAI・Oracle共同のAIインフラ構築プロジェクト。</td></tr>
+  </table>
+</section>
+
+<footer>
+  // Claude調査メモ | 2026-06-17 | Web・ネットワーク・AIインフラ歴史まとめ
+</footer>
+
+</body>
+</html>
