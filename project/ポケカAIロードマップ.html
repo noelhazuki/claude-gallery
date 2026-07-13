@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RES-008 ロードマップ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: radial-gradient(ellipse at top, #1b1030 0%, #0a0716 60%, #05040c 100%);
+    color: #eae6f5;
+    padding: 28px 16px 60px;
+    min-height: 100vh;
+  }
+  header { text-align: center; margin-bottom: 30px; }
+  header .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #c9a6ff;
+    border: 1px solid #6a4fae;
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin-bottom: 10px;
+  }
+  header h1 { font-size: 19px; font-weight: 700; }
+  header p { font-size: 12px; color: #9a8fc0; margin-top: 4px; }
+
+  .path {
+    position: relative;
+    max-width: 420px;
+    margin: 0 auto;
+    padding-left: 26px;
+  }
+  .path::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: linear-gradient(to bottom, #ffd76a 0%, #ffd76a var(--doneratio, 55%), #3a3358 var(--doneratio, 55%), #3a3358 100%);
+    border-radius: 3px;
+  }
+
+  .step {
+    position: relative;
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #171029;
+    border: 1px solid #352a55;
+  }
+  .step::before {
+    content: "";
+    position: absolute;
+    left: -26px;
+    top: 18px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3a3358;
+    border: 3px solid #0a0716;
+  }
+  .step.done { border-color: #4a3f78; opacity: 0.72; }
+  .step.done::before { background: #ffd76a; box-shadow: 0 0 6px #ffd76a; }
+  .step.now {
+    border-color: #ff9ecf;
+    box-shadow: 0 0 0 1px #ff9ecf55, 0 0 18px #ff5fae33;
+    background: #201232;
+  }
+  .step.now::before {
+    background: #ff5fae;
+    box-shadow: 0 0 10px #ff5fae, 0 0 0 4px #ff5fae33;
+  }
+  .step.todo::before { background: #2a2444; }
+
+  .step .tag {
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .step.done .tag { color: #ffd76a; }
+  .step.now .tag { color: #ff9ecf; }
+  .step.todo .tag { color: #6e6590; }
+
+  .step h2 { font-size: 14px; margin-top: 4px; }
+  .step.todo h2 { color: #a89fc8; }
+  .step p.note { font-size: 11.5px; color: #a79cc8; margin-top: 4px; line-height: 1.5; }
+  .step.todo p.note { color: #736a94; }
+
+  .section-label {
+    max-width: 420px;
+    margin: 0 auto 12px;
+    padding-left: 26px;
+    font-size: 11px;
+    color: #7d72a3;
+    letter-spacing: 1px;
+    margin-top: 26px;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: #6e6590;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
+  <h1>バトルロード進捗マップ</h1>
+  <p>2026-07-14時点</p>
+</header>
+
+<div class="section-label">▸ とおってきた道</div>
+<div class="path">
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>Worker + KV インフラ構築</h2>
+    <p class="note">pokeca-ai-worker稼働・KV接続確認済み</p>
+  </div>
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>TCGdex接続・SV28セット取得</h2>
+    <p class="note">sets:standard / set:SV* をKVに格納完了</p>
+  </div>
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>register_meta / register_mine 実装</h2>
+    <p class="note">CORS対応込みで動作確認済み</p>
+  </div>
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>list_meta / list_mine 実装</h2>
+    <p class="note">一覧取得エンドポイント動作確認済み</p>
+  </div>
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>cardList構造の再設計・確定</h2>
+    <p class="note">cardId一次識別子・{cardId,count}形式・cardRuleOverrides分離方針</p>
+  </div>
+  <div class="step done">
+    <div class="tag">DONE</div>
+    <h2>register_meta/mine 新スキーマ対応</h2>
+    <p class="note">cardList検証ロジック実装・正常系/異常系ともテスト確認済み</p>
+  </div>
+</div>
+
+<div class="section-label">▸ 今ここ</div>
+<div class="path" style="--doneratio: 0%;">
+  <div class="step now">
+    <div class="tag">NOW</div>
+    <h2>card:{cardId} 実データ投入方法の設計</h2>
+    <p class="note">set:SV*から都度引くか、専用キーに複製するか検討中</p>
+  </div>
+</div>
+
+<div class="section-label">▸ この先の道</div>
+<div class="path" style="--doneratio: 0%;">
+  <div class="step todo">
+    <div class="tag">TODO</div>
+    <h2>card:{cardId} 実装</h2>
+    <p class="note">カード表示用データの実取得・KV投入</p>
+  </div>
+  <div class="step todo">
+    <div class="tag">TODO</div>
+    <h2>cardRuleOverrides 初期データ作成</h2>
+    <p class="note">かがやくポケモン・ACE SPEC・ペア専用カード等の例外登録</p>
+  </div>
+  <div class="step todo">
+    <div class="tag">TODO</div>
+    <h2>既存テストデータの新形式移行</h2>
+    <p class="note">test / test2 / dora03</p>
+  </div>
+  <div class="step todo">
+    <div class="tag">TODO</div>
+    <h2>デッキ一覧表示（HTML）作り直し</h2>
+    <p class="note">画像・詳細データ込みの表示に対応</p>
+  </div>
+  <div class="step todo">
+    <div class="tag">TODO</div>
+    <h2>?ask エンドポイント実装</h2>
+    <p class="note">Claude API連携によるAIアドバイス機能</p>
+  </div>
+</div>
+
+<footer>PROJECT_STATE.md基準・計画は変わりうるで</footer>
+
+</body>
+</html>

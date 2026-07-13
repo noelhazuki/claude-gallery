@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RES-008 用語一覧</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: radial-gradient(ellipse at top, #1b1030 0%, #0a0716 60%, #05040c 100%);
+    color: #eae6f5;
+    padding: 24px 14px 50px;
+  }
+  header { text-align: center; margin-bottom: 22px; }
+  header .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #c9a6ff;
+    border: 1px solid #6a4fae;
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin-bottom: 10px;
+  }
+  header h1 { font-size: 18px; }
+  header p { font-size: 12px; color: #9a8fc0; margin-top: 4px; }
+
+  .group { max-width: 480px; margin: 0 auto 26px; }
+  .group h2 {
+    font-size: 13px;
+    color: #ffd76a;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 3px solid #ffd76a;
+    padding-left: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #171029;
+    border: 1px solid #352a55;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 10px;
+    font-size: 12.5px;
+    vertical-align: top;
+    border-bottom: 1px solid #2a2244;
+  }
+  th {
+    background: #201a3a;
+    font-size: 11px;
+    color: #b0a6d8;
+    letter-spacing: 0.5px;
+    width: 30%;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.term {
+    font-family: monospace;
+    color: #ff9ecf;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  td.desc { color: #cfc6e8; line-height: 1.5; }
+  td.status {
+    font-size: 10px;
+    color: #ff8f8f;
+  }
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: #6e6590;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
+  <h1>用語一覧（cardList / KVキー関連）</h1>
+  <p>2026-07-14時点</p>
+</header>
+
+<div class="group">
+  <h2>デッキの中身に関わるやつ</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">cardId</td>
+      <td class="desc">TCGdexのカード個別ID。カード名だけでなく収録パック・型番まで含めた一意の識別子<br><span style="color:#8f84b0;">例：sv11W-043</span></td>
+    </tr>
+    <tr>
+      <td class="term">count</td>
+      <td class="desc">そのカードの投入枚数</td>
+    </tr>
+    <tr>
+      <td class="term">cardList</td>
+      <td class="desc">デッキの中身全体を表すオブジェクト。8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）に分かれ、各分類が{cardId, count}の配列</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
+  <h2>登録データのフィールド</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">howToPlay</td>
+      <td class="desc">register_meta（環境デッキ）専用。そのデッキの回し方</td>
+    </tr>
+    <tr>
+      <td class="term">concern</td>
+      <td class="desc">register_mine（自分のデッキ）専用。気になってる点・相談したいこと</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
+  <h2>KVキー（データの保存場所の名前）</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">deck:meta:{id}</td>
+      <td class="desc">環境デッキの保存キー。{id}部分にdorapa01みたいな略称IDが入る</td>
+    </tr>
+    <tr>
+      <td class="term">deck:mine:{id}</td>
+      <td class="desc">自分のデッキの保存キー</td>
+    </tr>
+    <tr>
+      <td class="term">card:{cardId}<div class="status">未実装</div></td>
+      <td class="desc">カード表示用データ（名前・画像・技など）の保存キー</td>
+    </tr>
+    <tr>
+      <td class="term">cardRuleOverrides<div class="status">未実装</div></td>
+      <td class="desc">4枚制限などのルール例外だけをまとめておくキー</td>
+    </tr>
+    <tr>
+      <td class="term">set:SV*</td>
+      <td class="desc">TCGdexから取ってきたセット単位のカードデータ</td>
+    </tr>
+    <tr>
+      <td class="term">sets:standard</td>
+      <td class="desc">スタンダードレギュレーション対象セットの一覧</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
+  <h2>ルール絡みの用語</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">countGroup</td>
+      <td class="desc">枚数制限を合算する単位（基本は表示名基準）</td>
+    </tr>
+    <tr>
+      <td class="term">maxCount</td>
+      <td class="desc">そのグループの最大投入可能枚数</td>
+    </tr>
+  </table>
+</div>
+
+<footer>Dictionary.jsonへの登録はまだ。登録するか要確認</footer>
+
+</body>
+</html>
