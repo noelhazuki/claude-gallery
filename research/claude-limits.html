@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIリファレンス</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #222536;
+  --border: #2e3148;
+  --text: #e2e4f0;
+  --text-muted: #7a7f9a;
+  --text-dim: #4a4f6a;
+  --accent: #7c6af7;
+  --accent-soft: #2d2750;
+  --ok: #4ade80;
+  --ok-soft: #0d2e1a;
+  --warn: #facc15;
+  --warn-soft: #2a2200;
+  --danger: #f87171;
+  --danger-soft: #2e0f0f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ヘッダー */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.header-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+#searchInput {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px 8px 34px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#searchInput:focus { border-color: var(--accent); }
+#searchInput::placeholder { color: var(--text-dim); }
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+/* ジャンルフィルター */
+.genre-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.genre-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.genre-btn:hover { border-color: var(--accent); color: var(--accent); }
+.genre-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+#resultCount {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 6px;
+  min-height: 14px;
+}
+
+/* メイン */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 14px 60px;
+}
+
+/* セクション */
+.section {
+  margin-bottom: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.section-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  line-height: 1.8;
+}
+
+/* カード */
+.cards { display: flex; flex-direction: column; gap: 7px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.card:hover { border-color: var(--accent); background: var(--surface2); }
+.card.hidden { display: none; }
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.card-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.badge-ok   { background: var(--ok-soft);     color: var(--ok); }
+.badge-warn { background: var(--warn-soft);   color: var(--warn); }
+.badge-ng   { background: var(--danger-soft); color: var(--danger); }
+.badge-info { background: var(--accent-soft); color: var(--accent); }
+
+.card-keyword {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+
+.card-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.card-genre-tag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-top: 3px;
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.gtag-tech    { background: #1a2e4a; color: #60a5fa; }
+.gtag-ethics  { background: #2e1e0d; color: #fb923c; }
+.gtag-bias    { background: #0d2233; color: #38bdf8; }
+.gtag-concept { background: #1e1a3a; color: #a78bfa; }
+.gtag-compare { background: #0d2e1a; color: #4ade80; }
+.gtag-other   { background: #2a2a2a; color: #9ca3af; }
+
+.card-body {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.85;
+}
+
+.card.open .card-body { display: block; }
+.card-body p { margin-bottom: 7px; }
+.card-body p:last-child { margin-bottom: 0; }
+
+.note {
+  background: var(--surface2);
+  border-radius: 5px;
+  padding: 7px 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  border-left: 2px solid var(--text-dim);
+}
+
+.note.good { border-left-color: var(--ok); color: var(--text); }
+
+/* AI比較テーブル */
+.ai-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.ai-table th {
+  text-align: left;
+  padding: 6px 10px;
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.ai-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.ai-table tr:last-child td { border-bottom: none; }
+.ai-table tr:hover td { background: var(--surface2); }
+
+.ai-name {
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ai-maker {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin: 1px 2px 1px 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pill-free    { background: var(--ok-soft);     color: var(--ok); }
+.pill-paid    { background: var(--danger-soft);  color: var(--danger); }
+.pill-freemium{ background: var(--warn-soft);    color: var(--warn); }
+.pill-oss     { background: #1a2e4a;             color: #60a5fa; }
+.pill-rt      { background: #0d2233;             color: #38bdf8; }
+.pill-jp-good { background: #0d2e1a;             color: #4ade80; }
+.pill-jp-mid  { background: var(--warn-soft);    color: var(--warn); }
+.pill-jp-low  { background: var(--danger-soft);  color: var(--danger); }
+
+/* 凡例 */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* 追加ボタン */
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* モーダル */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+
+.modal label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 8px 0 3px;
+}
+
+.modal input, .modal textarea, .modal select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 9px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+}
+
+.modal textarea { min-height: 70px; resize: vertical; }
+
+.modal-btns {
+  display: flex;
+  gap: 7px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  border: none;
+}
+
+.btn-primary   { background: var(--accent); color: #fff; }
+.btn-secondary { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-size: 12px;
+  display: none;
+}
+
+.no-results.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>AIリファレンス</h1>
+    <span class="header-sub">personal ref</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="キーワード検索…" autocomplete="off">
+  </div>
+  <div class="genre-bar" id="genreBar">
+    <button class="genre-btn active" data-genre="all">すべて</button>
+    <button class="genre-btn" data-genre="tech">🔧 技術的</button>
+    <button class="genre-btn" data-genre="ethics">⚖️ 倫理・ポリシー</button>
+    <button class="genre-btn" data-genre="bias">🌐 知識の偏り</button>
+    <button class="genre-btn" data-genre="concept">📖 概念・背景</button>
+    <button class="genre-btn" data-genre="compare">🤖 AI比較</button>
+    <button class="genre-btn" data-genre="other">📌 その他・未分類</button>
+  </div>
+  <div id="resultCount"></div>
+</header>
+
+<div class="container">
+
+  <div class="legend">
+    <div class="legend-item"><span class="card-badge badge-ok">できる</span>問題なし</div>
+    <div class="legend-item"><span class="card-badge badge-warn">条件付き</span>工夫すればできる</div>
+    <div class="legend-item"><span class="card-badge badge-ng">できない</span>技術・制約上無理</div>
+    <div class="legend-item"><span class="card-badge badge-info">概念</span>背景知識</div>
+  </div>
+
+  <div id="allSections">
+
+  <!-- ===== CH.1 概念 ===== -->
+  <div class="section" data-section="1">
+    <div class="section-header">
+      <span class="section-num">CH.1</span>
+      <span class="section-title">Claudeって何もの？</span>
+    </div>
+    <div class="section-desc">Claudeは「テキストを受け取ってテキストを返す機械」。設計図を描く人で、工事する人ではない。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="concept" data-tags="claude 基本 仕組み テキスト">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Claudeの正体</div>
+            <div class="card-summary">テキストを返すだけの機械</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Claudeは「入力されたテキストに対して、次に来そうなテキストを返す」を繰り返しているだけ。ファイルを保存する・インターネットに繋ぐ・プログラムを実行する、といった「外の世界への働きかけ」は本来できない。</p>
+          <p>検索ツールや計算ツールはAnthropicが別途用意して繋いでいるもので、Claude本体の能力ではない。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="コード プログラム 実行 書く">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">コードを「書く」と「動かす」は別の話</div>
+            <div class="card-summary">書くのはほぼ何でもできる。動かすのはブラウザかサーバーの仕事</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>React・Python・SQL・C言語など、ほぼどんな言語でもコードを書ける。ただし「書いたコードを実行して結果を確認する」のはClaude自身の仕事ではなく、ブラウザやサーバーが担う。</p>
+          <div class="note good">→ 実行環境はCloudflare Workers / ブラウザ / ローカルPCで担う</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="記憶 会話 セッション メモリ">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">会話をまたいだ記憶</div>
+            <div class="card-summary">本質的には毎回初対面</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Claudeにはセッションをまたぐ記憶がない。「メモリ機能」はAnthropicが別途用意した仕組みで、要点を外部に保存して次の会話に読み込んでいるだけ。半年前の会話をそのまま覚えているわけではない。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.2 Webアプリ ===== -->
+  <div class="section" data-section="2">
+    <div class="section-header">
+      <span class="section-num">CH.2</span>
+      <span class="section-title">Webアプリって何もの？</span>
+    </div>
+    <div class="section-desc">ブラウザの上で動くWebアプリは、セキュリティのためにOSやハードウェアへのアクセスが厳しく制限されている。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="tech" data-tags="ブラウザ セキュリティ ファイル ストレージ 写真 スキャン">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">スマホのファイルを全部スキャンする</div>
+            <div class="card-summary">ブラウザはストレージ全体に触れない</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Webアプリはブラウザのサンドボックス内で動いており、スマホ内のファイルシステム全体を勝手に見ることはできない。「ファイルを選んでもらう」形なら読めるが、「全部スキャンして整理する」はネイティブアプリが必要。</p>
+          <div class="note">→ ファイラー・写真一括整理をWebアプリで作るのは原理的に無理</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="root android ファイル システム">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">root・システム領域へのアクセス</div>
+            <div class="card-summary">WebアプリどころかAndroidアプリでも基本無理</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Androidのroot権限（システム領域への書き込み等）はWebアプリでは完全に不可能。ネイティブアプリでも通常は禁止されており、端末をroot化しない限り触れない。Galaxy S24はroot化が難しい機種のひとつ。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="プッシュ通知 定期実行 バックグラウンド Worker">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">プッシュ通知・定期実行</div>
+            <div class="card-summary">PWAだけでは無理。Cloudflare Workersを使えばできる</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>純粋なPWAはアプリが開いている間しか動けない。バックグラウンドでの定期実行やプッシュ通知は、サーバーサイド（Cloudflare Workers等）を組み合わせる必要がある。</p>
+          <div class="note good">→ Workers + Web Push APIで実現可能。実装はやや複雑</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="pwa インストール ホーム画面 chrome shortcut">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">PWAとして本当にインストールされるか問題</div>
+            <div class="card-summary">ChromeがショートカットとPWAを区別する条件がある</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ChromeがPWAとして認識するにはmanifest.jsonのstart_urlやscope、HTTPSなどの条件を満たす必要がある。条件が足りないとホーム画面ショートカット扱いになり、Web Share Target等の機能が使えない。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.3 4分類 ===== -->
+  <div class="section" data-section="3">
+    <div class="section-header">
+      <span class="section-num">CH.3</span>
+      <span class="section-title">できない理由の4分類</span>
+    </div>
+    <div class="section-desc">「なんでできないの？」の理由はだいたいこの4つ。理由がわかると回避策も見える。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="concept" data-tags="ブラウザ 壁 分類 ファイル ハード">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">① ブラウザの壁 — OSやハードに触れない</div>
+            <div class="card-summary">ファイル全体・他アプリのデータ・rootなど</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ブラウザはセキュリティのためにOSやハードウェアへのアクセスを制限している。カメラ・マイク・位置情報は許可を取れば使えるが、ファイルシステム全体・他アプリのデータ・Bluetooth詳細制御などは原則不可。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="サーバー 定期実行 通知 分類 Worker">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">② サーバーの壁 — 常時動いてるものが必要</div>
+            <div class="card-summary">定期実行・プッシュ通知・バックグラウンド処理</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ブラウザアプリは「開いている間しか動かない」。定期的に何かする・通知を送る・外部APIを叩き続けるといった処理には、常時動いているサーバーが必要。Cloudflare WorkersはこのギャップをFaaSで埋められる。</p>
+          <div class="note good">→ Cloudflare Workersで多くは解決できる</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="外部 API CORS スクレイピング 利用規約 分類">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">③ 外部サービスの壁 — 相手側の制約</div>
+            <div class="card-summary">CORS・有料API・利用規約・動的レンダリング</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>外部サイトやAPIを使いたい場合、相手側の制約がある。CORSでブラウザから直接叩けないケース・APIキーが必要または有料なケース・利用規約でスクレイピング禁止なケース・JavaScriptで動的に描画されるので静的取得できないケースなど。</p>
+          <div class="note good">→ CORSはCloudflare Workerをプロキシにすれば回避できることが多い</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="ethics" data-tags="倫理 ポリシー 制約 Anthropic 著作権 有名人">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">④ 倫理・ポリシーの壁 — 技術的にはできるけどやらない</div>
+            <div class="card-summary">著作権・有名人・差別・暴力・有害情報</div>
+            <span class="card-genre-tag gtag-ethics">倫理・ポリシー</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Anthropicがポリシーとして設定している制約。技術的にはClaudeには生成できるが、出力しないよう設定されている。実在の人物の名前を使ったコンテンツ・著作権のある歌詞や台本の再現・特定の人を傷つけるコンテンツなど。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.4 具体例 ===== -->
+  <div class="section" data-section="4">
+    <div class="section-header">
+      <span class="section-num">CH.4</span>
+      <span class="section-title">具体例集</span>
+    </div>
+    <div class="section-desc">「これやりたいけどどうなの？」実際のユースケース別まとめ。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="tech" data-tags="写真 整理 スマホ ギャラリー 全部">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">スマホ内の写真を全部整理したい</div>
+            <div class="card-summary">ブラウザの壁①</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Webアプリはスマホのギャラリー全体を読み込めない。「写真を選んで表示・タグ付け」はできるが、「自動で全スキャンして分類」はネイティブアプリが必要。Google フォト等の既存アプリが現実的。</p>
+          <div class="note">→ ネイティブアプリ（Android APK）として作れば原理的には可能。開発コスト大</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="レシピ スクレイピング 料理 外部サイト クックパッド">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">外部サイトからレシピを読み込みたい</div>
+            <div class="card-summary">外部サービスの壁③ — 利用規約要確認</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>クックパッド・デリッシュキッチン等はスクレイピング禁止が利用規約に明記されているケースが多い。また動的レンダリングのサイトは静的取得も難しい。</p>
+          <div class="note good">→ 自分で登録する形（手入力・URL貼り付け）なら問題なく作れる</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="ethics" data-tags="有名人 実名 著作権 歌詞 フィクション 芸能人">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">有名人の名前を使ったコンテンツ・歌詞の再現</div>
+            <div class="card-summary">倫理・ポリシーの壁④</div>
+            <span class="card-genre-tag gtag-ethics">倫理・ポリシー</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>実在の人物（芸能人・政治家・スポーツ選手など）を主役にしたフィクション・発言を捏造するコンテンツはAnthropicのポリシーで禁止。著作権のある歌詞・台本・小説の一節をそのまま再現するのも同様。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="気圧 天気 位置情報 通知 低気圧">
+        <div class="card-header">
+          <span class="card-badge badge-ok">できる</span>
+          <div>
+            <div class="card-keyword">現在地の気圧をチェックしたい</div>
+            <div class="card-summary">位置情報 + 気象APIで実現可能</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ブラウザのGeolocation APIで位置情報を取得し、Open-Meteo等の無料気象APIに投げるだけで実現できる。上越市の直江津エリアの細かい気圧も取れる。プッシュ通知まで要るならWorkerが必要だが、アプリを開いて確認するだけなら純粋なWebアプリで十分。</p>
+          <div class="note good">→ これが一番すぐ作れる候補</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="健康 血圧 薬 メモ 記録 ベンゾ">
+        <div class="card-header">
+          <span class="card-badge badge-ok">できる</span>
+          <div>
+            <div class="card-keyword">血圧・お薬・ベンゾ調整の記録</div>
+            <div class="card-summary">localStorageで全部いける</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>数値入力・グラフ化・メモ記録はlocalStorageだけで完結できる。Claudeが医療アドバイスを出す機能を付けようとすると制約が出てくるが、「記録・可視化・メモ」の範囲なら問題ない。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="ダウンロード ファイル 場所 管理 どこ">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">ダウンロードしたファイルがどこか探したい</div>
+            <div class="card-summary">ブラウザの壁①</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Webアプリはファイルシステムを走査できない。ダウンロード履歴もブラウザ外からは見えない。Androidの場合はFiles by Google等のネイティブアプリを使うのが現実的。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.5 AI技術的限界 ===== -->
+  <div class="section" data-section="5">
+    <div class="section-header">
+      <span class="section-num">CH.5</span>
+      <span class="section-title">AIそのものの技術的限界</span>
+    </div>
+    <div class="section-desc">「制約で禁止されている」とは別に、現時点のAI技術としてまだ苦手なこと。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="tech" data-tags="カットオフ 学習 締め切り 最新 知識 いつまで ワンピース ジャンプ">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">カットオフって何？</div>
+            <div class="card-summary">学習データの締め切り日。それ以降のことは知らない</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>AIは大量のテキストを読んで学習しているが、その学習が終わった日（カットオフ）以降の情報は持っていない。</p>
+          <p>「最新号のジャンプを読んでいないから、ワンピースの最新話がわからない」のと同じ感覚。「ルフィってどんなキャラ？」みたいな昔からある話は答えられるが、先週の展開は知らない。</p>
+          <div class="note good">→ 検索ツールを使えば補えるが、それは外から情報を取ってきているだけで「知っている」わけではない</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="リアルタイム 現在 速報 株価 天気 カットオフ">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">「今この瞬間」を知ること</div>
+            <div class="card-summary">学習データに締め切り（カットオフ）がある</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Claudeの知識はトレーニングデータの締め切り日までのもの。速報ニュース・株価・今日の天気・最新のアップデート情報などはリアルタイムでは知らない。検索ツールを使えば補えるが、それはAnthropicが繋いだ外部ツールの力。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="画像 認識 数える 精度 写真">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">画像を見て正確に処理する</div>
+            <div class="card-summary">「見る」はできるが精度に限界がある</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>画像の内容を説明したり何が写っているか判断するのはかなり進歩した。ただし「正確に数える」「微妙な感情の差を読む」「手書き文字を完璧に読む」などは精度が落ちる。重要な判断をさせる用途には向かない。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="完全オリジナル 創造 前例 パターン 発明">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">完全にオリジナルなものを生み出す</div>
+            <div class="card-summary">既存パターンの組み合わせが得意なだけ</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Claudeは学習したテキストのパターンを組み合わせて出力している。「前例のない発明」「世界初の芸術」は本質的に苦手。「アイデアの引き出しが多い人」くらいのイメージが近い。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="動画 リアルタイム 解析 カメラ 映像">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">動画をリアルタイム解析しながら何かする</div>
+            <div class="card-summary">まだ技術的に厳しい</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>静止画は処理できるが、カメラの映像をリアルタイムで見続けながら何か判断し続けるのは現時点では対応していない（エッジAIやローカルモデルが必要）。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.6 知識の偏り ===== -->
+  <div class="section" data-section="6">
+    <div class="section-header">
+      <span class="section-num">CH.6</span>
+      <span class="section-title">Claudeの知識の偏り・限界</span>
+    </div>
+    <div class="section-desc">Claudeの知識はネット上のテキストが出所。ネットに書かれていないこと・少ないことは弱い。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="bias" data-tags="英語 日本語 言語 ニュアンス 翻訳 文化">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">言語・文化のニュアンスの壁</div>
+            <div class="card-summary">英語圏・西洋的な視点に偏っている</div>
+            <span class="card-genre-tag gtag-bias">知識の偏り</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>学習データは英語のテキストが圧倒的に多い。日本語特有の言い回し・関西の空気感・上越の地域文化・日本の慣習などは、英語圏から見た「外からの解説」で学んでいる部分が多く、当事者の感覚とズレることがある。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="bias" data-tags="マイノリティ 当事者 障害 ADHD 偏り 男女 性別">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">マイノリティ・当事者にしかわからないこと</div>
+            <div class="card-summary">多数派・健常者・男性の視点に偏りやすい</div>
+            <span class="card-genre-tag gtag-bias">知識の偏り</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ネット上のテキストは多数派（健常者・男性・英語話者・西洋人）が書いたものが多い。ADHDの「ほんまにしんどい感覚」、ベンゾ離脱の実際のつらさ、専業主婦の働き方のリアル、在日外国人の日常などは「外から説明した情報」は多くても当事者の深い感覚は薄い。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="bias" data-tags="医療 薬 診断 アドバイス 健康 個別">
+        <div class="card-header">
+          <span class="card-badge badge-warn">条件付き</span>
+          <div>
+            <div class="card-keyword">医療・薬についての具体的なアドバイス</div>
+            <div class="card-summary">情報は出せるが個別判断はできない</div>
+            <span class="card-genre-tag gtag-bias">知識の偏り</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>一般的な医薬品情報や症状の説明は出せる。ただし「あなたの場合はこうすべき」という個別判断はポリシー上も技術的限界的にも難しい。ベンゾジアゼピンの減量スケジュールなど個人の状態に依存するものは特に要注意。</p>
+          <div class="note">→ 記録・可視化ツールは作れる。減量判断は医師と</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="bias" data-tags="言語化 暗黙知 常識 感覚 当たり前">
+        <div class="card-header">
+          <span class="card-badge badge-ng">できない</span>
+          <div>
+            <div class="card-keyword">言語化されていない「当たり前」</div>
+            <div class="card-summary">書かれていないことは学べない</div>
+            <span class="card-genre-tag gtag-bias">知識の偏り</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>「関西人なら当然知ってること」「ゲームプランナーの現場感」「長年の主婦として積み上げた生活の勘」など、ネットに書かれていない暗黙知はClaudeには入っていない。「わかってる風な答えを返す」ことはあるが、実際には薄い。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.7 AI比較 ===== -->
+  <div class="section" data-section="7">
+    <div class="section-header">
+      <span class="section-num">CH.7</span>
+      <span class="section-title">主要AI比較</span>
+    </div>
+    <div class="section-desc">有名どころのAIサービスの特徴まとめ。情報は2025年時点のもので変わることがある。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="compare" data-tags="AI比較 全体 概要 一覧">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">主要AI一覧表</div>
+            <div class="card-summary">会社・モデル・料金・日本語・情報ソースの比較</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <table class="ai-table">
+            <thead>
+              <tr>
+                <th>AI / 会社</th>
+                <th>料金</th>
+                <th>日本語</th>
+                <th>情報ソース</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="ai-name">Claude</div><div class="ai-maker">Anthropic</div></td>
+                <td><span class="pill pill-freemium">無料あり</span><span class="pill pill-paid">Pro $20/月</span></td>
+                <td><span class="pill pill-jp-good">良好</span></td>
+                <td>カットオフあり。検索ツールは別途オプション</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">ChatGPT / o3</div><div class="ai-maker">OpenAI</div></td>
+                <td><span class="pill pill-freemium">無料あり</span><span class="pill pill-paid">Plus $20/月</span></td>
+                <td><span class="pill pill-jp-good">良好</span></td>
+                <td>基本はカットオフあり。有料版でWeb検索オプションあり</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">Gemini</div><div class="ai-maker">Google</div></td>
+                <td><span class="pill pill-freemium">無料あり</span><span class="pill pill-paid">Advanced あり</span></td>
+                <td><span class="pill pill-jp-good">良好</span></td>
+                <td>Google検索と統合。リアルタイム性が強い</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">Grok</div><div class="ai-maker">xAI（イーロン・マスク）</div></td>
+                <td><span class="pill pill-freemium">無料あり</span><span class="pill pill-paid">X Premium+</span></td>
+                <td><span class="pill pill-jp-mid">普通</span></td>
+                <td><span class="pill pill-rt">X(Twitter)リアルタイム参照</span>最新の話題に強い</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">Copilot</div><div class="ai-maker">Microsoft（OpenAI GPT使用）</div></td>
+                <td><span class="pill pill-freemium">無料あり</span><span class="pill pill-paid">Pro あり</span></td>
+                <td><span class="pill pill-jp-good">良好</span></td>
+                <td>Bing検索と統合。Web参照あり</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">Llama</div><div class="ai-maker">Meta（オープンソース）</div></td>
+                <td><span class="pill pill-oss">OSS 無料</span></td>
+                <td><span class="pill pill-jp-mid">普通</span></td>
+                <td>カットオフのみ。ローカル動作が多くネット参照なし</td>
+              </tr>
+              <tr>
+                <td><div class="ai-name">Alexa</div><div class="ai-maker">Amazon</div></td>
+                <td><span class="pill pill-freemium">端末込み</span></td>
+                <td><span class="pill pill-jp-mid">普通</span></td>
+                <td>音声アシスタントが主軸。スマートホーム連携が強み</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="Claude 特徴 得意 不得意 Anthropic 安全">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Claude の特徴</div>
+            <div class="card-summary">長文・コード・丁寧な説明が得意。安全性重視で制約は強め</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--ok)">得意：</strong>長文の読解・要約、コード生成・デバッグ、丁寧で段階的な説明、倫理的に慎重な回答</p>
+          <p><strong style="color:var(--danger)">不得意：</strong>リアルタイム情報（検索ツールなしでは）、実在人物のフィクション、歌詞・著作物の再現</p>
+          <p><strong style="color:var(--warn)">日本語：</strong>自然で読みやすい。関西弁も一応いける</p>
+          <p><strong style="color:var(--text-muted)">情報ソース：</strong>学習データのカットオフあり。claude.aiでは検索ツール付き</p>
+          <p><strong style="color:var(--text-muted)">料金：</strong>無料プランあり。Proは月$20（約3,000円）</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="ChatGPT OpenAI 特徴 得意 不得意 GPT o3">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">ChatGPT / o3 の特徴</div>
+            <div class="card-summary">汎用性が高く利用者が多い。プラグイン・ツール連携が豊富</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--ok)">得意：</strong>汎用的なタスク全般、画像生成（DALL-E連携）、数学・論理推論（o3モデル）、外部ツール連携</p>
+          <p><strong style="color:var(--danger)">不得意：</strong>たまに自信満々に嘘をつく（ハルシネーション）、無料版はモデルが古い</p>
+          <p><strong style="color:var(--warn)">日本語：</strong>良好。ただし自然さはClaudeやGeminiに若干劣ることも</p>
+          <p><strong style="color:var(--text-muted)">情報ソース：</strong>基本カットオフあり。Plus以上でWeb検索オプション</p>
+          <p><strong style="color:var(--text-muted)">料金：</strong>無料あり。Plus月$20。o3は高性能だが高め</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="Gemini Google 特徴 得意 不得意 検索 リアルタイム">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Gemini の特徴</div>
+            <div class="card-summary">Google検索と統合。最新情報に強い</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--ok)">得意：</strong>最新情報の検索・まとめ、Google サービス連携（Gmail・Drive・カレンダー）、マルチモーダル（画像・音声）</p>
+          <p><strong style="color:var(--danger)">不得意：</strong>長文の一貫性、複雑なコード生成はClaudeやChatGPTに劣ることも</p>
+          <p><strong style="color:var(--warn)">日本語：</strong>良好</p>
+          <p><strong style="color:var(--text-muted)">情報ソース：</strong>Google検索と統合。リアルタイム性が高い</p>
+          <p><strong style="color:var(--text-muted)">料金：</strong>無料あり。Advanced（Google One AI プレミアム）月約2,900円</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="Grok xAI イーロン X Twitter 特徴 得意 リアルタイム">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Grok の特徴</div>
+            <div class="card-summary">X（Twitter）をリアルタイム参照。最新トレンドに強い</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--ok)">得意：</strong>X上のリアルタイムな話題・トレンド・ニュース、皮肉・ユーモアを含んだ回答スタイル</p>
+          <p><strong style="color:var(--danger)">不得意：</strong>深い専門知識・長文コード・日本語の自然さはやや劣る。Xへの依存度が高い</p>
+          <p><strong style="color:var(--warn)">日本語：</strong>普通程度。英語の方が得意</p>
+          <p><strong style="color:var(--text-muted)">情報ソース：</strong>Xのポストをリアルタイムで参照できる。これが最大の強み</p>
+          <p><strong style="color:var(--text-muted)">料金：</strong>X Premium+（月約¥2,200〜）に含まれる</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="Llama Meta オープンソース ローカル 無料">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Llama の特徴</div>
+            <div class="card-summary">Meta製オープンソース。自分のPCで動かせる唯一の選択肢</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--ok)">得意：</strong>ローカル動作（データが外に出ない）、無料・制限なし、カスタマイズ可能</p>
+          <p><strong style="color:var(--danger)">不得意：</strong>高性能版は動かすのにGPUが必要、リアルタイム情報なし、セットアップが難しい</p>
+          <p><strong style="color:var(--warn)">日本語：</strong>普通〜やや弱い（モデルによる）</p>
+          <p><strong style="color:var(--text-muted)">情報ソース：</strong>カットオフのみ。ネット参照なし</p>
+          <p><strong style="color:var(--text-muted)">料金：</strong>モデル自体は無料。実行環境のPC性能が必要</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="compare" data-tags="どれ 選ぶ 使い分け 目的別 おすすめ">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">目的別おすすめ</div>
+            <div class="card-summary">何をしたいかで選ぶ</div>
+            <span class="card-genre-tag gtag-compare">AI比較</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p><strong style="color:var(--text)">コードを書いてもらいたい →</strong> Claude か ChatGPT（o3）</p>
+          <p><strong style="color:var(--text)">最新ニュース・今起きてることを知りたい →</strong> Gemini か Grok</p>
+          <p><strong style="color:var(--text)">X（Twitter）のトレンドを把握したい →</strong> Grok 一択</p>
+          <p><strong style="color:var(--text)">長い文章を読んで要約・整理してほしい →</strong> Claude</p>
+          <p><strong style="color:var(--text)">Googleのサービスと連携させたい →</strong> Gemini</p>
+          <p><strong style="color:var(--text)">データを外に出したくない・完全無料で使いたい →</strong> Llama（ただし環境構築が必要）</p>
+          <p><strong style="color:var(--text)">画像を生成したい →</strong> ChatGPT（DALL-E連携）かMidjourney等の専用ツール</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CH.8 ネットワーク基礎 ===== -->
+  <div class="section" data-section="8">
+    <div class="section-header">
+      <span class="section-num">CH.8</span>
+      <span class="section-title">ネットワーク基礎知識</span>
+    </div>
+    <div class="section-desc">Claudeと作業してると必ず出てくるネットワーク用語の基礎。「なんでCORSが出るの？」「Workerって何してるの？」がわかる。</div>
+    <div class="cards">
+
+      <div class="card" data-genre="concept" data-tags="IP アドレス 住所 プロバイダ docomo インターネット">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">IPアドレスって何？</div>
+            <div class="card-summary">ネット上の「住所」。プロバイダから借りてるもの</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ネット上の通信は全部「宛先」と「送り元」がついた小包（パケット）のやりとり。Webサイトを見るときも、自分のIPを「返送先住所」として書いた手紙を送って返事をもらっている構造。</p>
+          <p>普段ネットに出るときのIPアドレスは自分のものではなく、契約しているプロバイダ（docomoとかSo-netとか）から借りているもの。だからIPアドレスには「どこの国の、どのプロバイダの利用者か」という素性がだいたい載っている。</p>
+          <div class="note">→ サイト側からは訪問者のIPが見えるので、素性の怪しいIPは「ロボットかも」と疑われる</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="プライベートIP グローバルIP 家 外 ルーター LAN">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">プライベートIPとグローバルIPの違い</div>
+            <div class="card-summary">家の中の住所と、外から見える住所は別</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>グローバルIPはプロバイダから割り当てられた「外の世界の住所」。家のルーターが持っている。プライベートIPは家の中だけで使う住所（192.168.x.xとか）で、外からは直接見えない。</p>
+          <p>家のスマホやPCは全部プライベートIPを持っていて、外と通信するときはルーターがグローバルIPに変換して出ていく（これをNATという）。だから外から見るとスマホもPCも「同じ住所」に見える。</p>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="DNS ドメイン 名前 アドレス 変換 lookup">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">DNSって何？</div>
+            <div class="card-summary">ドメイン名をIPアドレスに変換する仕組み</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>「google.com」みたいなドメイン名は人間が読みやすいように付けた名前で、コンピュータが実際に使うのはIPアドレス（142.250.x.xみたいな数字）。DNSはこの「名前→数字」の変換をしてくれる仕組み。</p>
+          <p>ネットショッピングで「店名で検索→住所が出てくる」みたいな感じ。DNSの設定を変えると同じドメインが別のサーバーに繋がるようになる。Cloudflareにデプロイするときもここを触る。</p>
+          <div class="note">→ Cloudflareの検証ループが起きた原因のひとつがSecure DNS設定だった</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="concept" data-tags="VPN 匿名 暗号化 住所 プロキシ セキュア">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">VPNって何？</div>
+            <div class="card-summary">住所の付け替え＋通信の暗号化</div>
+            <span class="card-genre-tag gtag-concept">概念・背景</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>VPNを使うと通信はまずVPN業者のサーバーを経由してから目的地に届く。目的のサイトから見ると訪問者は「VPNサーバーのIP」に見えるので、自分の本当のIPは隠れる。自分とVPNサーバー間は暗号化されるので途中のWi-Fiから盗聴されにくくなるおまけもつく。</p>
+          <p>ただしVPNサーバーのIPは世界中の不特定多数が共有している。その中に悪いbotや攻撃者も混ざっているので評判が悪くなりがち。Cloudflareから見ると「前科者がいっぱい住んでるアパート」状態で、住人全員が疑われる。</p>
+          <div class="note">→ GalaxyのSecure Wi-Fi機能が裏でVPNとして動いていてCloudflare検証ループの原因になった</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="CORS ブラウザ 安全 制限 外部 fetch アクセス">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">CORSって何？</div>
+            <div class="card-summary">ブラウザが「勝手に他のサイトのデータを取るな」と止める仕組み</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>ブラウザには「今見ているサイトAが、別のサイトBのデータを勝手に取得しようとしたら止める」という安全装置がある。これがCORS（Cross-Origin Resource Sharing）。</p>
+          <p>たとえばWebアプリからポケカ公式サイトに直接fetchしようとするとCORSに弾かれる。サイトB側が「このサイトAからのアクセスはOK」と明示的に許可していないと通らない。</p>
+          <div class="note good">→ Cloudflare WorkerをプロキシにするとWorker↔外部サイトはサーバー間通信になるのでCORSが関係なくなる</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="Worker Cloudflare サーバー 橋渡し プロキシ FaaS">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">Cloudflare Workersって何？</div>
+            <div class="card-summary">ブラウザとサーバーの間で動く「橋渡し役」</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Cloudflare Workersはサーバーサイドで動くJavaScriptの実行環境。ブラウザから直接届かない外部サイトへのアクセスや、定期実行・CORSの回避などをサーバー側で肩代わりしてくれる。</p>
+          <p>自分でサーバーを立てなくても使えて、アクセスが少なければ無料枠で収まる。ポケカアプリでは「ブラウザ→Worker→ポケカ公式サイト」という中継役として使った。</p>
+          <div class="note good">→ 「ブラウザの壁」「サーバーの壁」を超えるための主要な手段</div>
+        </div>
+      </div>
+
+      <div class="card" data-genre="tech" data-tags="HTTPS HTTP 暗号化 セキュリティ 通信 証明書">
+        <div class="card-header">
+          <span class="card-badge badge-info">概念</span>
+          <div>
+            <div class="card-keyword">HTTPとHTTPSの違い</div>
+            <div class="card-summary">Sがつくと通信が暗号化される</div>
+            <span class="card-genre-tag gtag-tech">技術的</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>HTTPは通信の内容が平文（丸見え）。HTTPSはSSL/TLSで暗号化されているので途中で盗み見されにくい。ブラウザのアドレスバーに鍵マークがついてるのがHTTPS。</p>
+          <p>PWAとしてインストールしてもらうにはHTTPSが必須。Cloudflare WorkersはデフォルトでHTTPSなので特に設定不要。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  </div><!-- /allSections -->
+
+  <div class="no-results" id="noResults">該当するカードが見つかりません</div>
+  <button class="add-btn" id="openAddModal">＋ カードを追加する</button>
+
+</div>
+
+<!-- 追加モーダル -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>カードを追加</h3>
+    <label>ジャンル</label>
+    <select id="addGenre">
+      <option value="tech">🔧 技術的</option>
+      <option value="ethics">⚖️ 倫理・ポリシー</option>
+      <option value="bias">🌐 知識の偏り</option>
+      <option value="concept">📖 概念・背景</option>
+      <option value="compare">🤖 AI比較</option>
+      <option value="other" selected>📌 その他・未分類</option>
+    </select>
+    <label>章</label>
+    <select id="addSection">
+      <option value="1">CH.1 Claudeって何もの？</option>
+      <option value="2">CH.2 Webアプリって何もの？</option>
+      <option value="3">CH.3 できない理由4分類</option>
+      <option value="4" selected>CH.4 具体例集</option>
+      <option value="5">CH.5 AIの技術的限界</option>
+      <option value="6">CH.6 知識の偏り・限界</option>
+      <option value="7">CH.7 主要AI比較</option>
+      <option value="8">CH.8 ネットワーク基礎知識</option>
+    </select>
+    <label>ステータス</label>
+    <select id="addBadge">
+      <option value="ok">できる</option>
+      <option value="warn">条件付き</option>
+      <option value="ng" selected>できない</option>
+      <option value="info">概念</option>
+    </select>
+    <label>キーワード（タイトル）</label>
+    <input type="text" id="addKeyword" placeholder="例：音声認識で文字起こし">
+    <label>一行サマリー</label>
+    <input type="text" id="addSummary" placeholder="例：精度はまあまあだが誤認識がある">
+    <label>詳細説明</label>
+    <textarea id="addBody" placeholder="詳しい説明を書く"></textarea>
+    <label>検索タグ（スペース区切り）</label>
+    <input type="text" id="addTags" placeholder="例：音声 文字起こし 精度">
+    <div class="modal-btns">
+      <button class="btn btn-secondary" id="closeModal">キャンセル</button>
+      <button class="btn btn-primary" id="saveCard">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'claude_limits_v2';
+
+// ジャンルラベル
+const GENRE_LABELS = {
+  tech: '技術的', ethics: '倫理・ポリシー', bias: '知識の偏り',
+  concept: '概念・背景', compare: 'AI比較', other: 'その他・未分類'
+};
+const GENRE_TAG_CLASS = {
+  tech: 'gtag-tech', ethics: 'gtag-ethics', bias: 'gtag-bias',
+  concept: 'gtag-concept', compare: 'gtag-compare', other: 'gtag-other'
+};
+const BADGE_LABEL = { ok:'できる', warn:'条件付き', ng:'できない', info:'概念' };
+
+// =========== localStorage ===========
+function loadCustom() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveCustom(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+
+function renderCustom() {
+  document.querySelectorAll('.custom-el').forEach(el => el.remove());
+  loadCustom().forEach(c => {
+    const sec = document.querySelector(`[data-section="${c.section}"] .cards`);
+    if (!sec) return;
+    const el = makeCard(c);
+    el.classList.add('custom-el');
+    sec.appendChild(el);
+  });
+}
+
+function makeCard(c) {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.dataset.genre = c.genre || 'other';
+  d.dataset.tags = c.tags || '';
+  const gc = GENRE_TAG_CLASS[c.genre] || 'gtag-other';
+  const gl = GENRE_LABELS[c.genre] || 'その他';
+  d.innerHTML = `
+    <div class="card-header">
+      <span class="card-badge badge-${c.badge}">${BADGE_LABEL[c.badge]||c.badge}</span>
+      <div>
+        <div class="card-keyword">${esc(c.keyword)}</div>
+        <div class="card-summary">${esc(c.summary)}</div>
+        <span class="card-genre-tag ${gc}">${gl}</span>
+      </div>
+    </div>
+    <div class="card-body"><p>${esc(c.body)}</p></div>
+  `;
+  d.addEventListener('click', () => d.classList.toggle('open'));
+  return d;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// =========== フィルター ===========
+let activeGenre = 'all';
+let searchQ = '';
+
+function applyFilter() {
+  const cards = document.querySelectorAll('.card');
+  let count = 0;
+
+  cards.forEach(card => {
+    const genre = card.dataset.genre || '';
+    const text = card.textContent.toLowerCase();
+    const tags = (card.dataset.tags || '').toLowerCase();
+
+    const genreMatch = activeGenre === 'all' || genre === activeGenre;
+    const searchMatch = !searchQ || text.includes(searchQ) || tags.includes(searchQ);
+
+    const visible = genreMatch && searchMatch;
+    card.classList.toggle('hidden', !visible);
+    if (visible) count++;
+  });
+
+  // セクション表示制御
+  document.querySelectorAll('.section').forEach(sec => {
+    const any = [...sec.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+    sec.style.display = any ? '' : 'none';
+  });
+
+  const noR = document.getElementById('noResults');
+  const rc = document.getElementById('resultCount');
+
+  if (activeGenre !== 'all' || searchQ) {
+    rc.textContent = `${count} 件`;
+    noR.classList.toggle('show', count === 0);
+  } else {
+    rc.textContent = '';
+    noR.classList.remove('show');
+  }
+}
+
+// ジャンルボタン
+document.getElementById('genreBar').addEventListener('click', e => {
+  const btn = e.target.closest('.genre-btn');
+  if (!btn) return;
+  document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeGenre = btn.dataset.genre;
+  applyFilter();
+});
+
+// 検索
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQ = e.target.value.trim().toLowerCase();
+  applyFilter();
+});
+
+// =========== カード開閉（初期DOM） ===========
+document.querySelectorAll('.card').forEach(c => {
+  c.addEventListener('click', () => c.classList.toggle('open'));
+});
+
+// =========== モーダル ===========
+document.getElementById('openAddModal').addEventListener('click', () => {
+  document.getElementById('addModal').classList.add('show');
+});
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('addModal').classList.remove('show');
+});
+document.getElementById('addModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('addModal'))
+    document.getElementById('addModal').classList.remove('show');
+});
+
+document.getElementById('saveCard').addEventListener('click', () => {
+  const kw = document.getElementById('addKeyword').value.trim();
+  if (!kw) { alert('キーワードを入力してや'); return; }
+  const c = {
+    section:  document.getElementById('addSection').value,
+    genre:    document.getElementById('addGenre').value,
+    badge:    document.getElementById('addBadge').value,
+    keyword:  kw,
+    summary:  document.getElementById('addSummary').value.trim(),
+    body:     document.getElementById('addBody').value.trim(),
+    tags:     document.getElementById('addTags').value.trim(),
+  };
+  const arr = loadCustom();
+  arr.push(c);
+  saveCustom(arr);
+  renderCustom();
+  applyFilter();
+  ['addKeyword','addSummary','addBody','addTags'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('addModal').classList.remove('show');
+});
+
+// 初期化
+renderCustom();
+</script>
+</body>
+</html>
