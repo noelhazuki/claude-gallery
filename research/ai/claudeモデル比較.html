@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claudeモデル ステータス比較</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+  :root{
+    --bg:#12141c;
+    --panel:#1b1e2b;
+    --line:#2e3244;
+    --ink:#eceaf5;
+    --sub:#9497ad;
+    --gold:#e8b34d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, #232744 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #1d2138 0%, transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    padding:28px 16px 60px;
+  }
+
+  .header{
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:.2em;
+    color:var(--gold);
+    margin-bottom:6px;
+  }
+  h1{
+    font-size:22px;
+    font-weight:900;
+    margin:0 0 6px;
+    letter-spacing:.02em;
+  }
+  .lead{
+    font-size:13px;
+    color:var(--sub);
+    max-width:520px;
+    margin:0 auto 26px;
+    line-height:1.7;
+  }
+
+  .cards{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    max-width:440px;
+    margin:0 auto;
+  }
+
+  .card{
+    background:linear-gradient(180deg, var(--panel), #171a26);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    background:var(--accent);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+  }
+  .name-block .tier{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--accent);
+    letter-spacing:.15em;
+    margin-bottom:2px;
+  }
+  .name-block .name{
+    font-size:19px;
+    font-weight:900;
+  }
+  .price{
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .price .amt{
+    font-size:15px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .price .unit{
+    font-size:9px;
+    color:var(--sub);
+    display:block;
+  }
+
+  .role{
+    font-size:12.5px;
+    color:var(--ink);
+    background:rgba(255,255,255,0.04);
+    border-left:2px solid var(--accent);
+    padding:7px 10px;
+    border-radius:0 6px 6px 0;
+    margin-bottom:14px;
+    line-height:1.6;
+  }
+
+  .stats{display:flex; flex-direction:column; gap:9px;}
+  .stat-row{display:grid; grid-template-columns:56px 1fr 34px; align-items:center; gap:8px;}
+  .stat-label{font-size:10.5px; color:var(--sub); font-family:'JetBrains Mono', monospace;}
+  .bar-bg{
+    height:7px;
+    background:#0e1019;
+    border-radius:4px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:4px;
+    background:var(--accent);
+  }
+  .stat-val{
+    font-size:9.5px;
+    color:var(--sub);
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  /* per-model accent colors */
+  .haiku{--accent:#57c2e8;}
+  .sonnet{--accent:#e8b34d;}
+  .opus{--accent:#e8724c;}
+  .fable{--accent:#b478e8;}
+
+  .footnote{
+    max-width:440px;
+    margin:20px auto 0;
+    font-size:11.5px;
+    color:var(--sub);
+    line-height:1.8;
+    border-top:1px dashed var(--line);
+    padding-top:14px;
+  }
+  .footnote b{color:var(--ink); font-weight:700;}
+  .src{
+    max-width:440px;
+    margin:14px auto 0;
+    font-size:10px;
+    color:#5b5e73;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="eyebrow">CLAUDE MODEL LINEUP · 2026.07</div>
+    <h1>ステータス比較</h1>
+    <p class="lead">RPGのキャラステータス画面みたいにまとめてみた。<br>「賢さ」「記憶容量(長文対応)」「速さ」「値段」の4軸。</p>
+  </div>
+
+  <div class="cards">
+
+    <!-- HAIKU -->
+    <div class="card haiku">
+      <div class="card-top">
+        <div class="name-block">
+          <div class="tier">SPEED TYPE</div>
+          <div class="name">Haiku 4.5</div>
+        </div>
+        <div class="price">
+          <span class="amt">$1 / $5</span>
+          <span class="unit">100万トークンあたり</span>
+        </div>
+      </div>
+      <div class="role">分類・仕分け・定型文など「大量に・即答」する作業向け。妖怪プランナーの軽い動作確認とかに向いてそう。</div>
+      <div class="stats">
+        <div class="stat-row"><span class="stat-label">賢さ</span><div class="bar-bg"><div class="bar-fill" style="width:55%"></div></div><span class="stat-val">十分</span></div>
+        <div class="stat-row"><span class="stat-label">記憶力</span><div class="bar-bg"><div class="bar-fill" style="width:20%"></div></div><span class="stat-val">20万字</span></div>
+        <div class="stat-row"><span class="stat-label">速さ</span><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div><span class="stat-val">最速</span></div>
+      </div>
+    </div>
+
+    <!-- SONNET -->
+    <div class="card sonnet">
+      <div class="card-top">
+        <div class="name-block">
+          <div class="tier">DAILY DRIVER ★今ワイはコレ</div>
+          <div class="name">Sonnet 5</div>
+        </div>
+        <div class="price">
+          <span class="amt">$2 / $10</span>
+          <span class="unit">8月末まで割引価格</span>
+        </div>
+      </div>
+      <div class="role">普段使いのバランス型。コーディング・設計相談・雑談ぜんぶこなす。Opusにかなり肉薄する賢さになった最新版。</div>
+      <div class="stats">
+        <div class="stat-row"><span class="stat-label">賢さ</span><div class="bar-bg"><div class="bar-fill" style="width:80%"></div></div><span class="stat-val">高い</span></div>
+        <div class="stat-row"><span class="stat-label">記憶力</span><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div><span class="stat-val">100万字</span></div>
+        <div class="stat-row"><span class="stat-label">速さ</span><div class="bar-bg"><div class="bar-fill" style="width:65%"></div></div><span class="stat-val">普通</span></div>
+      </div>
+    </div>
+
+    <!-- OPUS -->
+    <div class="card opus">
+      <div class="card-top">
+        <div class="name-block">
+          <div class="tier">HEAVY REASONER</div>
+          <div class="name">Opus 4.8</div>
+        </div>
+        <div class="price">
+          <span class="amt">$5 / $25</span>
+          <span class="unit">100万トークンあたり</span>
+        </div>
+      </div>
+      <div class="role">難問・複雑な設計判断・長時間の自律作業向け。矛盾を見抜くような込み入った相談で本領発揮するタイプ。</div>
+      <div class="stats">
+        <div class="stat-row"><span class="stat-label">賢さ</span><div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div><span class="stat-val">かなり高い</span></div>
+        <div class="stat-row"><span class="stat-label">記憶力</span><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div><span class="stat-val">100万字</span></div>
+        <div class="stat-row"><span class="stat-label">速さ</span><div class="bar-bg"><div class="bar-fill" style="width:45%"></div></div><span class="stat-val">じっくり型</span></div>
+      </div>
+    </div>
+
+    <!-- FABLE -->
+    <div class="card fable">
+      <div class="card-top">
+        <div class="name-block">
+          <div class="tier">MAX TIER</div>
+          <div class="name">Fable 5</div>
+        </div>
+        <div class="price">
+          <span class="amt">$10 / $50</span>
+          <span class="unit">100万トークンあたり</span>
+        </div>
+      </div>
+      <div class="role">現行ラインナップの最上位。人手を挟まず長時間・多工程を自分で計画して進められる。値段も応答時間も一番重い。</div>
+      <div class="stats">
+        <div class="stat-row"><span class="stat-label">賢さ</span><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div><span class="stat-val">最高</span></div>
+        <div class="stat-row"><span class="stat-label">記憶力</span><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div><span class="stat-val">100万字</span></div>
+        <div class="stat-row"><span class="stat-label">速さ</span><div class="bar-bg"><div class="bar-fill" style="width:25%"></div></div><span class="stat-val">かなり遅め</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <b>「賢さ」の違い</b>＝複雑な矛盾を見抜いたり、込み入った条件を整理する力の差。単純な質問ならどのモデルでもほぼ差が出えへん。<br><br>
+    <b>「記憶力」の違い</b>＝一度に読み込める文章量（＝長い会話・長いコードでも忘れにくいか）。Haikuだけ約20万字、他は約100万字までいける。<br><br>
+    <b>使い分けの目安</b>：普段の相談・作業はSonnet。設計判断で「これは複数のトレードオフが絡むな」と感じたらOpus。丸ごと長時間任せたい大作業だけFable、って感じ。
+  </div>
+
+  <div class="src">出典：Anthropic公式モデル概要・Sonnet 5発表ページ（2026年7月時点）</div>
+
+</body>
+</html>
