@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTG × ポケカ 違い早見表</title>
+<style>
+  :root{
+    --mtg:#5b3a8c; --mtg-bg:#f3eefa;
+    --poke:#c9a000; --poke-bg:#fff8e1;
+    --ink:#2a2a2a; --line:#e0ddd6; --soft:#7a7a7a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:16px;
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+    background:#faf8f3; color:var(--ink); line-height:1.6;
+    -webkit-text-size-adjust:100%;
+  }
+  h1{font-size:1.3rem; margin:0 0 4px;}
+  .sub{color:var(--soft); font-size:.82rem; margin:0 0 18px;}
+  .legend{display:flex; gap:14px; margin-bottom:14px; font-size:.8rem;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+  .dot.m{background:var(--mtg);} .dot.p{background:var(--poke);}
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    margin-bottom:14px; overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .topic{
+    background:#2a2a2a; color:#fff; padding:9px 14px;
+    font-weight:700; font-size:.92rem;
+  }
+  .row{display:flex; border-top:1px solid var(--line);}
+  .row:first-of-type{border-top:none;}
+  .side{flex:1; padding:11px 13px; font-size:.85rem;}
+  .side.m{background:var(--mtg-bg); border-right:1px solid var(--line);}
+  .side.p{background:var(--poke-bg);}
+  .side .lbl{
+    font-size:.68rem; font-weight:700; letter-spacing:.04em;
+    display:inline-block; padding:1px 7px; border-radius:99px; margin-bottom:5px;
+  }
+  .side.m .lbl{background:var(--mtg); color:#fff;}
+  .side.p .lbl{background:var(--poke); color:#fff;}
+
+  .note{
+    background:#fffdf5; border:1px dashed var(--poke);
+    border-radius:12px; padding:13px 15px; font-size:.83rem; margin-top:18px;
+  }
+  .note b{color:#a07c00;}
+  .tag{font-size:.74rem; color:var(--soft);}
+</style>
+</head>
+<body>
+
+<h1>🔮 MTG × ⚡ ポケカ 違い早見表</h1>
+<p class="sub">MTG経験者目線で「ここが違う」だけ並べたで（Jレギュ・2026年6月時点）</p>
+
+<div class="legend">
+  <span><i class="dot m"></i>MTG（君が慣れてる方）</span>
+  <span><i class="dot p"></i>ポケカ（始めたばかり）</span>
+</div>
+
+<div class="card">
+  <div class="topic">🎯 勝利条件</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>相手のライフを20→0に削る。1本道。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>サイド6枚を先に取り切る。気絶させた回数のレース。盤面有利でも取られたら負け。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">💧 マナ／エネルギー</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>土地を毎ターン1枚置ける。事故＝土地過多/過少。色マナ管理が肝。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>エネルギーは手札から<b>1ターン1枚</b>だけポケモンに「手貼り」。土地枠は無い。エネ自体がデッキ圧迫しつつ加速カードで補う。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">🃏 1ターンの土地/リソース</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>土地は場に残り蓄積。10ターン目は10マナ。リソースが伸びていく。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>エネは付け替えしにくく蓄積も遅い。<b>加速しないと盤面が間に合わない</b>。テンポゲーに近い。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">⚔️ ターン制とインタラクション</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>相手ターンにインスタント・打ち消しで割り込める。スタック有り。読み合いが密。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>基本<b>自分のターンしか動けない</b>。割り込み概念がほぼ無い。特性の常在効果で受ける。コントロール民が一番面食らうとこ。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">🔁 進化システム</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>該当概念なし。クリーチャーは出したら基本そのまま。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>たね→1進化→2進化と重ねて強化。進化ライン全部デッキに必要。立ち遅れると詰む。構築の主役。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">🪑 ベンチ（控え）</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>場に出てるクリーチャーは全部殴れる/殴られる。控えの概念なし。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>バトル場1体＋ベンチ最大5体。<b>戦うのはバトル場の1体だけ</b>。ベンチは育成・控え。相手はベンチも狙撃してくる。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">📜 手札補充エンジン</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>毎ターン1ドロー固定＋カードでドロー追加。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>自分ターンの最初に1枚＋<b>サポート（1ターン1枚制限）</b>で大量ドロー/サーチ。サポート枠の取り合いが構築の核。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">🗑️ 除去・対象操作</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>除去呪文が豊富。盤面を一方的に捌ける。あなたの好きなアグロ/ミッドの強み。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>ピンポイント除去は少なめ。基本は殴って気絶させる。「ボスの指令」でベンチを引きずり出して狙撃が定番ムーブ。</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="topic">🏆 今の環境感（Jレギュ）</div>
+  <div class="row">
+    <div class="side m"><span class="lbl">MTG</span>ミシック帯はメタが多様。ティア表が層になってる。</div>
+    <div class="side p"><span class="lbl">ポケカ</span>大会勝者の約6割が<b>ドラパルト</b>。草回復・ロケット団が追う。一強寄りでメタ読みしやすい。</div>
+  </div>
+</div>
+
+<div class="note">
+  <b>君の好み（ゴルガリミッド・白単アグロ）で言うと…</b><br>
+  ポケカで一番近い感覚は「たねポケモン主体の<b>低エネ・速攻アグロ</b>」や「殴り合いながらサイドレースを押し切るミッド型」。
+  逆にコントロール（妨害でロックして勝つ型）はポケカでは数も強さも限られるから、君の苦手分野がそのまま少ないのは追い風やで。
+  <br><br>
+  <span class="tag">MTGの「テンポ」「盤面アドバンテージ」の感覚はほぼ流用できる。ただし“相手ターンに何もできん”一点だけは思考のクセを切り替える必要あり。</span>
+</div>
+
+</body>
+</html>
