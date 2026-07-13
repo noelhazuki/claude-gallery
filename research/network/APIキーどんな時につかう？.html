@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APIキー、いる？いらない？</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+  :root{
+    --bg: #171b26;
+    --bg-soft: #1f2433;
+    --panel: #232939;
+    --gold: #d3a24a;
+    --blue: #6fa8c9;
+    --text: #eef1f5;
+    --text-dim: #a7afc0;
+    --line: #333c52;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    line-height: 1.8;
+    padding: 0 0 60px;
+  }
+
+  .wrap{max-width: 640px; margin: 0 auto; padding: 0 20px;}
+
+  header{
+    padding: 44px 20px 32px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(211,162,74,0.15), transparent 60%);
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  h1{
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 800;
+    font-size: clamp(26px, 7vw, 34px);
+    margin: 0 0 10px;
+    letter-spacing: 0.03em;
+  }
+  .sub{
+    color: var(--text-dim);
+    font-size: 14.5px;
+  }
+
+  section{margin-top: 44px;}
+  h2{
+    font-family: 'Shippori Mincho', serif;
+    font-size: 19px;
+    font-weight: 800;
+    margin: 0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h2::before{
+    content:"";
+    width:4px; height: 18px;
+    background: var(--gold);
+    display:inline-block;
+    border-radius: 2px;
+  }
+  p{ font-size: 15px; color: var(--text); margin: 0 0 14px;}
+  .dim{color: var(--text-dim);}
+
+  /* 店の見取り図 */
+  .shop{
+    position: relative;
+    margin: 20px 0 8px;
+    padding: 26px 18px 18px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .shop-label{
+    position:absolute; top:-11px; left:16px;
+    background: var(--gold);
+    color:#171b26;
+    font-size:11px;
+    font-weight:700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+  }
+  .doors{
+    display:flex;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .door{
+    flex:1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align:center;
+  }
+  .door .icon{ font-size: 30px; margin-bottom: 8px; display:block;}
+  .door .name{ font-weight:700; font-size:14px; margin-bottom:4px;}
+  .door .desc{ font-size:12.5px; color: var(--text-dim); line-height:1.6;}
+  .door.front{ border-color: rgba(111,168,201,0.5); }
+  .door.back{ border-color: rgba(211,162,74,0.5); }
+  .door.front .name{ color: var(--blue); }
+  .door.back .name{ color: var(--gold); }
+
+  .arrow{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 20px;
+    margin: 4px 0;
+  }
+
+  /* 比較カード */
+  .compare{
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--blue);
+    border-radius: 10px;
+    padding: 18px 18px;
+  }
+  .card.key{ border-left-color: var(--gold); }
+  .card .tag{
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display:inline-block;
+    margin-bottom: 10px;
+  }
+  .card .tag{ background: rgba(111,168,201,0.15); color: var(--blue); }
+  .card.key .tag{ background: rgba(211,162,74,0.15); color: var(--gold); }
+  .card ul{ margin: 10px 0 0; padding-left: 18px; }
+  .card li{ font-size: 14px; color: var(--text-dim); margin-bottom: 6px;}
+  .card li b{ color: var(--text); font-weight: 600;}
+
+  /* まとめ */
+  .rule{
+    background: linear-gradient(135deg, rgba(211,162,74,0.12), rgba(111,168,201,0.08));
+    border: 1px solid rgba(211,162,74,0.35);
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 8px;
+  }
+  .rule .q{
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .note{
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">API KEY OR NOT</div>
+    <h1>APIキー、<br>いる？いらない？</h1>
+    <div class="sub">「お店の入口」で考えたらわかりやすいで</div>
+  </header>
+
+  <section>
+    <h2>まず結論からいくで</h2>
+    <p>
+      APIキーは<b>「裏口の鍵」</b>やと思ったらええ。<br>
+      お店の<b>表からフロント係（お店の人）</b>に頼んで注文するときは鍵はいらん。<br>
+      でも<b>裏口から自分で厨房に直接入って</b>材料を取りに行くときは、鍵がないと入られへん。
+    </p>
+
+    <div class="shop">
+      <div class="shop-label">あるサービスのお店</div>
+      <div class="doors">
+        <div class="door front">
+          <span class="icon">🚪</span>
+          <div class="name">表口</div>
+          <div class="desc">フロント係（サービスの画面）が<br>代わりに厨房へ注文してくれる</div>
+        </div>
+        <div class="door back">
+          <span class="icon">🔑</span>
+          <div class="name">裏口</div>
+          <div class="desc">自分で厨房（サーバー）に<br>直接入って材料を取る</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>鍵が「いらん」パターン</h2>
+    <div class="compare">
+      <div class="card">
+        <span class="tag">表口を使ってるだけ</span>
+        <p style="margin-bottom:0;">
+          もう出来上がった<b>お店（Webサイトやアプリ）</b>を、ログインして使うだけの場合。
+        </p>
+        <ul>
+          <li><b>ChatGPTのサイト</b>でチャッピーと喋る</li>
+          <li><b>claude.ai</b>でワイ（クロウ）と作業する</li>
+          <li>ワイがアーティファクトの中で<b>Anthropicの機能</b>を使うとき（裏で会社側が鍵を持っとって、ハノイさんは触らんでええ仕組み）</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:14px; font-size:13.5px;">
+      → 「フロント係（サービス提供者）」が代わりに鍵を管理してくれとる。<br>
+      利用者はID・パスワードでログインするだけでOK。
+    </p>
+  </section>
+
+  <div class="arrow">▼</div>
+
+  <section style="margin-top:0;">
+    <h2>鍵が「いる」パターン</h2>
+    <div class="compare">
+      <div class="card key">
+        <span class="tag">裏口から直接アクセス</span>
+        <p style="margin-bottom:0;">
+          自分の<b>プログラム・アプリ</b>から、その会社のAPI（厨房）に<b>直接</b>リクエストを送る場合。
+        </p>
+        <ul>
+          <li>自作の<b>Reactアプリ</b>から、OpenAIやAnthropicのAPIに直接リクエストを送るコードを書くとき</li>
+          <li><b>Cloudflare Workers</b>から外部の天気APIやDB APIを呼び出すとき</li>
+          <li>ITディクショナリーポータルのような自作サービスが<b>裏で別のAPIと通信する</b>とき</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:14px; font-size:13.5px;">
+      → フロント係がおらんから、「これは私が注文してる客です」と証明する<b>鍵（APIキー）</b>を自分で持って提示せなあかん。
+    </p>
+  </section>
+
+  <section>
+    <div class="rule">
+      <div class="q">迷ったときの見分け方</div>
+      <p style="margin-bottom:0;">
+        <b>「今、画面の裏で誰が注文してる？」</b>を考えるとええで。<br><br>
+        ・<b>会社側のフロント係が注文してくれてる</b>（＝完成したサイトやアプリをそのまま使ってる）→ 鍵いらん<br><br>
+        ・<b>自分のコードが直接注文してる</b>（＝自分でAPIにリクエストを書いてる）→ 鍵いる
+      </p>
+    </div>
+  </section>
+
+  <div class="note">
+    ちなみに：ワイがアーティファクトの中でAnthropic APIを叩く機能は、ハノイさんから見たら「裏口を使こてるようで実は表口」な特殊ケースや。鍵はこっちで勝手に処理されるから、ハノイさんが鍵を用意する必要はないで。
+  </div>
+
+</div>
+</body>
+</html>

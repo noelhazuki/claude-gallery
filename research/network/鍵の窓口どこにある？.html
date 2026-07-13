@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鍵の窓口、どこに何本ある？</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+  :root{
+    --bg: #171b26;
+    --bg-soft: #1f2433;
+    --panel: #232939;
+    --gold: #d3a24a;
+    --blue: #6fa8c9;
+    --red: #c97a6d;
+    --text: #eef1f5;
+    --text-dim: #a7afc0;
+    --line: #333c52;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background: var(--bg); color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif; line-height: 1.8;
+    padding-bottom: 60px;
+  }
+  .wrap{max-width: 640px; margin:0 auto; padding: 0 20px;}
+  header{
+    padding: 40px 20px 28px; text-align:center;
+    border-bottom: 1px solid var(--line);
+    background: radial-gradient(ellipse at 50% -10%, rgba(211,162,74,0.15), transparent 60%);
+  }
+  .eyebrow{ font-size:12px; letter-spacing:.25em; color:var(--gold); margin-bottom:14px;}
+  h1{
+    font-family:'Shippori Mincho', serif; font-weight:800;
+    font-size: clamp(24px,7vw,32px); margin:0 0 10px;
+  }
+  .sub{ color:var(--text-dim); font-size:14px;}
+
+  section{margin-top:40px;}
+  h2{
+    font-family:'Shippori Mincho', serif; font-size:18px; font-weight:800;
+    margin:0 0 14px; display:flex; align-items:center; gap:10px;
+  }
+  h2::before{content:""; width:4px; height:18px; background:var(--gold); border-radius:2px;}
+  p{font-size:15px; margin:0 0 12px;}
+  .dim{color:var(--text-dim); font-size:13.5px;}
+
+  /* 窓口が3つ並ぶ図 */
+  .windows{ display:flex; flex-direction:column; gap:14px; margin-top:16px;}
+  .window{
+    background: var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding: 16px 16px; position:relative; padding-left: 20px;
+  }
+  .window::before{
+    content:""; position:absolute; left:0; top:14px; bottom:14px; width:4px;
+    border-radius:3px;
+  }
+  .window.w1::before{ background: var(--gold); }
+  .window.w2::before{ background: var(--blue); }
+  .window.w3::before{ background: var(--red); }
+  .window .name{ font-weight:700; font-size:15px; margin-bottom:4px;}
+  .window .desc{ font-size:13px; color:var(--text-dim);}
+  .window .keyid{
+    display:inline-block; margin-top:8px; font-size:12px;
+    background: rgba(255,255,255,0.06); padding:3px 10px; border-radius:20px;
+    color: var(--text);
+  }
+
+  /* 鍵の一生（3ステップ） */
+  .steps{ display:flex; flex-direction:column; gap:0; margin-top:18px;}
+  .step{
+    display:flex; gap:14px; padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .step:last-child{ border-bottom:none; }
+  .step .num{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%;
+    background: rgba(211,162,74,0.15); color:var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho',serif; font-weight:800; font-size:15px;
+  }
+  .step .body b{ display:block; font-size:15px; margin-bottom:4px;}
+  .step .body span{ font-size:13.5px; color:var(--text-dim);}
+
+  /* NG / OK */
+  .ngok{ display:flex; gap:12px; margin-top:16px;}
+  .box{
+    flex:1; border-radius:10px; padding:14px; font-size:13px;
+  }
+  .box.ng{ background: rgba(201,122,109,0.12); border:1px solid rgba(201,122,109,0.4);}
+  .box.ok{ background: rgba(111,168,201,0.12); border:1px solid rgba(111,168,201,0.4);}
+  .box .label{ font-weight:700; margin-bottom:6px; }
+  .box.ng .label{ color: var(--red);}
+  .box.ok .label{ color: var(--blue);}
+
+  /* 実例 */
+  .example{
+    background: linear-gradient(135deg, rgba(211,162,74,0.1), rgba(111,168,201,0.06));
+    border:1px solid rgba(211,162,74,0.3); border-radius:14px; padding:20px; margin-top:10px;
+  }
+  .example .q{ font-family:'Shippori Mincho',serif; font-weight:800; color:var(--gold); font-size:15px; margin-bottom:10px;}
+  .flow{ display:flex; flex-direction:column; gap:8px; font-size:14px;}
+  .flow .row{ display:flex; align-items:center; gap:8px;}
+  .flow .arrow{ color: var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">WHERE DO KEYS LIVE</div>
+    <h1>鍵の窓口、<br>どこに何本ある？</h1>
+    <div class="sub">窓口＝会社ごと。鍵は1本ずつ別物やで</div>
+  </header>
+
+  <section>
+    <h2>窓口は「会社の数」だけある</h2>
+    <p>
+      前の図の「裏口の鍵」、実は<b>お店（会社）ごとに全部別の鍵</b>や。<br>
+      Anthropicの裏口の鍵でBoxの裏口は開かへんし、逆もそう。<br>
+      ハノイさんが実際に触ってる範囲やとこんな感じ↓
+    </p>
+    <div class="windows">
+      <div class="window w1">
+        <div class="name">🔑 Anthropicの窓口</div>
+        <div class="desc">Claude API（アーティファクト内のClaudeception機能など）</div>
+      </div>
+      <div class="window w2">
+        <div class="name">🔑 Boxの窓口</div>
+        <div class="desc">ITディクショナリーポータルがBoxのHTMLを自動取得する時に使う</div>
+      </div>
+      <div class="window w3">
+        <div class="name">🔑 Cloudflareの窓口</div>
+        <div class="desc">Workersを動かしたりKVを読み書きしたりする時の鍵</div>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:14px;">
+      それぞれの窓口（＝各社の管理画面）で「発行してください」と申請して、その会社専用の鍵を1本もらう。
+    </p>
+  </section>
+
+  <section>
+    <h2>鍵の一生、3ステップ</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>発行する</b>
+          <span>各社の「管理画面（ダッシュボード）」で申請して1本もらう。ここが窓口。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>金庫にしまう</b>
+          <span>コードの中に直接書かず、Cloudflareなら「環境変数／Secrets」という金庫に保管する。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>裏側のコードだけが使う</b>
+          <span>サーバー側（Workersなど）のコードが金庫から取り出して使う。ブラウザ側には絶対に出さへん。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>誰が使う？のルール</h2>
+    <div class="ngok">
+      <div class="box ng">
+        <div class="label">✕ NG</div>
+        フロントエンド（Reactの画面側のコードやlocalStorage周り）に鍵を直接書く。誰でも画面のソースを見たら盗める。
+      </div>
+      <div class="box ok">
+        <div class="label">◯ OK</div>
+        サーバー側（Cloudflare Workersのコードや環境変数）にだけ鍵を置いて、画面側からは「結果だけ」もらう。
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="example">
+      <div class="q">ITディクショナリーポータルで当てはめると</div>
+      <div class="flow">
+        <div class="row">📄 <b>Box窓口</b>で鍵を発行</div>
+        <div class="row arrow">↓</div>
+        <div class="row">🔒 Cloudflareの<b>環境変数（金庫）</b>に保管</div>
+        <div class="row arrow">↓</div>
+        <div class="row">⚙️ <b>Workersのコード（裏側）</b>だけが金庫から出して使う</div>
+        <div class="row arrow">↓</div>
+        <div class="row">🌐 ユーザーが見る画面には鍵は一切出てこない</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13px; color:var(--text-dim);">
+    ざっくりまとめると：窓口＝会社の数だけあって、鍵は会社ごとに別物。もらった鍵は画面には出さず、裏側の金庫（環境変数）に隠しといて、裏側のコードだけがこっそり使う、っていうのが基本の型やで。
+  </div>
+
+</div>
+</body>
+</html>
