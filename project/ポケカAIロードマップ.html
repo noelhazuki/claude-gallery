@@ -5,191 +5,305 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RES-008 ロードマップ</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-    background: radial-gradient(ellipse at top, #1b1030 0%, #0a0716 60%, #05040c 100%);
-    color: #eae6f5;
-    padding: 28px 16px 60px;
-    min-height: 100vh;
+  :root {
+    --done: #3f9142;
+    --done-bg: #e8f5e9;
+    --now: #e0592a;
+    --now-bg: #fff1e8;
+    --todo: #8b8b95;
+    --todo-bg: #f4f4f6;
+    --line: #d8d8de;
+    --card-bg: #ffffff;
+    --paper: #f7f6f2;
   }
-  header { text-align: center; margin-bottom: 30px; }
-  header .badge {
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: var(--paper);
+    color: #2c2c33;
+    padding: 24px 14px 60px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .header .badge {
     display: inline-block;
     font-size: 11px;
-    letter-spacing: 2px;
-    color: #c9a6ff;
-    border: 1px solid #6a4fae;
-    border-radius: 20px;
-    padding: 3px 12px;
+    letter-spacing: 0.08em;
+    background: #2c2c33;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
     margin-bottom: 10px;
   }
-  header h1 { font-size: 19px; font-weight: 700; }
-  header p { font-size: 12px; color: #9a8fc0; margin-top: 4px; }
+  .header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  .header p {
+    font-size: 12px;
+    color: #6b6b76;
+    margin: 0 0 20px;
+  }
 
-  .path {
+  .stage-group {
     position: relative;
-    max-width: 420px;
-    margin: 0 auto;
+    margin-bottom: 6px;
+  }
+  .stage-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #9a9aa4;
+    letter-spacing: 0.1em;
+    margin: 26px 4px 10px;
+  }
+
+  .track {
+    position: relative;
     padding-left: 26px;
   }
-  .path::before {
+  .track::before {
     content: "";
     position: absolute;
-    left: 9px;
+    left: 10px;
     top: 6px;
     bottom: 6px;
     width: 3px;
-    background: linear-gradient(to bottom, #ffd76a 0%, #ffd76a var(--doneratio, 55%), #3a3358 var(--doneratio, 55%), #3a3358 100%);
+    background: var(--line);
     border-radius: 3px;
   }
 
-  .step {
+  .node {
     position: relative;
-    margin-bottom: 22px;
-    padding: 14px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
     border-radius: 12px;
-    background: #171029;
-    border: 1px solid #352a55;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
-  .step::before {
+  .node::before {
     content: "";
     position: absolute;
-    left: -26px;
-    top: 18px;
-    width: 16px;
-    height: 16px;
+    left: -22px;
+    top: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    background: #3a3358;
-    border: 3px solid #0a0716;
+    background: var(--todo);
+    border: 3px solid var(--paper);
+    box-shadow: 0 0 0 2px var(--line);
   }
-  .step.done { border-color: #4a3f78; opacity: 0.72; }
-  .step.done::before { background: #ffd76a; box-shadow: 0 0 6px #ffd76a; }
-  .step.now {
-    border-color: #ff9ecf;
-    box-shadow: 0 0 0 1px #ff9ecf55, 0 0 18px #ff5fae33;
-    background: #201232;
+  .node.done { background: var(--done-bg); border-color: #bfe0c1; }
+  .node.done::before { background: var(--done); box-shadow: 0 0 0 2px #bfe0c1; }
+  .node.now { background: var(--now-bg); border-color: #f3c3a6; }
+  .node.now::before {
+    background: var(--now);
+    box-shadow: 0 0 0 2px #f3c3a6;
+    animation: pulse 1.8s infinite;
   }
-  .step.now::before {
-    background: #ff5fae;
-    box-shadow: 0 0 10px #ff5fae, 0 0 0 4px #ff5fae33;
-  }
-  .step.todo::before { background: #2a2444; }
+  .node.todo { background: var(--todo-bg); }
 
-  .step .tag {
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 2px #f3c3a6; }
+    50% { box-shadow: 0 0 0 6px #fbd9c3; }
+    100% { box-shadow: 0 0 0 2px #f3c3a6; }
+  }
+
+  .node-title {
+    font-size: 13.5px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .node.done .node-title { color: #2b6e2e; }
+  .node.now .node-title { color: #b5451a; }
+  .node.todo .node-title { color: #5c5c66; }
+
+  .tag {
+    font-size: 9.5px;
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-weight: normal;
+  }
+  .node.done .tag { background: var(--done); color: #fff; }
+  .node.now .tag { background: var(--now); color: #fff; }
+  .node.todo .tag { background: #c6c6ce; color: #fff; }
+
+  .node-desc {
+    font-size: 11.5px;
+    color: #55555f;
+    line-height: 1.5;
+  }
+
+  .now-panel {
+    margin: 22px 0 8px;
+    background: #2c2c33;
+    color: #fff;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .now-panel .label {
     font-size: 10px;
-    letter-spacing: 1px;
-    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #f3a878;
+    margin-bottom: 6px;
   }
-  .step.done .tag { color: #ffd76a; }
-  .step.now .tag { color: #ff9ecf; }
-  .step.todo .tag { color: #6e6590; }
-
-  .step h2 { font-size: 14px; margin-top: 4px; }
-  .step.todo h2 { color: #a89fc8; }
-  .step p.note { font-size: 11.5px; color: #a79cc8; margin-top: 4px; line-height: 1.5; }
-  .step.todo p.note { color: #736a94; }
-
-  .section-label {
-    max-width: 420px;
-    margin: 0 auto 12px;
-    padding-left: 26px;
-    font-size: 11px;
-    color: #7d72a3;
-    letter-spacing: 1px;
-    margin-top: 26px;
+  .now-panel .title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 8px;
   }
-  .section-label:first-of-type { margin-top: 0; }
-
-  footer {
-    text-align: center;
-    font-size: 11px;
-    color: #6e6590;
-    margin-top: 30px;
+  .now-panel ol {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.9;
+    color: #e4e4ea;
   }
+  .now-panel ol li::marker {
+    color: #f3a878;
+    font-weight: bold;
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 22px 0 4px;
+    font-size: 10.5px;
+    color: #6b6b76;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+  }
+  .dot.done { background: var(--done); }
+  .dot.now { background: var(--now); }
+  .dot.todo { background: var(--todo); }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
-  <h1>バトルロード進捗マップ</h1>
-  <p>2026-07-14時点</p>
-</header>
+<div class="header">
+  <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
+  <h1>進化ロードマップ</h1>
+  <p>2026-07-14 時点</p>
+</div>
 
-<div class="section-label">▸ とおってきた道</div>
-<div class="path">
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>Worker + KV インフラ構築</h2>
-    <p class="note">pokeca-ai-worker稼働・KV接続確認済み</p>
-  </div>
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>TCGdex接続・SV28セット取得</h2>
-    <p class="note">sets:standard / set:SV* をKVに格納完了</p>
-  </div>
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>register_meta / register_mine 実装</h2>
-    <p class="note">CORS対応込みで動作確認済み</p>
-  </div>
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>list_meta / list_mine 実装</h2>
-    <p class="note">一覧取得エンドポイント動作確認済み</p>
-  </div>
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>cardList構造の再設計・確定</h2>
-    <p class="note">cardId一次識別子・{cardId,count}形式・cardRuleOverrides分離方針</p>
-  </div>
-  <div class="step done">
-    <div class="tag">DONE</div>
-    <h2>register_meta/mine 新スキーマ対応</h2>
-    <p class="note">cardList検証ロジック実装・正常系/異常系ともテスト確認済み</p>
+<div class="legend">
+  <span><i class="dot done"></i>完了</span>
+  <span><i class="dot now"></i>現在地</span>
+  <span><i class="dot todo"></i>未着手</span>
+</div>
+
+<div class="stage-group">
+  <div class="stage-label">STAGE 1 ・ たまご期（基盤構築）</div>
+  <div class="track">
+    <div class="node done">
+      <div class="node-title">Worker / KV 稼働開始 <span class="tag">完了</span></div>
+      <div class="node-desc">pokeca-ai-worker と pokeca-ai-kv を構築。GitHub連携で自動デプロイパイプラインも構築済み。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">register / list エンドポイント <span class="tag">完了</span></div>
+      <div class="node-desc">register_meta・register_mine・list_meta・list_mineを実装。KVスキーマ（deck:meta:* / deck:mine:*）確定。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">HTMLテストツール <span class="tag">完了</span></div>
+      <div class="node-desc">register_meta_test.htmlでmeta/mine登録トグル＋一覧表示を確認できる状態。</div>
+    </div>
   </div>
 </div>
 
-<div class="section-label">▸ 今ここ</div>
-<div class="path" style="--doneratio: 0%;">
-  <div class="step now">
-    <div class="tag">NOW</div>
-    <h2>card:{cardId} 実データ投入方法の設計</h2>
-    <p class="note">set:SV*から都度引くか、専用キーに複製するか検討中</p>
+<div class="stage-group">
+  <div class="stage-label">STAGE 2 ・ 1進化（デッキ管理まわり強化）</div>
+  <div class="track">
+    <div class="node done">
+      <div class="node-title">エンドポイント構成の再設計 <span class="tag">完了</span></div>
+      <div class="node-desc">「更新エンドポイントが無い」問題を専用セッションで検討。meta＝register/delete/listのみ、mine＝register/update/unlock/copy/listに確定。ロック機構・二重バックアップ方針も決定。</div>
+    </div>
+    <div class="node now">
+      <div class="node-title">エンドポイント実装 <span class="tag">現在地</span></div>
+      <div class="node-desc">delete_meta / update_mine / unlock_mine / copy_mineをworker.jsに実装するフェーズ。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">update_mine マージロジック <span class="tag">未着手</span></div>
+      <div class="node-desc">「読み込み→マージ→書き戻し」の実装とテスト。concernの空文字クリアと未送信保持の区別を丁寧に設計。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">KVキー命名規則の確定 <span class="tag">未着手</span></div>
+      <div class="node-desc">バックアップキー（deck:mine:backup:{id}的な形）を含めて命名ルールを確定。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">バックアップ保存ボタン <span class="tag">未着手</span></div>
+      <div class="node-desc">HTMLツールにlist_mine結果をローカルJSON保存するボタンを追加。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">deckCode＋一覧画面分岐 <span class="tag">未着手</span></div>
+      <div class="node-desc">deckCodeフィールド追加、一覧画面の画像あり/プレースホルダー分岐を実装。</div>
+    </div>
   </div>
 </div>
 
-<div class="section-label">▸ この先の道</div>
-<div class="path" style="--doneratio: 0%;">
-  <div class="step todo">
-    <div class="tag">TODO</div>
-    <h2>card:{cardId} 実装</h2>
-    <p class="note">カード表示用データの実取得・KV投入</p>
-  </div>
-  <div class="step todo">
-    <div class="tag">TODO</div>
-    <h2>cardRuleOverrides 初期データ作成</h2>
-    <p class="note">かがやくポケモン・ACE SPEC・ペア専用カード等の例外登録</p>
-  </div>
-  <div class="step todo">
-    <div class="tag">TODO</div>
-    <h2>既存テストデータの新形式移行</h2>
-    <p class="note">test / test2 / dora03</p>
-  </div>
-  <div class="step todo">
-    <div class="tag">TODO</div>
-    <h2>デッキ一覧表示（HTML）作り直し</h2>
-    <p class="note">画像・詳細データ込みの表示に対応</p>
-  </div>
-  <div class="step todo">
-    <div class="tag">TODO</div>
-    <h2>?ask エンドポイント実装</h2>
-    <p class="note">Claude API連携によるAIアドバイス機能</p>
+<div class="stage-group">
+  <div class="stage-label">STAGE 3 ・ 2進化（カードデータ構造化）</div>
+  <div class="track">
+    <div class="node todo">
+      <div class="node-title">cardList構造の再設計 <span class="tag">未着手</span></div>
+      <div class="node-desc">カード名テキストのみ→TCGdex形式cardID対応へ。専用セッション予定の大物課題。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">cardRuleOverrides初期データ <span class="tag">未着手</span></div>
+      <div class="node-desc">かがやくゲッコウガ・ACE SPEC・ストームエメラルダ等、既知の例外ルール登録。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">既存テストデータ移行 <span class="tag">未着手</span></div>
+      <div class="node-desc">test / test2 / dora03を新cardList形式へ移行する方針決め。</div>
+    </div>
   </div>
 </div>
 
-<footer>PROJECT_STATE.md基準・計画は変わりうるで</footer>
+<div class="stage-group">
+  <div class="stage-label">STAGE 4 ・ 完全体（AIアドバイス機能）</div>
+  <div class="track">
+    <div class="node todo">
+      <div class="node-title">?ask エンドポイント <span class="tag">未着手</span></div>
+      <div class="node-desc">Claude API呼び出しによるAIアドバイス機能。デッキ構築・対戦戦略・メタ分析の相談カテゴリ設計含む。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">カード画像・詳細データ表示 <span class="tag">未着手</span></div>
+      <div class="node-desc">cardList構造化後、TCGdex経由で画像・エネルギーコスト・にげる・特性等を表示。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">購入サポート機能 再開 <span class="tag">未着手</span></div>
+      <div class="node-desc">目標デッキの不足カード特定Worker。カード画像取得問題の解決待ちで中断中（ideas.md記録済み）。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">pokeka2 Worker統合検討 <span class="tag">未着手</span></div>
+      <div class="node-desc">公式デッキコード→カードJSON変換Workerを、register_metaの入力フローに統合するか検討。</div>
+    </div>
+  </div>
+</div>
+
+<div class="now-panel">
+  <div class="label">NEXT ACTION</div>
+  <div class="title">エンドポイント実装、ここから着手</div>
+  <ol>
+    <li>delete_meta / update_mine / unlock_mine / copy_mineのコード実装</li>
+    <li>update_mineのマージロジック実装＋テスト</li>
+    <li>KVキー命名規則の確定</li>
+    <li>HTMLツールにバックアップ保存ボタン追加</li>
+    <li>deckCodeフィールド＋一覧画面分岐の実装</li>
+  </ol>
+</div>
 
 </body>
 </html>
