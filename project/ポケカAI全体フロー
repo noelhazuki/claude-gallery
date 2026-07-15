@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokeca-ai 全体フロー俯瞰図</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg: #12161f;
+    --panel: #1a2030;
+    --panel-2: #212840;
+    --line: #313a52;
+    --ink: #eef0f6;
+    --ink-dim: #9aa3bd;
+    --grass: #6fbf73;
+    --fire: #ef7b52;
+    --water: #4fa3d9;
+    --electric: #ecd15f;
+    --psychic: #c084d9;
+    --done: #6fbf73;
+    --progress: #ecd15f;
+    --planned: #52607f;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 16px 80px;
+  }
+
+  .wrap{max-width: 760px; margin: 0 auto;}
+
+  header{margin-bottom: 40px;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--electric);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1{
+    font-size: clamp(26px, 6vw, 34px);
+    font-weight: 900;
+    margin: 0 0 8px;
+    line-height: 1.25;
+  }
+  .sub{
+    color: var(--ink-dim);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .legend{
+    display:flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 24px 0 44px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-family:'JetBrains Mono', monospace;
+  }
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .dot.done{background:var(--done);}
+  .dot.progress{background:var(--progress);}
+  .dot.planned{background:var(--planned);}
+
+  .flow{position:relative; padding-left: 28px;}
+  .flow::before{
+    content:'';
+    position:absolute;
+    left: 9px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--grass), var(--fire), var(--water), var(--electric), var(--psychic));
+    opacity: 0.5;
+  }
+
+  .stage{
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .stage-marker{
+    position: absolute;
+    left: -28px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .stage-marker.done{border-color: var(--done);}
+  .stage-marker.progress{border-color: var(--progress);}
+  .stage-marker.planned{border-color: var(--planned); border-style: dashed;}
+  .stage-marker .dot{width:8px; height:8px;}
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width: 3px;
+  }
+  .stage.set-load .card::before{background: var(--grass);}
+  .stage.regist .card::before{background: var(--fire);}
+  .stage.regu .card::before{background: var(--water);}
+  .stage.ask .card::before{background: var(--psychic);}
+
+  .stage-head{
+    display:flex;
+    align-items:baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .stage-num{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+  .stage-title{
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .status-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+  .status-tag.done{color: var(--done); border-color: var(--done);}
+  .status-tag.progress{color: var(--progress); border-color: var(--progress);}
+  .status-tag.planned{color: var(--planned); border-color: var(--planned);}
+
+  .stage-desc{
+    font-size: 13.5px;
+    color: var(--ink-dim);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .steps{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .step{
+    display:flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 8px 10px;
+    background: var(--panel-2);
+    border-radius: 6px;
+  }
+  .step-n{
+    font-family:'JetBrains Mono', monospace;
+    color: var(--ink-dim);
+    flex-shrink: 0;
+  }
+  .step.focus{
+    outline: 1px dashed var(--progress);
+    outline-offset: -1px;
+  }
+
+  .kv-tags{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .kv-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    padding: 3px 7px;
+    border-radius: 4px;
+  }
+
+  .focus-note{
+    margin-top: 40px;
+    background: linear-gradient(135deg, rgba(236,209,95,0.12), rgba(236,209,95,0.02));
+    border: 1px solid rgba(236,209,95,0.35);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .focus-note .stage-num{color: var(--electric);}
+  .focus-note p{
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.8;
+    margin: 8px 0 0;
+  }
+  .focus-note p b{color: var(--electric); font-weight: 700;}
+
+  footer{
+    margin-top: 48px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-align: center;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 480px){
+    body{padding: 24px 12px 60px;}
+    .card{padding: 15px 16px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">RES-008 / pokeca-ai</div>
+    <h1>プロジェクト全体フロー<br>俯瞰図</h1>
+    <div class="sub">新弾ロードからAI相談まで、①〜③がどう繋がっているかの位置関係。今回は②の設計に入る前の整理として作成（2026-07-15）。</div>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot done"></i>設計確定 / 実装済み</span>
+    <span><i class="dot progress"></i>検討中（今ここ）</span>
+    <span><i class="dot planned"></i>未着手</span>
+  </div>
+
+  <div class="flow">
+
+    <div class="stage set-load">
+      <div class="stage-marker done"><span class="dot done"></span></div>
+      <div class="card">
+        <div class="stage-head">
+          <div>
+            <div class="stage-num">STAGE 1</div>
+            <div class="stage-title">① 新弾ロード運用</div>
+          </div>
+          <div class="status-tag done">設計確定・未実装</div>
+        </div>
+        <div class="stage-desc">新弾発売のたびに、TCGdexのカードデータをKVへ取り込むまでの運用フロー。</div>
+        <div class="steps">
+          <div class="step"><span class="step-n">1</span><span>Googleカレンダーの発売日リマインダーで気づく</span></div>
+          <div class="step"><span class="step-n">2</span><span>Worker経由でTCGdexに該当セットが登録済みか確認（仮称 ?check_set=true）</span></div>
+          <div class="step"><span class="step-n">3</span><span>登録済みならKVへ取り込む（未登録なら数日後に手動再確認）</span></div>
+          <div class="step"><span class="step-n">4</span><span>公式レギュレーションページの差分を確認</span></div>
+          <div class="step"><span class="step-n">5</span><span>特殊カード（合算ギミック等）に気づいたらideas.mdへメモ</span></div>
+        </div>
+        <div class="kv-tags">
+          <span class="kv-tag">set:SV*</span>
+          <span class="kv-tag">card:{cardId}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage regist">
+      <div class="stage-marker progress"><span class="dot progress"></span></div>
+      <div class="card">
+        <div class="stage-head">
+          <div>
+            <div class="stage-num">STAGE 2</div>
+            <div class="stage-title">② デッキ登録フロー</div>
+          </div>
+          <div class="status-tag progress">検討中</div>
+        </div>
+        <div class="stage-desc">①で取り込んだカードデータを使って、meta/mineデッキを登録する既存フロー。ここに基本ルール層・例外レイヤー層（③の判定ロジック）をどう組み込むかが論点。</div>
+        <div class="steps">
+          <div class="step"><span class="step-n">-</span><span>register_meta / register_mine（cardId + count でcardList入力）</span></div>
+          <div class="step focus"><span class="step-n">?</span><span>ここに③のレギュ判定・cardRuleOverridesの枚数チェックをどう挟むか ← 今の論点</span></div>
+          <div class="step"><span class="step-n">-</span><span>update_mine / copy_mine / delete_meta 等の周辺操作</span></div>
+        </div>
+        <div class="kv-tags">
+          <span class="kv-tag">deck:meta:{id}</span>
+          <span class="kv-tag">deck:mine:{id}</span>
+          <span class="kv-tag">cardRuleOverrides</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage regu">
+      <div class="stage-marker done"><span class="dot done"></span></div>
+      <div class="card">
+        <div class="stage-head">
+          <div>
+            <div class="stage-num">STAGE 3</div>
+            <div class="stage-title">③ レギュチェック（判定ルール）</div>
+          </div>
+          <div class="status-tag done">基礎ルール確定・実装はまだ</div>
+        </div>
+        <div class="stage-desc">②のどこかで呼び出される「このカード編成は合法か」の判定ロジック本体。②から独立した1つの判定エンジンとして位置づけ。</div>
+        <div class="steps">
+          <div class="step"><span class="step-n">-</span><span>デフォルト：cardId＋レギュレーションマークで判定</span></div>
+          <div class="step"><span class="step-n">-</span><span>基本エネルギーは常時合法（マーク対象外）</span></div>
+          <div class="step"><span class="step-n">-</span><span>公式ホワイトリスト（約35件）による名前ベース救済</span></div>
+        </div>
+        <div class="kv-tags">
+          <span class="kv-tag">regulation:{id}:legalNameWhitelist（未設計）</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage ask">
+      <div class="stage-marker planned"><span class="dot" style="background:var(--planned);"></span></div>
+      <div class="card">
+        <div class="stage-head">
+          <div>
+            <div class="stage-num">STAGE 4</div>
+            <div class="stage-title">AI相談（?ask）</div>
+          </div>
+          <div class="status-tag planned">未着手</div>
+        </div>
+        <div class="stage-desc">①〜③で整った合法・最新のカードデータをもとに、Claude APIがデッキ相談・対面分析・シナジー探索に答える最終出口。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="focus-note">
+    <div class="stage-num">今回の論点</div>
+    <p><b>②の中で③（レギュ判定）と、cardRuleOverrides（枚数例外）を、どのタイミング・どの層で呼ぶか。</b><br>
+    候補は「register時に検証」「?ask時に都度検証」「両方」の3パターン。次はここを個別フローとして掘り下げる。</p>
+  </div>
+
+  <footer>pokeca-ai / RES-008 &nbsp;·&nbsp; 2026-07-15 作成</footer>
+
+</div>
+</body>
+</html>
