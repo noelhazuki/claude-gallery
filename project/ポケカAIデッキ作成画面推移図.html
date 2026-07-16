@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>候補確定UI - 全体フロー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --surface: #FDFAF9;
+    --accent: #D9473D;
+    --accent-soft: #FCE9E7;
+    --accent-deep: #B3352C;
+    --ink: #2B2624;
+    --ink-sub: #8A817D;
+    --line: #F0E7E4;
+    --focus-bg: #FFF9F0;
+    --focus-line: #E8B84B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #EDEAE8;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--ink);
+    padding: 32px 16px 60px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: var(--ink-sub);
+    font-size: 13px;
+    margin: 0 0 28px;
+  }
+
+  .flow { display: flex; flex-direction: column; }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 8px rgba(43,38,36,0.04);
+    position: relative;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--ink-sub);
+  }
+  .step-body { flex: 1; min-width: 0; }
+  .step-title {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    margin-bottom: 4px;
+  }
+  .step-desc {
+    font-size: 12.5px;
+    color: var(--ink-sub);
+    line-height: 1.6;
+  }
+  .screen-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+    padding: 2px 9px;
+    border-radius: 999px;
+  }
+
+  .connector {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+  }
+  .connector svg { width: 16px; height: 22px; }
+
+  /* フォーカスステップ（3番） */
+  .step.focus {
+    background: var(--focus-bg);
+    border: 1.5px solid var(--focus-line);
+    box-shadow: 0 4px 14px rgba(232,184,75,0.25);
+  }
+  .step.focus .step-num {
+    background: var(--focus-line);
+    border-color: var(--focus-line);
+    color: #fff;
+  }
+  .focus-badge {
+    position: absolute;
+    top: -11px;
+    right: 14px;
+    background: var(--focus-line);
+    color: #fff;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(232,184,75,0.4);
+  }
+
+  /* ステップ3内の分岐イメージ */
+  .branch {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .branch-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 11.5px;
+  }
+  .branch-row .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot.multi { background: var(--focus-line); }
+  .dot.none { background: var(--ink-sub); }
+  .branch-row .label {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .branch-row .note {
+    color: var(--ink-sub);
+  }
+
+  /* 未着手メモ */
+  .todo-note {
+    margin-top: 30px;
+    background: var(--bg);
+    border: 1px dashed var(--ink-sub);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 12.5px;
+    color: var(--ink-sub);
+    line-height: 1.7;
+  }
+  .todo-note strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>デッキ作成 〜 確定までの流れ</h1>
+  <p class="subtitle">候補確定UI（ステップ3）が全体のどこに挟まるかの整理</p>
+
+  <div class="flow">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">カード名を入力していく</div>
+        <div class="step-desc">デッキ作成画面で、カード名をポチポチ打ち込んでcardListを組み立てる。</div>
+        <span class="screen-tag">デッキ作成画面</span>
+      </div>
+    </div>
+
+    <div class="connector"><svg viewBox="0 0 16 22"><path d="M8 0v18M2 14l6 6 6-6" stroke="#B3352C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">保存しようとすると変換が走る</div>
+        <div class="step-desc">入力し終えて保存操作をしたタイミングで、pokeka2が名前→cardIdの解決を試みる（裏側の処理・画面遷移なし）。</div>
+        <span class="screen-tag">裏側処理</span>
+      </div>
+    </div>
+
+    <div class="connector"><svg viewBox="0 0 16 22"><path d="M8 0v18M2 14l6 6 6-6" stroke="#B3352C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="step focus">
+      <div class="focus-badge">今日ここ決める</div>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">候補確定画面（割り込み）</div>
+        <div class="step-desc">名前が複数弾・複数マークにまたがるカードだけ、この画面に引っかかる。全カードに出るわけではない。</div>
+        <span class="screen-tag">候補確定UI（新規）</span>
+        <div class="branch">
+          <div class="branch-row">
+            <div class="dot multi"></div>
+            <span class="label">候補が複数</span>
+            <span class="note">→「カード名（レギュマーク・弾名）」の並びで一覧提示、本人が1つ選ぶ</span>
+          </div>
+          <div class="branch-row">
+            <div class="dot none"></div>
+            <span class="label">候補がゼロ</span>
+            <span class="note">→ 理由問わず「該当なし」表示のみ（選ぶアクションなし）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><svg viewBox="0 0 16 22"><path d="M8 0v18M2 14l6 6 6-6" stroke="#B3352C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">選び終わったものを反映</div>
+        <div class="step-desc">複数候補から選んだcardId、該当なしのまま残したもの、両方を確認できる状態にする。</div>
+        <span class="screen-tag">候補確定UI（新規）</span>
+      </div>
+    </div>
+
+    <div class="connector"><svg viewBox="0 0 16 22"><path d="M8 0v18M2 14l6 6 6-6" stroke="#B3352C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">デッキ保存</div>
+        <div class="step-desc">確定した内容でregister_mine / register_metaに保存される。</div>
+        <span class="screen-tag">デッキ作成画面 → 一覧へ</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="todo-note">
+    <strong>今日決めたい2点（ステップ3の中身）</strong><br>
+    ① 一覧のどこに「未確定」マークを出すか（デッキ作成画面のカードリスト上？別セクション？）<br>
+    ② タップした時にどう見せるか（その場で展開？別モーダル・別画面？）
+  </div>
+
+</div>
+</body>
+</html>
