@@ -26,6 +26,19 @@
   header h1 { font-size: 18px; }
   header p { font-size: 12px; color: #9a8fc0; margin-top: 4px; }
 
+  .update-note {
+    max-width: 480px;
+    margin: 0 auto 22px;
+    background: #241a3f;
+    border: 1px solid #4a3a78;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #cbb8ec;
+    line-height: 1.6;
+  }
+  .update-note b { color: #ffd76a; }
+
   .group { max-width: 480px; margin: 0 auto 26px; }
   .group h2 {
     font-size: 13px;
@@ -66,10 +79,15 @@
     white-space: nowrap;
   }
   td.desc { color: #cfc6e8; line-height: 1.5; }
-  td.status {
-    font-size: 10px;
-    color: #ff8f8f;
+  .status {
+    display: inline-block;
+    font-size: 9.5px;
+    padding: 1px 6px;
+    border-radius: 5px;
+    margin-top: 4px;
   }
+  .status.done { background: #2f5c34; color: #b6e6bb; }
+  .status.todo { background: #5c2e2e; color: #ffb3b3; }
   footer {
     text-align: center;
     font-size: 11px;
@@ -83,8 +101,12 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-14時点</p>
+  <p>2026-07-18時点（実コード確認済み）</p>
 </header>
+
+<div class="update-note">
+  <b>今回の更新メモ：</b>GitHubのindex.jsを直接確認。card:{cardId}・set:{setId}は実装済みと判明（前回は未実装扱いやった）。一方cardRuleOverrides・countGroup・maxCountは未実装のままで、レギュ判定は別方式（legalMarks＋legalNameWhitelist）で動いてた。
+</div>
 
 <div class="group">
   <h2>デッキの中身に関わるやつ</h2>
@@ -92,15 +114,19 @@
     <tr><th>用語</th><td class="desc">意味</td></tr>
     <tr>
       <td class="term">cardId</td>
-      <td class="desc">TCGdexのカード個別ID。カード名だけでなく収録パック・型番まで含めた一意の識別子<br><span style="color:#8f84b0;">例：sv11W-043</span></td>
+      <td class="desc">TCGdexのカード個別ID。カード名だけでなく収録パック・型番まで含めた一意の識別子。setInfo（例：「SV11W 043/086」）からスペース→ハイフン置換＋「/」より前だけ取る形で自動生成される<br><span style="color:#8f84b0;">例：SV11W-043</span></td>
     </tr>
     <tr>
       <td class="term">count</td>
-      <td class="desc">そのカードの投入枚数</td>
+      <td class="desc">そのカードの投入枚数（1以上の整数）</td>
     </tr>
     <tr>
       <td class="term">cardList</td>
-      <td class="desc">デッキの中身全体を表すオブジェクト。8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）に分かれ、各分類が{cardId, count}の配列</td>
+      <td class="desc">デッキの中身全体を表すオブジェクト。8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）に分かれ、各分類が配列</td>
+    </tr>
+    <tr>
+      <td class="term">provisional / tempName</td>
+      <td class="desc">仮登録エントリー用のフィールド。TCGdexで照合できなかったカードは{cardId,count}の代わりに{provisional:true, tempName:"カード名", count}の形で登録される</td>
     </tr>
   </table>
 </div>
@@ -121,6 +147,44 @@
 </div>
 
 <div class="group">
+  <h2>変換・照合まわりの用語</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">setInfo</td>
+      <td class="desc">公式サイト形式のカード番号表記（例：「SV11W 043/086」）。resolve_card_idでcardIdに変換する元データ</td>
+    </tr>
+    <tr>
+      <td class="term">deckCode</td>
+      <td class="desc">resolve_cardlistの入力。pokeka2 Service Binding経由でデッキの生データを取得するためのコード</td>
+    </tr>
+    <tr>
+      <td class="term">unmappedCategories</td>
+      <td class="desc">pokeka2側のカテゴリ名（日本語）が内部8分類のどれにも対応しなかった場合、cardListには含めずこちらに別出しされる</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
+  <h2>レギュレーション判定まわりの用語</h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">regulation:current:legalMarks</td>
+      <td class="desc">現行合法とされるレギュレーションマークの一覧。カードのregulationMarkがここに含まれていればOK</td>
+    </tr>
+    <tr>
+      <td class="term">regulation:{id}:legalNameWhitelist</td>
+      <td class="desc">マークだけでは合法判定できないカードを、カード名ベースで救済するホワイトリスト<br><span style="color:#8f84b0;">例：regulation:2026H:legalNameWhitelist</span></td>
+    </tr>
+    <tr>
+      <td class="term">violations</td>
+      <td class="desc">レギュ違反として積まれるリスト。reasonは"card_not_found"（カードデータ自体が見つからない）か"regulation_violation"（マーク・名前どちらでも救済できず違反）の2種類</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
   <h2>KVキー（データの保存場所の名前）</h2>
   <table>
     <tr><th>用語</th><td class="desc">意味</td></tr>
@@ -133,35 +197,24 @@
       <td class="desc">自分のデッキの保存キー</td>
     </tr>
     <tr>
-      <td class="term">card:{cardId}<div class="status">未実装</div></td>
-      <td class="desc">カード表示用データ（名前・画像・技など）の保存キー</td>
+      <td class="term">card:{cardId}<div class="status done">実装済み</div></td>
+      <td class="desc">カード表示用データ（名前・画像・技など）の保存キー。get_cardとレギュ判定の共通ヘルパーが遅延キャッシュ方式で使用（無ければTCGdexから取得して保存）</td>
     </tr>
     <tr>
-      <td class="term">cardRuleOverrides<div class="status">未実装</div></td>
-      <td class="desc">4枚制限などのルール例外だけをまとめておくキー</td>
-    </tr>
-    <tr>
-      <td class="term">set:SV*</td>
-      <td class="desc">TCGdexから取ってきたセット単位のカードデータ</td>
+      <td class="term">set:{setId}<div class="status done">実装済み</div></td>
+      <td class="desc">セット単位のカードデータ。トレーナーズ・エネの名前照合専用、こちらも遅延キャッシュ方式</td>
     </tr>
     <tr>
       <td class="term">sets:standard</td>
       <td class="desc">スタンダードレギュレーション対象セットの一覧</td>
     </tr>
-  </table>
-</div>
-
-<div class="group">
-  <h2>ルール絡みの用語</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
     <tr>
-      <td class="term">countGroup</td>
-      <td class="desc">枚数制限を合算する単位（基本は表示名基準）</td>
+      <td class="term">counter:meta / counter:mine</td>
+      <td class="desc">register時のid連番発行用カウンター。type-XXX（3桁ゼロ埋め）の採番に使用</td>
     </tr>
     <tr>
-      <td class="term">maxCount</td>
-      <td class="desc">そのグループの最大投入可能枚数</td>
+      <td class="term">cardRuleOverrides<div class="status todo">未実装</div></td>
+      <td class="desc">4枚制限などのルール例外だけをまとめておくキー（かがやくゲッコウガ・ACE SPEC等）。レギュ判定（legalMarks/whitelist）とは別軸の仕組み</td>
     </tr>
   </table>
 </div>

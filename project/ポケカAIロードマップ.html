@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RES-008 ロードマップ</title>
@@ -47,6 +45,18 @@
     color: #6b6b76;
     margin: 0 0 20px;
   }
+  .note-banner {
+    max-width: 520px;
+    margin: 0 auto 20px;
+    background: #fff8e6;
+    border: 1px solid #f0d999;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: #7a5c1c;
+    line-height: 1.6;
+  }
+  .note-banner b { color: #9c7412; }
 
   .stage-group {
     position: relative;
@@ -133,6 +143,7 @@
   .node.done .tag { background: var(--done); color: #fff; }
   .node.now .tag { background: var(--now); color: #fff; }
   .node.todo .tag { background: #c6c6ce; color: #fff; }
+  .tag.small { background: #d8d1e8 !important; color: #4a3c66 !important; }
 
   .node-desc {
     font-size: 11.5px;
@@ -196,7 +207,11 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-14 時点</p>
+  <p>2026-07-18 時点（実コード確認済み）</p>
+</div>
+
+<div class="note-banner">
+  <b>今回の更新メモ：</b>index.js（GitHub）を直接確認して実態に合わせた。前回版から見えてなかった完了項目がかなりあった一方、<b>copy_meta（環境デッキのコピー）は未実装</b>、<b>resolve_card_idはテスト用のままでregister_meta本体には未組み込み</b>と判明。
 </div>
 
 <div class="legend">
@@ -224,31 +239,27 @@
 </div>
 
 <div class="stage-group">
-  <div class="stage-label">STAGE 2 ・ 1進化（デッキ管理まわり強化）</div>
+  <div class="stage-label">STAGE 2 ・ 1進化（エンドポイント整備）</div>
   <div class="track">
     <div class="node done">
-      <div class="node-title">エンドポイント構成の再設計 <span class="tag">完了</span></div>
-      <div class="node-desc">「更新エンドポイントが無い」問題を専用セッションで検討。meta＝register/delete/listのみ、mine＝register/update/unlock/copy/listに確定。ロック機構・二重バックアップ方針も決定。</div>
+      <div class="node-title">mine系フル装備 <span class="tag">完了</span></div>
+      <div class="node-desc">register_mine・update_mine（マージロジック込み）・unlock_mine・delete_mine・copy_mine（Windows方式の自動命名込み）まで実装済み。</div>
     </div>
-    <div class="node now">
-      <div class="node-title">エンドポイント実装 <span class="tag">現在地</span></div>
-      <div class="node-desc">delete_meta / update_mine / unlock_mine / copy_mineをworker.jsに実装するフェーズ。</div>
+    <div class="node done">
+      <div class="node-title">meta系（register・delete）<span class="tag">完了</span></div>
+      <div class="node-desc">register_meta・delete_metaは実装済み。copy_metaのみ未実装（下の積み残しタスク参照）。</div>
     </div>
-    <div class="node todo">
-      <div class="node-title">update_mine マージロジック <span class="tag">未着手</span></div>
-      <div class="node-desc">「読み込み→マージ→書き戻し」の実装とテスト。concernの空文字クリアと未送信保持の区別を丁寧に設計。</div>
+    <div class="node done">
+      <div class="node-title">カード取得・照合の基盤 <span class="tag">完了</span></div>
+      <div class="node-desc">get_card（card:{cardId}の遅延キャッシュ）、resolve_cardlist（pokeka2連携でdeckCode→cardList変換、マッチ確定/仮登録provisionalの振り分け）を実装。</div>
     </div>
-    <div class="node todo">
-      <div class="node-title">KVキー命名規則の確定 <span class="tag">未着手</span></div>
-      <div class="node-desc">バックアップキー（deck:mine:backup:{id}的な形）を含めて命名ルールを確定。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">バックアップ保存ボタン <span class="tag">未着手</span></div>
-      <div class="node-desc">HTMLツールにlist_mine結果をローカルJSON保存するボタンを追加。</div>
+    <div class="node done">
+      <div class="node-title">レギュレーション適合チェック <span class="tag">完了</span></div>
+      <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。</div>
     </div>
     <div class="node todo">
-      <div class="node-title">deckCode＋一覧画面分岐 <span class="tag">未着手</span></div>
-      <div class="node-desc">deckCodeフィールド追加、一覧画面の画像あり/プレースホルダー分岐を実装。</div>
+      <div class="node-title">積み残しタスク2点 <span class="tag">未着手</span></div>
+      <div class="node-desc">①copy_metaの実装（環境デッキのコピー機能）。②resolve_card_id（setInfo→cardId変換）を動作確認用テストの位置づけからregister_meta本体の入力フローへ組み込む。</div>
     </div>
   </div>
 </div>
@@ -256,13 +267,17 @@
 <div class="stage-group">
   <div class="stage-label">STAGE 3 ・ 2進化（カードデータ構造化）</div>
   <div class="track">
-    <div class="node todo">
-      <div class="node-title">cardList構造の再設計 <span class="tag">未着手</span></div>
-      <div class="node-desc">カード名テキストのみ→TCGdex形式cardID対応へ。専用セッション予定の大物課題。</div>
+    <div class="node done">
+      <div class="node-title">cardList構造の再設計 <span class="tag">完了</span></div>
+      <div class="node-desc">8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）＋{cardId,count}、TCGdex未照合時は{provisional:true,tempName,count}の仮登録形式で実運用中。</div>
+    </div>
+    <div class="node now">
+      <div class="node-title">OCR共通スキーマの整理 <span class="tag">現在地</span></div>
+      <div class="node-desc">3層構造（subtypes／ruleTags／deckRules）のうち、subtypesとruleTagsの重複整理（導出ルール検討）と、サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出しが未着手のまま持ち越し中。</div>
     </div>
     <div class="node todo">
       <div class="node-title">cardRuleOverrides初期データ <span class="tag">未着手</span></div>
-      <div class="node-desc">かがやくゲッコウガ・ACE SPEC・ストームエメラルダ等、既知の例外ルール登録。</div>
+      <div class="node-desc">かがやくゲッコウガ・ACE SPEC・ストームエメラルダ等、既知の例外ルール登録。レギュレーション判定（legalMarks/whitelist）とは別軸の仕組みとして未実装のまま。</div>
     </div>
     <div class="node todo">
       <div class="node-title">既存テストデータ移行 <span class="tag">未着手</span></div>
@@ -280,30 +295,33 @@
     </div>
     <div class="node todo">
       <div class="node-title">カード画像・詳細データ表示 <span class="tag">未着手</span></div>
-      <div class="node-desc">cardList構造化後、TCGdex経由で画像・エネルギーコスト・にげる・特性等を表示。</div>
+      <div class="node-desc">cardList構造化・get_card実装済みなので前提は揃った。表示側（フロント）の実装がこれから。</div>
     </div>
     <div class="node todo">
       <div class="node-title">購入サポート機能 再開 <span class="tag">未着手</span></div>
       <div class="node-desc">目標デッキの不足カード特定Worker。カード画像取得問題の解決待ちで中断中（ideas.md記録済み）。</div>
     </div>
     <div class="node todo">
-      <div class="node-title">pokeka2 Worker統合検討 <span class="tag">未着手</span></div>
-      <div class="node-desc">公式デッキコード→カードJSON変換Workerを、register_metaの入力フローに統合するか検討。</div>
+      <div class="node-title">pokeka2 Worker 本統合 <span class="tag">未着手</span></div>
+      <div class="node-desc">resolve_cardlist（Service Binding経由の呼び出し）は実装済みだが、register_metaの入力フローへの本統合（UI側でdeckCode入力→自動でcardList埋まる、まで）はこれから。</div>
+    </div>
+    <div class="node todo">
+      <div class="node-title">対戦シミュレーション <span class="tag small">今後検討</span></div>
+      <div class="node-desc">両デッキを指定して先攻/後攻の展開を読ませたいという新しい要望。効果テキストを将来構造化する余地（effectStructured等の拡張フィールド）を残す方向とだけ一致、詳細は未確定（ideas.md記録済み）。</div>
     </div>
   </div>
 </div>
 
 <div class="now-panel">
   <div class="label">NEXT ACTION</div>
-  <div class="title">エンドポイント実装、ここから着手</div>
+  <div class="title">OCR共通スキーマの整理、ここから着手</div>
   <ol>
-    <li>delete_meta / update_mine / unlock_mine / copy_mineのコード実装</li>
-    <li>update_mineのマージロジック実装＋テスト</li>
-    <li>KVキー命名規則の確定</li>
-    <li>HTMLツールにバックアップ保存ボタン追加</li>
-    <li>deckCodeフィールド＋一覧画面分岐の実装</li>
+    <li>スキーマ構造（3層：subtypes／ruleTags／deckRules）を図解（ロジック設計図・入出力設計図）で提示</li>
+    <li>subtypes／ruleTagsの重複整理・導出ルール検討</li>
+    <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し</li>
+    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
+    <li>（積み残し）copy_meta実装／resolve_card_idのregister_meta組み込み</li>
   </ol>
 </div>
 
-</body>
-</html>
+</body></html>
