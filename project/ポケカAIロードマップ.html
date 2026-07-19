@@ -211,7 +211,7 @@
 </div>
 
 <div class="note-banner">
-  <b>今回の更新メモ：</b>resolve_card_id（setInfo→cardId変換）はregister_meta本体の入力フローに組み込み済みと確認、表記を修正。あわせて「メタデッキは完成品として扱い、中身は編集不可（触りたければmineにコピーして改造）」という設計方針を確認し、一覧の「🏷️ deckCode編集」ボタンは削除する方針に決定（実装作業はこれから）。積み残しはcopy_meta（環境デッキのコピー）のみ。
+  <b>今回の更新メモ：</b>Cloudflare Worker実コードを直接確認したところ、copy_meta（環境デッキのコピー）は実は実装済みと判明（前回の引き継ぎで未実装扱いのまま持ち越されてた）。resolve_card_idも同様にregister_meta本体の入力フローに組み込み済み。あわせて「メタデッキは完成品として扱い、中身は編集不可（触りたければmineにコピーして改造）」という設計方針を確認し、一覧の「🏷️ deckCode編集」ボタンは削除済み。STAGE2の積み残しタスクは無し。
 </div>
 
 <div class="legend">
@@ -247,7 +247,7 @@
     </div>
     <div class="node done">
       <div class="node-title">meta系（register・delete）<span class="tag">完了</span></div>
-      <div class="node-desc">register_meta・delete_metaは実装済み（resolve_card_id込みで入力フロー完成）。copy_metaのみ未実装（下の積み残しタスク参照）。</div>
+      <div class="node-desc">register_meta・delete_meta・copy_metaは実装済み（resolve_card_id込みで入力フロー完成、実コード確認済み）。</div>
     </div>
     <div class="node done">
       <div class="node-title">カード取得・照合の基盤 <span class="tag">完了</span></div>
@@ -257,9 +257,9 @@
       <div class="node-title">レギュレーション適合チェック <span class="tag">完了</span></div>
       <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。</div>
     </div>
-    <div class="node todo">
-      <div class="node-title">積み残しタスク：copy_meta <span class="tag">未着手</span></div>
-      <div class="node-desc">copy_metaの実装（環境デッキのコピー機能）が未着手。※resolve_card_id（setInfo→cardId変換）はregister_meta本体の入力フローに組み込み済みと確認済みのため、このタスクからは除外。</div>
+    <div class="node done">
+      <div class="node-title">copy_meta <span class="tag">完了</span></div>
+      <div class="node-desc">環境デッキのコピー機能。sourceIdから元デッキを取得し、新id・新名称を自動生成して複製。実コード確認済み。</div>
     </div>
   </div>
 </div>
@@ -320,8 +320,7 @@
     <li>subtypes／ruleTagsの重複整理・導出ルール検討</li>
     <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し</li>
     <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
-    <li>（積み残し）copy_meta実装</li>
-    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタンを削除（メタデッキの中身は編集不可という方針決定を反映）</li>
+    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除（メタデッキの中身は編集不可という方針決定を反映）：対応済み</li>
   </ol>
 </div>
 
