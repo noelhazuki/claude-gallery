@@ -207,11 +207,11 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-19 時点（実コード確認済み）</p>
+  <p>2026-07-20 時点（実コード確認済み）</p>
 </div>
 
 <div class="note-banner">
-  <b>今回の更新メモ：</b>Cloudflare Worker実コードを直接確認したところ、copy_meta（環境デッキのコピー）は実は実装済みと判明（前回の引き継ぎで未実装扱いのまま持ち越されてた）。resolve_card_idも同様にregister_meta本体の入力フローに組み込み済み。あわせて「メタデッキは完成品として扱い、中身は編集不可（触りたければmineにコピーして改造）」という設計方針を確認し、一覧の「🏷️ deckCode編集」ボタンは削除済み。STAGE2の積み残しタスクは無し。
+  <b>今回の更新メモ：</b>手動ロックの実装経路を実コードで確認し、一覧画面の専用トグルボタンに実装統一（以前の想定にあった「deckCode確定時の自動ロック」は実コード上存在しないと判明、記録から削除）。provisional一括再チェック（recheck_mine）を新規実装し、provisional保存内容にsetInfo/setCodeを追加。あわせてトレーナーズ／エネのcardId照合も実装済みと確認（以前の図では未確定表記のままやった）。
 </div>
 
 <div class="legend">
@@ -251,7 +251,7 @@
     </div>
     <div class="node done">
       <div class="node-title">カード取得・照合の基盤 <span class="tag">完了</span></div>
-      <div class="node-desc">get_card（card:{cardId}の遅延キャッシュ）、resolve_cardlist（pokeka2連携でdeckCode→cardList変換、マッチ確定/仮登録provisionalの振り分け）を実装。</div>
+      <div class="node-desc">get_card（card:{cardId}の遅延キャッシュ）、resolve_cardlist（pokeka2連携でdeckCode→cardList変換）を実装。ポケモンはsetInfo変換、トレーナーズ／エネはsetCode＋名前の完全一致でcardId照合（実コード確認済み、以前は未確認扱いやったが実装済みと判明）。マッチ確定/仮登録provisionalの振り分けも実装済み。</div>
     </div>
     <div class="node done">
       <div class="node-title">レギュレーション適合チェック <span class="tag">完了</span></div>
@@ -260,6 +260,14 @@
     <div class="node done">
       <div class="node-title">copy_meta <span class="tag">完了</span></div>
       <div class="node-desc">環境デッキのコピー機能。sourceIdから元デッキを取得し、新id・新名称を自動生成して複製。実コード確認済み。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">mineロック操作の一本化 <span class="tag">完了</span></div>
+      <div class="node-desc">編集パネルのlockedプルダウンを廃止し、一覧画面の専用トグルボタンに統一。ロックはupdate_mineへ{id, locked:true}のみ送信、解除は従来通りunlock_mine。あわせて「自動ロック（deckCode確定時）」という以前の想定は実コード上存在しないと判明したため記録から削除。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">provisional一括再チェック（recheck_mine）<span class="tag">完了</span></div>
+      <div class="node-desc">mine1件分のprovisionalカードをまとめて再照合する新規エンドポイント。あわせてprovisional保存内容を拡張し、setInfo（ポケモン）／setCode（トレーナーズ／エネ）を保持するよう変更（再照合の材料として必要だったため）。拡張前に登録済みの古いprovisionalは再照合不可（skipped扱い）。ロック中デッキでも実行可。一覧画面に「❓未確定×N」バッジも追加。</div>
     </div>
   </div>
 </div>
@@ -320,7 +328,8 @@
     <li>subtypes／ruleTagsの重複整理・導出ルール検討</li>
     <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し</li>
     <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
-    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除（メタデッキの中身は編集不可という方針決定を反映）：対応済み</li>
+    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
+    <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
   </ol>
 </div>
 

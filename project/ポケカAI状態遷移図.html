@@ -119,16 +119,16 @@
   <div class="transition-list">
     <div class="transition">
       <div class="arrow-mark">unlocked→locked</div>
-      <div class="body"><b>自動ロック</b>：deckCodeが確定した時点で自動的にlocked:trueになる<span class="tag confirmed-tag">確定</span></div>
-    </div>
-    <div class="transition">
-      <div class="arrow-mark">unlocked→locked</div>
-      <div class="body"><b>手動ロック</b>：deckCode未確定のままでも任意でロック可能、という方針だけ決まっている<span class="tag unresolved-tag">実装経路は未確認</span></div>
+      <div class="body"><b>ロックボタン</b>：一覧で選択したデッキに対し専用トグルボタンを押すと、update_mineに<span class="kv">{id, locked:true}</span>のみ送信されてロックされる（他フィールドは触らない）<span class="tag confirmed-tag">確定</span></div>
     </div>
     <div class="transition">
       <div class="arrow-mark">locked→unlocked</div>
-      <div class="body"><b>unlock_mine呼び出し</b>：意図的な操作としてこの専用エンドポイントを叩いた時のみ解除される<span class="tag confirmed-tag">確定</span></div>
+      <div class="body"><b>同じトグルボタン（ロック中は表示が切り替わる）</b>：unlock_mineを呼び出して解除する。意図的な操作としてこのエンドポイントを叩いた時のみ解除される<span class="tag confirmed-tag">確定</span></div>
     </div>
+  </div>
+
+  <div class="note-box">
+    <b>2026-07-20訂正：</b>以前この図に書いていた「deckCodeが確定した時点で自動的にlocked:trueになる」という自動ロック処理は、実コード確認の結果コード上どこにも存在しないと判明したため削除した。ロック/解除は常に、一覧画面のトグルボタン経由の明示的な操作のみで発生する（以前は編集パネル内のプルダウンで locked を送る形だったが、専用ボタンに置き換え済み）。
   </div>
 
   <div class="note-box">
@@ -148,15 +148,19 @@
   <div class="transition-list">
     <div class="transition">
       <div class="arrow-mark">新規→provisional</div>
-      <div class="body">resolve_cardlist時点でTCGdex照合が0件だったカードは、まずprovisionalとして登録される（処理フロー図②参照）<span class="tag confirmed-tag">確定</span></div>
+      <div class="body">resolve_cardlist時点でTCGdex照合が0件だったカードは、まずprovisionalとして登録される（処理フロー図①参照）。2026-07-20以降はtempName・countに加えて、再照合用の元データ（ポケモンはsetInfo、トレーナーズ／エネはsetCode）も一緒に保持される<span class="tag confirmed-tag">確定</span></div>
     </div>
     <div class="transition">
       <div class="arrow-mark">provisional→confirmed</div>
-      <div class="body"><b>一括再チェックボタン</b>：一覧画面の「未確定」バッジ付きカードに対して、まとめてTCGdexへ再照合。ヒットすれば自動でconfirmedへ昇格<span class="tag unresolved-tag">設計のみ・未実装</span></div>
+      <div class="body"><b>再チェックボタン（recheck_mine）</b>：一覧の「❓未確定×N」バッジが出てるmineデッキを選択して押すと、そのデッキ内のprovisionalカードだけをまとめてTCGdexへ再照合。ヒットすれば自動でconfirmedへ昇格。ロック中のデッキでも実行可（枚数・構成は変えず、正体確定のみのため）<span class="tag confirmed-tag">確定</span></div>
     </div>
     <div class="transition">
       <div class="arrow-mark">provisional→provisional</div>
-      <div class="body">再チェックしてもヒットしなければそのまま留まる（何度でも再チェック可能な想定）<span class="tag unresolved-tag">設計のみ・未実装</span></div>
+      <div class="body">再チェックしてもヒットしなければそのまま留まる（何度でも再チェック可能）<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">provisional→provisional（救済不可）</div>
+      <div class="body">2026-07-20の機能実装より前に登録されたprovisionalは、setInfo/setCodeを持っていないため再照合しようが無い。recheck_mine実行時は"skipped"件数としてカウントされるだけで、中身は変わらない（手動でcardIdを調べて編集パネルから直すしかない）</div>
     </div>
     <div class="transition">
       <div class="arrow-mark">confirmed→…</div>
@@ -171,8 +175,8 @@
 </div>
 
 <div class="footer">
-  作成：2026-07-19<br>
-  未確認箇所の扱い：「手動ロックの実装経路」と「一括再チェックボタン」は、設計として合意はされているが実コード（GitHub index.js）での確認が取れていない。次にこのあたりを触る時は、まず実コードを確認してから進めること。
+  作成：2026-07-19／2026-07-20更新<br>
+  2026-07-20更新内容：①「自動ロック」の記述を削除（実コード上に存在しないと判明）。手動ロックは一覧画面の専用トグルボタンとして実装済みに更新。②provisional一括再チェック（recheck_mine）実装済みに更新。あわせてprovisional保存内容がsetInfo/setCodeを含む形に拡張されたため、再照合できないケース（拡張前の古いデータ）についても追記した。
 </div>
 
 </body>

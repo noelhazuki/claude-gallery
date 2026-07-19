@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokeca-ai 処理フロー図（resolve_cardlist）</title>
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --ink:#242019;
+    --card:#ffffff;
+    --line:#d8d1c2;
+    --confirmed:#2f6f5e;
+    --confirmed-bg:#e6f0ec;
+    --provisional:#b4711f;
+    --provisional-bg:#f6ead9;
+    --unresolved:#9a3b3b;
+    --unresolved-bg:#f5e4e1;
+    --decision:#1f4d6b;
+    --decision-bg:#e6eef4;
+    --accent:#1f4d6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:24px 16px 64px;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+  }
+  .header{margin-bottom:20px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 26px;font-size:12px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.decision{background:var(--decision);}
+
+  .flow{display:flex;flex-direction:column;align-items:stretch;max-width:520px;margin:0 auto;}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  .node .label{font-size:11px;color:#8a8271;margin-bottom:4px;}
+  .node .title{font-size:14px;font-weight:700;}
+  .node .detail{font-size:12.5px;color:#4a4437;margin-top:6px;white-space:pre-line;}
+  .node.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg);}
+  .node.provisional{border-color:var(--provisional); background:var(--provisional-bg);}
+  .node.unresolved{border-color:var(--unresolved); background:var(--unresolved-bg); border-style:dashed;}
+  .node.decision{border-color:var(--decision); background:var(--decision-bg);}
+  .node.decision .title::before{content:"分岐：";color:var(--decision);}
+
+  .arrow{align-self:center;font-size:18px;color:#a89f8c;margin:2px 0;}
+
+  .branch{display:flex;gap:10px;margin:4px 0;}
+  .branch > div{flex:1;display:flex;flex-direction:column;}
+  .branch-label{font-size:11px;text-align:center;color:#8a8271;margin-bottom:4px;font-weight:700;}
+  .branch-label.yes{color:var(--confirmed);}
+  .branch-label.no{color:var(--unresolved);}
+
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+
+  .context-box{
+    max-width:520px;margin:0 auto 22px;
+    background:#fff8e6;border:1px solid #f0d999;border-radius:10px;
+    padding:10px 14px;font-size:11.5px;color:#7a5c1c;line-height:1.6;
+  }
+  .context-box b{color:#9c7412;}
+
+  .footer{max-width:520px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">RES-008 / pokeca-ai</div>
+  <h1>処理フロー図：resolve_cardlist 内部の分岐</h1>
+  <div class="sub">register_metaフロー全体の中の「resolve_cardlist」の中身だけを拡大した図。全体の位置づけは「入出力設計図」を参照。</div>
+</div>
+
+<div class="context-box">
+  <b>この図の位置づけ：</b>入出力設計図では resolve_cardlist を1つの箱として描いた。この図はその箱の中で実際に何が起きているか（カテゴリ振り分け→カード照合→confirmed/provisional/passthroughの枝分かれ）を追う。
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--decision)"></span>分岐判定</span>
+  <span><span class="dot" style="background:var(--confirmed)"></span>確定・実装済み</span>
+  <span><span class="dot" style="background:var(--provisional)"></span>仮登録・フォールバック</span>
+  <span><span class="dot" style="background:var(--unresolved)"></span>未確定・次回検討</span>
+</div>
+
+<div class="flow">
+
+  <div class="node confirmed">
+    <div class="label">入力</div>
+    <div class="title">resolve_cardlist(deckCode) 呼び出し</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node confirmed">
+    <div class="title">pokeka2 Service Binding 呼び出し</div>
+    <div class="detail">deckCodeを渡して、公式デッキの生カードリストを取得。カテゴリ名はこの時点ではpokeka2側の日本語表記のまま（内部8分類にはまだ変換されていない）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node confirmed">
+    <div class="title">生カードリストを1件ずつループ処理</div>
+    <div class="detail">以下の判定を、取得できた全カード（1行＝1種類のカード）に対して繰り返す</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node decision">
+    <div class="title">カテゴリ名は内部8分類にマッピングできるか</div>
+    <div class="detail">pokeka2側のカテゴリ名（日本語）が、pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpecのいずれかに対応しているか</div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branch-label no">No（対応なし）</div>
+      <div class="node unresolved">
+        <div class="title">unmappedCategoriesへ退避</div>
+        <div class="detail">cardListには含めない。別出しリストとして保持するのみ（このカードは以降の分岐に進まない＝ここでこのカードの処理は終了）</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-label yes">Yes（対応あり）</div>
+      <div class="node confirmed">
+        <div class="title">次の分岐へ進む</div>
+        <div class="detail">マッピング先の分類名を確定させて、下の「ポケモンか」判定に渡す</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓（マッピングできたカードのみ、ここから先へ）</div>
+
+  <div class="node decision">
+    <div class="title">マッピング先はpokemon分類か</div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branch-label no">No（トレーナーズ／エネ）</div>
+      <div class="node confirmed">
+        <div class="title">cardId照合を行う</div>
+        <div class="detail">setCode＋カード名の完全一致で、set:{setId}の遅延キャッシュと突き合わせる（matchTrainerOrEnergyCard）</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-label yes">Yes（ポケモン）</div>
+      <div class="node confirmed">
+        <div class="title">cardId照合を行う</div>
+        <div class="detail">setInfo（公式カード番号表記）からcardIdを変換し、card:{cardId}の遅延キャッシュと突き合わせる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓（照合方法は違うが、ここで両ルート合流。以降は共通処理）</div>
+
+  <div class="node decision">
+    <div class="title">cardIdが一意にヒットしたか</div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branch-label no">No（0件／照合不可）</div>
+      <div class="node provisional">
+        <div class="title">provisional（仮登録）</div>
+        <div class="detail"><span class="kv">{provisional:true, tempName:"カード名", count}</span>に加えて、再照合用の元データも保持する（ポケモンは<span class="kv">setInfo</span>、トレーナーズ／エネは<span class="kv">setCode</span>）。確認UIで人の目チェックが必要な状態</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-label yes">Yes（ヒット）</div>
+      <div class="node confirmed">
+        <div class="title">confirmed（確定）</div>
+        <div class="detail"><span class="kv">{cardId, count}</span>の形でcardListに入れる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓（全カードのループが終わったら）</div>
+
+  <div class="node confirmed">
+    <div class="label">出力</div>
+    <div class="title">cardList（8分類構造）＋ unmappedCategories</div>
+    <div class="detail">この2つがresolve_cardlistの戻り値。ここから先（確認UI→deck:meta:{id}保存）は入出力設計図のフローに合流する</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  作成：2026-07-19<br>
+  読み方の補足：分岐（decision）ノードは「Yes/No」の2択で下に枝分かれする。枝分かれした先が同じ色（confirmed同士など）でも、通ってきた分岐条件が違えば意味が違うので、必ず直前の分岐ノードとセットで読むこと。<br>
+  2026-07-20更新：トレーナーズ／エネのcardId照合（setCode＋名前の完全一致）を実装済みと確認。あわせてprovisional化時にsetInfo/setCodeを保持するよう変更、provisionalからconfirmedへの再照合はrecheck_mine（mine限定）で実装済み。詳細は状態遷移図②を参照。
+</div>
+
+</body>
+</html>

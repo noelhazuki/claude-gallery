@@ -27,119 +27,32 @@
     font-family:"Hiragino Sans","Yu Gothic",sans-serif;
     line-height:1.6;
   }
-  .header{
-    margin-bottom:28px;
-  }
-  .eyebrow{
-    font-size:12px;
-    letter-spacing:0.12em;
-    color:var(--accent);
-    font-weight:700;
-  }
-  h1{
-    font-size:22px;
-    margin:4px 0 8px;
-    line-height:1.4;
-  }
-  .sub{
-    font-size:13px;
-    color:#5a5347;
-  }
-  .legend{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    margin:16px 0 28px;
-    font-size:12px;
-  }
-  .legend span{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-  }
-  .dot{
-    width:10px;height:10px;border-radius:50%;display:inline-block;
-  }
-  .flow-title{
-    font-size:15px;
-    font-weight:700;
-    margin:36px 0 14px;
-    padding-bottom:6px;
-    border-bottom:2px solid var(--accent);
-    color:var(--accent);
-  }
-  .flow{
-    display:flex;
-    flex-direction:column;
-    align-items:stretch;
-  }
-  .node{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:12px 14px;
-    box-shadow:0 1px 2px rgba(0,0,0,0.04);
-  }
-  .node .label{
-    font-size:11px;
-    color:#8a8271;
-    margin-bottom:4px;
-  }
-  .node .title{
-    font-size:14px;
-    font-weight:700;
-  }
-  .node .detail{
-    font-size:12.5px;
-    color:#4a4437;
-    margin-top:6px;
-    white-space:pre-line;
-  }
+  .header{margin-bottom:24px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:21px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 26px;font-size:12px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .flow-title{font-size:15px;font-weight:700;margin:32px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--accent);color:var(--accent);}
+  .flow{display:flex;flex-direction:column;align-items:stretch;}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  .node .label{font-size:11px;color:#8a8271;margin-bottom:4px;}
+  .node .title{font-size:14px;font-weight:700;}
+  .node .detail{font-size:12.5px;color:#4a4437;margin-top:6px;white-space:pre-line;}
   .node.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg);}
   .node.provisional{border-color:var(--provisional); background:var(--provisional-bg);}
   .node.unresolved{border-color:var(--unresolved); background:var(--unresolved-bg); border-style:dashed;}
-  .arrow{
-    align-self:center;
-    font-size:18px;
-    color:#a89f8c;
-    margin:2px 0;
-  }
-  .branch{
-    display:flex;
-    gap:10px;
-    margin:4px 0;
-  }
-  .branch > div{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-  }
-  .branch-label{
-    font-size:11px;
-    text-align:center;
-    color:#8a8271;
-    margin-bottom:4px;
-  }
-  .note{
-    font-size:12px;
-    color:#6b6455;
-    margin-top:4px;
-    padding-left:2px;
-  }
-  .kv{
-    font-family:"SF Mono","Menlo",monospace;
-    font-size:12px;
-    background:#efe9db;
-    padding:2px 6px;
-    border-radius:4px;
-  }
-  .footer{
-    margin-top:40px;
-    padding-top:16px;
-    border-top:1px solid var(--line);
-    font-size:12px;
-    color:#8a8271;
-  }
+  .arrow{align-self:center;font-size:18px;color:#a89f8c;margin:2px 0;}
+  .branch{display:flex;gap:10px;margin:4px 0;}
+  .branch > div{flex:1;display:flex;flex-direction:column;}
+  .branch-label{font-size:11px;text-align:center;color:#8a8271;margin-bottom:4px;}
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+  .compare{display:flex;gap:10px;margin-top:36px;}
+  .compare > div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .compare .ctitle{font-size:13px;font-weight:700;margin-bottom:6px;}
+  .compare .cbody{font-size:12.5px;color:#4a4437;}
+  .footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
 </style>
 </head>
 <body>
@@ -147,7 +60,7 @@
 <div class="header">
   <div class="eyebrow">RES-008 / pokeca-ai</div>
   <h1>入出力設計図：cardlist登録フロー</h1>
-  <div class="sub">デッキコード（またはOCR相当の入力）が、どこを通ってKVのどこに着地するか</div>
+  <div class="sub">デッキコード入力が、どこを通ってKVのどこに着地するか（全体像だけを追える版）</div>
 </div>
 
 <div class="legend">
@@ -157,95 +70,57 @@
 </div>
 
 <!-- ===== register_meta フロー ===== -->
-<div class="flow-title">① register_meta（メタデッキ登録）— 入口：公式デッキコード</div>
+<div class="flow-title">① register_meta（メタデッキ登録）</div>
 <div class="flow">
 
   <div class="node confirmed">
     <div class="label">入力</div>
-    <div class="title">公式デッキコードを入力欄にペースト</div>
+    <div class="title">公式デッキコードを貼り付け</div>
   </div>
   <div class="arrow">↓</div>
 
   <div class="node confirmed">
-    <div class="label">エンドポイント</div>
-    <div class="title">resolve_cardlist（POST {deckCode}）</div>
-    <div class="detail">Worker内部で POKEKA2 Service Binding 経由、pokeka2（?code=XXXX）を呼び出し</div>
-  </div>
-  <div class="arrow">↓</div>
-
-  <div class="node confirmed">
-    <div class="label">中間データ</div>
-    <div class="title">pokeka2の生カードリスト</div>
-    <div class="detail">{kinds, total, cards:[{name, setInfo, count, category}]}
-category：ポケモン/グッズ/ポケモンのどうぐ/サポート/スタジアム/エネルギー（6種）
-setInfoはポケモンのみ値あり（例：SV11W 043/086）</div>
+    <div class="title">resolve_cardlist</div>
+    <div class="detail">pokeka2を呼んで生カードリストを取得</div>
   </div>
   <div class="arrow">↓</div>
 
   <div class="branch">
     <div>
-      <div class="branch-label">category='ポケモン'（setInfoあり）</div>
+      <div class="branch-label">ポケモン</div>
       <div class="node confirmed">
-        <div class="title">setInfo → cardId 変換</div>
-        <div class="detail">「SV11W 043/086」→ SV11W-043
-→ TCGdexマスタ(KV)照合</div>
-      </div>
-      <div class="arrow">↓</div>
-      <div class="branch">
-        <div>
-          <div class="node confirmed">
-            <div class="title">1件ヒット</div>
-            <div class="detail">status: confirmed
-cardId確定</div>
-          </div>
-        </div>
-        <div>
-          <div class="node provisional">
-            <div class="title">0件ヒット</div>
-            <div class="detail">status: provisional
-tempNameのみ保持</div>
-          </div>
-        </div>
+        <div class="title">cardId照合</div>
+        <div class="detail">ヒット→confirmed
+0件→provisional（仮登録）</div>
       </div>
     </div>
     <div>
-      <div class="branch-label">category≠ポケモン（setInfoなし）</div>
-      <div class="node unresolved">
-        <div class="title">トレーナーズ／エネルギー</div>
-        <div class="detail">status: passthrough
-そのまま返す（今回未対応）</div>
-        <div class="note">照合方式は次回、pokeka2側の型番有無を確認してから確定</div>
+      <div class="branch-label">トレーナーズ／エネ</div>
+      <div class="node confirmed">
+        <div class="title">cardId照合</div>
+        <div class="detail">setCode＋名前の完全一致
+ヒット→confirmed
+0件→provisional（仮登録）</div>
       </div>
     </div>
   </div>
-
   <div class="arrow">↓</div>
 
   <div class="node confirmed">
-    <div class="label">確認UI</div>
-    <div class="title">register_meta_test.html</div>
-    <div class="detail">3列画像グリッド＋タップ選択→確定ボタンで人の目チェックを挟む</div>
+    <div class="title">確認UI（register_meta_test.html）</div>
+    <div class="detail">人の目でチェック→確定ボタン</div>
   </div>
   <div class="arrow">↓</div>
 
   <div class="node confirmed">
-    <div class="label">エンドポイント</div>
-    <div class="title">register_meta</div>
-    <div class="detail">cardList送信：confirmed分は{cardId, count}
-provisional分は{provisional:true, tempName, count}</div>
-  </div>
-  <div class="arrow">↓</div>
-
-  <div class="node confirmed">
-    <div class="label">着地点</div>
-    <div class="title">Cloudflare KV</div>
-    <div class="detail"><span class="kv">deck:meta:*</span> キーに保存</div>
+    <div class="label">着地</div>
+    <div class="title"><span class="kv">deck:meta:{id}</span></div>
   </div>
 
 </div>
 
 <!-- ===== register_mine フロー ===== -->
-<div class="flow-title">② register_mine（個人デッキ登録）— 入口は2種類</div>
+<div class="flow-title">② register_mine（個人デッキ登録）</div>
 <div class="flow">
 
   <div class="branch">
@@ -253,56 +128,48 @@ provisional分は{provisional:true, tempName, count}</div>
       <div class="branch-label">A：デッキコードあり</div>
       <div class="node confirmed">
         <div class="title">①と同じ流れ</div>
-        <div class="detail">resolve_cardlist → 候補選択 → 確定
-（上のフローをそのまま流用）</div>
       </div>
     </div>
     <div>
-      <div class="branch-label">B：デッキコードなし（調整中デッキ）</div>
+      <div class="branch-label">B：デッキコードなし</div>
       <div class="node unresolved">
         <div class="title">カード検索して1枚ずつ追加</div>
-        <div class="detail">検索UIの具体的な見た目は未設計</div>
+        <div class="detail">検索UI未設計</div>
       </div>
     </div>
-  </div>
-
-  <div class="arrow">↓</div>
-
-  <div class="branch">
-    <div>
-      <div class="node confirmed">
-        <div class="title">保存ボタン</div>
-        <div class="detail">本人操作による確実な確定保存</div>
-      </div>
-    </div>
-    <div>
-      <div class="node provisional">
-        <div class="title">自動保存</div>
-        <div class="detail">画面離脱時に発火
-ブラウザキャッシュへ一時保持（保険）</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="arrow">↓</div>
-
-  <div class="node confirmed">
-    <div class="label">エンドポイント</div>
-    <div class="title">register_mine</div>
   </div>
   <div class="arrow">↓</div>
 
   <div class="node confirmed">
-    <div class="label">着地点</div>
-    <div class="title">Cloudflare KV</div>
-    <div class="detail"><span class="kv">deck:mine:*</span> キーに保存</div>
+    <div class="label">着地</div>
+    <div class="title"><span class="kv">deck:mine:{id}</span></div>
   </div>
 
 </div>
 
+<!-- ===== 保存の保険2種（混同注意） ===== -->
+<div class="flow-title">保存の保険は2種類ある（別物・混同注意）</div>
+<div class="compare">
+  <div>
+    <div class="ctitle">① ブラウザの自動保存</div>
+    <div class="cbody">
+      場所：ブラウザ内のみ（KVではない）<br>
+      いつ：Bの入力中、画面離脱時<br>
+      役割：確定前の下書き保護
+    </div>
+  </div>
+  <div>
+    <div class="ctitle">② <span class="kv">deck:mine:backup:{id}</span></div>
+    <div class="cbody">
+      場所：KV<br>
+      いつ：update_mineで上書きする直前<br>
+      役割：確定済みデータの1世代前スナップショット。delete_mine時に本体と一緒に消える。一覧には出てこない
+    </div>
+  </div>
+</div>
+
 <div class="footer">
-  ⚠ 自動保存分と <span class="kv">deck:mine:backup:*</span> キーの対応関係は、このセッション時点では未整理（ブラウザキャッシュ止まりなのか、KVにも同期するのか要確認）。<br>
-  作成日：2026-07-18
+  作成：2026-07-18／更新：2026-07-20（トレーナーズ／エネのcardId照合を実コード確認のうえ確定表記に修正。setCode＋名前の完全一致で実装済み）
 </div>
 
 </body>
