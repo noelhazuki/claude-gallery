@@ -207,11 +207,11 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-18 時点（実コード確認済み）</p>
+  <p>2026-07-19 時点（実コード確認済み）</p>
 </div>
 
 <div class="note-banner">
-  <b>今回の更新メモ：</b>index.js（GitHub）を直接確認して実態に合わせた。前回版から見えてなかった完了項目がかなりあった一方、<b>copy_meta（環境デッキのコピー）は未実装</b>、<b>resolve_card_idはテスト用のままでregister_meta本体には未組み込み</b>と判明。
+  <b>今回の更新メモ：</b>resolve_card_id（setInfo→cardId変換）はregister_meta本体の入力フローに組み込み済みと確認、表記を修正。あわせて「メタデッキは完成品として扱い、中身は編集不可（触りたければmineにコピーして改造）」という設計方針を確認し、一覧の「🏷️ deckCode編集」ボタンは削除する方針に決定（実装作業はこれから）。積み残しはcopy_meta（環境デッキのコピー）のみ。
 </div>
 
 <div class="legend">
@@ -247,7 +247,7 @@
     </div>
     <div class="node done">
       <div class="node-title">meta系（register・delete）<span class="tag">完了</span></div>
-      <div class="node-desc">register_meta・delete_metaは実装済み。copy_metaのみ未実装（下の積み残しタスク参照）。</div>
+      <div class="node-desc">register_meta・delete_metaは実装済み（resolve_card_id込みで入力フロー完成）。copy_metaのみ未実装（下の積み残しタスク参照）。</div>
     </div>
     <div class="node done">
       <div class="node-title">カード取得・照合の基盤 <span class="tag">完了</span></div>
@@ -258,8 +258,8 @@
       <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。</div>
     </div>
     <div class="node todo">
-      <div class="node-title">積み残しタスク2点 <span class="tag">未着手</span></div>
-      <div class="node-desc">①copy_metaの実装（環境デッキのコピー機能）。②resolve_card_id（setInfo→cardId変換）を動作確認用テストの位置づけからregister_meta本体の入力フローへ組み込む。</div>
+      <div class="node-title">積み残しタスク：copy_meta <span class="tag">未着手</span></div>
+      <div class="node-desc">copy_metaの実装（環境デッキのコピー機能）が未着手。※resolve_card_id（setInfo→cardId変換）はregister_meta本体の入力フローに組み込み済みと確認済みのため、このタスクからは除外。</div>
     </div>
   </div>
 </div>
@@ -320,7 +320,8 @@
     <li>subtypes／ruleTagsの重複整理・導出ルール検討</li>
     <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し</li>
     <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
-    <li>（積み残し）copy_meta実装／resolve_card_idのregister_meta組み込み</li>
+    <li>（積み残し）copy_meta実装</li>
+    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタンを削除（メタデッキの中身は編集不可という方針決定を反映）</li>
   </ol>
 </div>
 
