@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokeca-ai 状態遷移図</title>
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --ink:#242019;
+    --card:#ffffff;
+    --line:#d8d1c2;
+    --confirmed:#2f6f5e;
+    --confirmed-bg:#e6f0ec;
+    --provisional:#b4711f;
+    --provisional-bg:#f6ead9;
+    --unresolved:#9a3b3b;
+    --unresolved-bg:#f5e4e1;
+    --locked:#5a3e8a;
+    --locked-bg:#ece5f7;
+    --unlocked:#3c6e9e;
+    --unlocked-bg:#e3edf6;
+    --accent:#1f4d6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:24px 16px 64px;
+    background:var(--bg); color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+  }
+  .header{margin-bottom:20px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+
+  .section-title{
+    font-size:14px;font-weight:700;color:var(--accent);
+    margin:34px auto 12px;max-width:520px;
+    padding-bottom:6px;border-bottom:2px solid var(--accent);
+  }
+
+  .diagram{max-width:520px;margin:0 auto;position:relative;}
+
+  .state-row{display:flex;justify-content:center;gap:40px;margin:10px 0;}
+  .state{
+    border-radius:999px;
+    padding:14px 22px;
+    text-align:center;
+    font-size:13.5px;
+    font-weight:700;
+    border:2px solid var(--line);
+    background:var(--card);
+    min-width:120px;
+  }
+  .state .sub-label{display:block;font-size:10.5px;font-weight:400;color:#6b6459;margin-top:3px;}
+  .state.locked{border-color:var(--locked); background:var(--locked-bg); color:var(--locked);}
+  .state.unlocked{border-color:var(--unlocked); background:var(--unlocked-bg); color:var(--unlocked);}
+  .state.provisional{border-color:var(--provisional); background:var(--provisional-bg); color:var(--provisional);}
+  .state.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg); color:var(--confirmed);}
+
+  .transition-list{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:12px 16px; margin:16px 0;
+  }
+  .transition{
+    display:flex; gap:10px; padding:8px 0;
+    border-bottom:1px dashed var(--line); font-size:12.5px;
+  }
+  .transition:last-child{border-bottom:none;}
+  .transition .arrow-mark{color:#a89f8c; flex-shrink:0; font-weight:700;}
+  .transition .body b{color:var(--ink);}
+  .transition .tag{
+    display:inline-block; font-size:9.5px; padding:1px 6px; border-radius:5px;
+    margin-left:6px; vertical-align:middle;
+  }
+  .tag.confirmed-tag{background:var(--confirmed); color:#fff;}
+  .tag.unresolved-tag{background:var(--unresolved); color:#fff;}
+
+  .note-box{
+    background:#fff8e6;border:1px solid #f0d999;border-radius:10px;
+    padding:10px 14px;font-size:11.5px;color:#7a5c1c;line-height:1.6;
+    max-width:520px;margin:14px auto;
+  }
+  .note-box b{color:#9c7412;}
+
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+
+  .footer{max-width:520px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px auto 0;font-size:12px;max-width:520px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">RES-008 / pokeca-ai</div>
+  <h1>状態遷移図：mineロック ＋ カードprovisional</h1>
+  <div class="sub">対象は別軸の2つ。①mineレコード全体の locked / unlocked ②cardList内の1カードエントリの provisional / confirmed。同じdeck:mine:{id}の中に両方が同時に存在しうる（＝ロック済みでも中身のカードは未確定のままの場合あり）。</div>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--locked)"></span>ロック系</span>
+  <span><span class="dot" style="background:var(--unlocked)"></span>アンロック系</span>
+  <span><span class="dot" style="background:var(--confirmed)"></span>確定・実装済み</span>
+  <span><span class="dot" style="background:var(--unresolved)"></span>未確認・未実装</span>
+</div>
+
+<!-- ===== ① mineロック状態遷移 ===== -->
+<div class="section-title">① mineレコード全体：locked / unlocked</div>
+
+<div class="diagram">
+  <div class="state-row">
+    <div class="state unlocked">unlocked<span class="sub-label">locked: false</span></div>
+    <div class="state locked">locked<span class="sub-label">locked: true</span></div>
+  </div>
+
+  <div class="transition-list">
+    <div class="transition">
+      <div class="arrow-mark">unlocked→locked</div>
+      <div class="body"><b>自動ロック</b>：deckCodeが確定した時点で自動的にlocked:trueになる<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">unlocked→locked</div>
+      <div class="body"><b>手動ロック</b>：deckCode未確定のままでも任意でロック可能、という方針だけ決まっている<span class="tag unresolved-tag">実装経路は未確認</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">locked→unlocked</div>
+      <div class="body"><b>unlock_mine呼び出し</b>：意図的な操作としてこの専用エンドポイントを叩いた時のみ解除される<span class="tag confirmed-tag">確定</span></div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <b>lockedの効果：</b>locked:trueのレコードは<span class="kv">update_mine</span>が拒否される（誤上書き防止）。<b>copy_mine</b>で複製した場合は、コピー元の状態に関係なく常にlocked:falseへリセットされる（複製後は作成途中扱いに戻る）。
+  </div>
+</div>
+
+<!-- ===== ② カードエントリの provisional/confirmed ===== -->
+<div class="section-title">② cardList内カードエントリ：provisional / confirmed</div>
+
+<div class="diagram">
+  <div class="state-row">
+    <div class="state provisional">provisional<span class="sub-label">tempNameのみ</span></div>
+    <div class="state confirmed">confirmed<span class="sub-label">cardId確定</span></div>
+  </div>
+
+  <div class="transition-list">
+    <div class="transition">
+      <div class="arrow-mark">新規→provisional</div>
+      <div class="body">resolve_cardlist時点でTCGdex照合が0件だったカードは、まずprovisionalとして登録される（処理フロー図②参照）<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">provisional→confirmed</div>
+      <div class="body"><b>一括再チェックボタン</b>：一覧画面の「未確定」バッジ付きカードに対して、まとめてTCGdexへ再照合。ヒットすれば自動でconfirmedへ昇格<span class="tag unresolved-tag">設計のみ・未実装</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">provisional→provisional</div>
+      <div class="body">再チェックしてもヒットしなければそのまま留まる（何度でも再チェック可能な想定）<span class="tag unresolved-tag">設計のみ・未実装</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">confirmed→…</div>
+      <div class="body">一度confirmedになったカードを再びprovisionalに戻す経路は今のところ無い（想定されていない）</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <b>①との関係：</b>この状態はcardList内の1枚ごとの話であり、①のmine全体ロックとは独立。deckCode確定→自動ロックされた後でも、中のカードにprovisionalが残っていることは普通にありうる。<br><br>
+    <b>紛らわしい別機構との違い：</b>ロードマップにある<span class="kv">recheck_all</span>は「登録済み全デッキのレギュ違反を一括再判定」する機能で、目的が違う（合法/違反の判定であって、provisional→confirmedのカード照合ではない）。混同注意。
+  </div>
+</div>
+
+<div class="footer">
+  作成：2026-07-19<br>
+  未確認箇所の扱い：「手動ロックの実装経路」と「一括再チェックボタン」は、設計として合意はされているが実コード（GitHub index.js）での確認が取れていない。次にこのあたりを触る時は、まず実コードを確認してから進めること。
+</div>
+
+</body>
+</html>
