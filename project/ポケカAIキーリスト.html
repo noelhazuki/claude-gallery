@@ -101,11 +101,11 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-20時点（実コード確認済み＋OCR共通スキーマ3層定義）</p>
+  <p>2026-07-20時点（新弾受け入れ手順セッションでの修正反映）</p>
 </header>
 
 <div class="update-note">
-  <b>今回の更新メモ：</b>手動ロックの実装経路を実コードで確認（update_mineへ{id, locked:true}を送る形で実装済み、一覧画面に専用トグルボタン追加）。provisional一括再チェック（recheck_mine）を新規実装、あわせてprovisional保存内容にsetInfo/setCode（再照合用の元データ）を追加した。
+  <b>今回の更新メモ：</b>recheck_mine実動作確認の過程で、provisionalカードがレギュ判定で"card_not_found"として違反扱いされ登録自体が弾かれる不具合を発見・修正。provisional状態のカードはレギュ判定の対象から除外し、登録を通すよう変更した（cardId確定済み＝confirmedのカードのみ判定）。violationsの説明を修正版に更新。あわせて「登録時に弾くか？askアドバイス行きにするか」の判断基準＝「公式大会のデッキチェックで引っかかるかどうか」を決定事項として追加。
 </div>
 
 <div class="group">
@@ -209,8 +209,8 @@
       <td class="desc">マークだけでは合法判定できないカードを、カード名ベースで救済するホワイトリスト<br><span style="color:#8f84b0;">例：regulation:2026H:legalNameWhitelist</span></td>
     </tr>
     <tr>
-      <td class="term">violations</td>
-      <td class="desc">レギュ違反として積まれるリスト。reasonは"card_not_found"（カードデータ自体が見つからない）か"regulation_violation"（マーク・名前どちらでも救済できず違反）の2種類</td>
+      <td class="term">violations<div class="status done">2026-07-20仕様修正</div></td>
+      <td class="desc">レギュ違反として積まれるリスト。<b style="color:#ffb3b3;">provisional（cardId未確定）のカードはレギュ判定の対象から除外される</b>ため、violationsに積まれるのはconfirmed（cardId確定済み）のカードが実際にマーク・ホワイトリストどちらでも救済できず違反していた場合（reason: "regulation_violation"）のみ。以前ここに書いていた"card_not_found"というreasonでの違反計上は、2026-07-20の仕様修正で廃止された（provisional化した時点でそもそもレギュ判定を通らなくなったため）</td>
     </tr>
   </table>
 </div>
