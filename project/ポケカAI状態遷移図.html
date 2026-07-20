@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="https://placehold.co/1200x630/1f4d6b/ffffff?text=RES-008+State+Diagram">
 <title>pokeca-ai 状態遷移図</title>
 <style>
   :root{
@@ -20,6 +21,10 @@
     --locked-bg:#ece5f7;
     --unlocked:#3c6e9e;
     --unlocked-bg:#e3edf6;
+    --waiting:#b4711f;
+    --waiting-bg:#f6ead9;
+    --manual:#6b5b3a;
+    --manual-bg:#efe8da;
     --accent:#1f4d6b;
   }
   *{box-sizing:border-box;}
@@ -58,6 +63,8 @@
   .state.unlocked{border-color:var(--unlocked); background:var(--unlocked-bg); color:var(--unlocked);}
   .state.provisional{border-color:var(--provisional); background:var(--provisional-bg); color:var(--provisional);}
   .state.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg); color:var(--confirmed);}
+  .state.waiting{border-color:var(--waiting); background:var(--waiting-bg); color:var(--waiting);}
+  .state.manual{border-color:var(--manual); background:var(--manual-bg); color:var(--manual); border-style:dashed;}
 
   .transition-list{
     background:var(--card); border:1px solid var(--line); border-radius:10px;
@@ -96,14 +103,15 @@
 
 <div class="header">
   <div class="eyebrow">RES-008 / pokeca-ai</div>
-  <h1>状態遷移図：mineロック ＋ カードprovisional</h1>
-  <div class="sub">対象は別軸の2つ。①mineレコード全体の locked / unlocked ②cardList内の1カードエントリの provisional / confirmed。同じdeck:mine:{id}の中に両方が同時に存在しうる（＝ロック済みでも中身のカードは未確定のままの場合あり）。</div>
+  <h1>状態遷移図：mineロック ＋ カードprovisional（＋awaitStatus）</h1>
+  <div class="sub">対象は別軸の3つ。①mineレコード全体の locked / unlocked ②cardList内の1カードエントリの provisional / confirmed ③provisionalエントリー内部のサブ状態 awaitStatus（waiting / manual）。同じdeck:mine:{id}の中に①②③が同時に存在しうる（＝ロック済みでも中身のカードは未確定のまま、しかもそのうち一部はmanual扱い、ということが普通にありうる）。</div>
 </div>
 
 <div class="legend">
   <span><span class="dot" style="background:var(--locked)"></span>ロック系</span>
   <span><span class="dot" style="background:var(--unlocked)"></span>アンロック系</span>
   <span><span class="dot" style="background:var(--confirmed)"></span>確定・実装済み</span>
+  <span><span class="dot" style="background:var(--waiting)"></span>awaitStatus系</span>
   <span><span class="dot" style="background:var(--unresolved)"></span>未確認・未実装</span>
 </div>
 
@@ -172,11 +180,59 @@
     <b>①との関係：</b>この状態はcardList内の1枚ごとの話であり、①のmine全体ロックとは独立。deckCode確定→自動ロックされた後でも、中のカードにprovisionalが残っていることは普通にありうる。<br><br>
     <b>紛らわしい別機構との違い：</b>ロードマップにある<span class="kv">recheck_all</span>は「登録済み全デッキのレギュ違反を一括再判定」する機能で、目的が違う（合法/違反の判定であって、provisional→confirmedのカード照合ではない）。混同注意。
   </div>
+
+  <div class="note-box">
+    <b>2026-07-21追記：「新規→provisional」に落ちる条件が一部変わった。</b>トレーナーズ／エネのcardId照合で、同一setCode内に同名カードの型番違いが複数存在するケース（例：ボスの指令、ポケパッド）が実在すると判明。以前は「複数ヒット＝どれが正解か決められない」として、setCode+名前が一致していてもそのままprovisional行きにしていた。2026-07-21以降は「型番(localId)が最小のものを機械的に採用してconfirmed扱いにする」ルール（<span class="kv">pickSmallestLocalIdCard</span>関数）に変更したため、この種のカードは以後provisionalに落ちずそのままconfirmedになる。型番最小＝必ず正しいカードという保証はない割り切りルールなので、万一ズレていた場合は編集パネルから手動でcardIdを直すしかない（自動検知の仕組みは無い）。
+  </div>
+</div>
+
+<!-- ===== ③ provisionalエントリー内サブ状態：awaitStatus ===== -->
+<div class="section-title">③ provisionalエントリー内サブ状態：awaitStatus（waiting / manual）</div>
+
+<div class="diagram">
+  <div class="sub" style="margin-bottom:12px;">これは②のprovisional状態の"中身"をさらに割った軸。cardエントリーが<span class="kv">provisional:true</span>の間だけ意味を持つフィールドで、confirmedになった時点でこの軸自体が意味を失う（awaitStatusフィールドは残っても参照されなくなる）。2026-07-20実装、registeredAt・waitDaysとセットで導入された。</div>
+
+  <div class="state-row">
+    <div class="state waiting">waiting<span class="sub-label">通常の仮登録</span></div>
+    <div class="state manual">manual<span class="sub-label">再照合の対象外</span></div>
+  </div>
+
+  <div class="transition-list">
+    <div class="transition">
+      <div class="arrow-mark">新規→waiting</div>
+      <div class="body">resolve_cardlist（register_meta/register_mine時）でTCGdex照合が0件だった場合のデフォルト。<span class="kv">applyProvisionalAwaitDefaults</span>が明示的にmanualが来てない限りwaitingを付与する<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">新規→manual（自動）</div>
+      <div class="body">provisionalになったカードのsetCode（ポケモンはsetInfoの前半、トレーナーズ／エネはsetCodeそのもの）が、KV<span class="kv">provisional:knownManualSetCodes</span>に事前登録済みの「恒久的にTCGdex未収録」リストに一致した場合、TCGdexに問い合わせるまでもなく最初からmanualで登録される（プロモ等が対象）<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">waiting→manual（recheck_mine時の自動切替）</div>
+      <div class="body">recheck_mine実行のたびに、その時点の<span class="kv">knownManualSetCodes</span>と照合し直す。後から人間がsetCodeを「既知manual」として登録した場合、既存のwaitingエントリーもrecheck_mineを1回実行するだけでmanualへ自動的に切り替わる（TCGdexへの問い合わせはスキップされる）。この件数はレスポンスの<span class="kv">autoManual</span>に入る<span class="tag confirmed-tag">確定</span></div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">waiting→manual（手動切替）</div>
+      <div class="body">人間が編集パネルからawaitStatusを直接manualに書き換える操作。update_mine経由のため、<b>ロック中のデッキでは実行できない</b>（①のlocked:trueだとupdate_mine自体が拒否されるため）。ここが今の未解決の課題（ロック中は手動manual切替もwaitDays延長もできない）</div>
+    </div>
+    <div class="transition">
+      <div class="arrow-mark">manual→waiting</div>
+      <div class="body">戻す経路は今のところ無い（想定されていない）。manualにした後で「やっぱり待ちたい」場合は編集パネルから手動で書き換えるしかない</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <b>waiting/manualの実際の効果：</b>recheck_mine実行時、<span class="kv">awaitStatus:"manual"</span>のエントリーはTCGdexへの再照合そのものをスキップされる（レスポンスの<span class="kv">manualSkipped</span>件数に入るだけで中身は変わらない）。「待っても永久に載らない見込み」という人間の判断を尊重し、無駄な再照合を省く仕組み。waitingはこの対象外＝毎回律儀に再照合される。
+  </div>
+
+  <div class="note-box">
+    <b>②の「provisional→provisional（救済不可）」との違い：</b>②のskipped（setInfo/setCode自体を持たない2026-07-20実装前の旧データ）とは別物。manualは「setInfo/setCodeはちゃんと持ってるが、人間か既知リストの判断で意図的に再照合対象から外されている」状態。skippedは"データ不足で照合しようがない"、manualは"照合はできるがあえてしない"、という違い。
+  </div>
 </div>
 
 <div class="footer">
-  作成：2026-07-19／2026-07-20更新<br>
-  2026-07-20更新内容：①「自動ロック」の記述を削除（実コード上に存在しないと判明）。手動ロックは一覧画面の専用トグルボタンとして実装済みに更新。②provisional一括再チェック（recheck_mine）実装済みに更新。あわせてprovisional保存内容がsetInfo/setCodeを含む形に拡張されたため、再照合できないケース（拡張前の古いデータ）についても追記した。
+  作成：2026-07-19／2026-07-20更新／2026-07-21更新<br>
+  2026-07-20更新内容：①「自動ロック」の記述を削除（実コード上に存在しないと判明）。手動ロックは一覧画面の専用トグルボタンとして実装済みに更新。②provisional一括再チェック（recheck_mine）実装済みに更新。あわせてprovisional保存内容がsetInfo/setCodeを含む形に拡張されたため、再照合できないケース（拡張前の古いデータ）についても追記した。<br>
+  2026-07-21更新内容：②に、トレーナーズ／エネの複数ヒット時の挙動変更（型番最小を機械採用、pickSmallestLocalIdCard）を追記。③awaitStatus（waiting/manual）のサブ状態セクションを新規追加（既知manual setCode自動判定・recheck_mine時の自動切替・手動切替の3経路と、ロック中は手動切替不可という現在の課題を記録）。
 </div>
 
 </body>

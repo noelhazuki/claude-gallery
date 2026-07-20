@@ -2,6 +2,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RES-008 ロードマップ</title>
+<meta property="og:image" content="https://placehold.co/1200x630/2c2c33/ffffff?text=RES-008+Roadmap">
 <style>
   :root {
     --done: #3f9142;
@@ -207,11 +208,11 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-20 時点（実コード確認済み）</p>
+  <p>2026-07-21 時点（実コード確認済み）</p>
 </div>
 
 <div class="note-banner">
-  <b>今回の更新メモ：</b>手動ロックの実装経路を実コードで確認し、一覧画面の専用トグルボタンに実装統一（以前の想定にあった「deckCode確定時の自動ロック」は実コード上存在しないと判明、記録から削除）。provisional一括再チェック（recheck_mine）を新規実装し、provisional保存内容にsetInfo/setCodeを追加。あわせてトレーナーズ／エネのcardId照合も実装済みと確認（以前の図では未確定表記のままやった）。
+  <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。
 </div>
 
 <div class="legend">
@@ -255,7 +256,7 @@
     </div>
     <div class="node done">
       <div class="node-title">レギュレーション適合チェック <span class="tag">完了</span></div>
-      <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。</div>
+      <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。<br><b>2026-07-21追記（運用手順）：</b>legalMarks自体は年1回のレギュ改定時のみ更新（普段は触らない）。whitelistは新弾のたび、再録トレーナーズ（同名・新イラスト）が公式の例外リストに載っているか確認して追加するかどうかを判断する。新弾情報の把握自体はまとめサイト等の自然な流入に任せ、確定判断は必ず公式の例外リストで行う（人間＝ハノイさんが確認しClaudeへ投げるルート、自動巡回はしない）。</div>
     </div>
     <div class="node done">
       <div class="node-title">copy_meta <span class="tag">完了</span></div>
@@ -268,6 +269,14 @@
     <div class="node done">
       <div class="node-title">provisional一括再チェック（recheck_mine）<span class="tag">完了</span></div>
       <div class="node-desc">mine1件分のprovisionalカードをまとめて再照合する新規エンドポイント。あわせてprovisional保存内容を拡張し、setInfo（ポケモン）／setCode（トレーナーズ／エネ）を保持するよう変更（再照合の材料として必要だったため）。拡張前に登録済みの古いprovisionalは再照合不可（skipped扱い）。ロック中デッキでも実行可。一覧画面に「❓未確定×N」バッジも追加。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">provisional内サブ状態 awaitStatus（waiting/manual）<span class="tag">完了</span></div>
+      <div class="node-desc">provisionalエントリーに registeredAt／awaitStatus／waitDays を付与する仕組み。新規provisionalは基本waiting、KV「provisional:knownManualSetCodes」（恒久的にTCGdex未収録と判断済みのsetCode一覧、プロモ等）に一致すれば自動でmanualに切り替わる。manualはrecheck_mineの再照合対象から除外される（無駄な問い合わせを省く）。人間による手動manual切替・waitDays延長はupdate_mine経由のため、ロック中デッキでは操作不可という制約が残っている（課題として持ち越し中）。詳細は状態遷移図③参照。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">トレーナーズ／エネ複数ヒット時の確定ルール <span class="tag">完了（2026-07-21）</span></div>
+      <div class="node-desc">同一setCode内に同名カードの型番違いが複数存在するケース（例：ボスの指令、ポケパッド）で、以前は複数ヒットを処理できず常にprovisional行きになっていた不具合（MC/M3）を修正。「型番(localId)最小のものを機械的に採用してconfirmed扱いにする」pickSmallestLocalIdCardルールを追加し、デプロイ・実機確認済み。型番最小＝必ず正解の保証はない割り切りルール。</div>
     </div>
   </div>
 </div>
@@ -287,9 +296,9 @@
       <div class="node-title">cardRuleOverrides初期データ <span class="tag">未着手</span></div>
       <div class="node-desc">かがやくゲッコウガ・ACE SPEC・ストームエメラルダ等、既知の例外ルール登録。レギュレーション判定（legalMarks/whitelist）とは別軸の仕組みとして未実装のまま。</div>
     </div>
-    <div class="node todo">
-      <div class="node-title">既存テストデータ移行 <span class="tag">未着手</span></div>
-      <div class="node-desc">test / test2 / dora03を新cardList形式へ移行する方針決め。</div>
+    <div class="node done">
+      <div class="node-title">既存テストデータ移行 <span class="tag">完了（2026-07-21・方針転換）</span></div>
+      <div class="node-desc">当初は test / test2 / dora03 を新cardList形式へ移行する方針やったが、どれも使わないテスト用データやったため、移行ではなく<b>削除</b>で決着。全て削除済み（「登録日情報なし」表示の混同疑いも、この旧データが原因と判明→データ削除により解消）。</div>
     </div>
   </div>
 </div>
@@ -330,6 +339,7 @@
     <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
     <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
     <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
+    <li>MC/M3のprovisional固着バグ修正（pickSmallestLocalIdCard）・awaitStatus実装・旧テストデータ削除：対応済み（2026-07-21）</li>
   </ol>
 </div>
 
