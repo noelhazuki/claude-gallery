@@ -141,22 +141,36 @@
       <div class="branch-label no">No（トレーナーズ／エネ）</div>
       <div class="node confirmed">
         <div class="title">cardId照合を行う</div>
-        <div class="detail">setCode＋カード名の完全一致で、set:{setId}の遅延キャッシュと突き合わせる（matchTrainerOrEnergyCard）</div>
+        <div class="detail">setCode＋カード名の完全一致で、set:{setId}の遅延キャッシュと突き合わせる（matchTrainerOrEnergyCard）
+0件ヒット → 未ヒット扱い
+1件ヒット → そのカードで確定
+複数件ヒット → 下記の追加ルールで1件に絞ってから確定扱いにする</div>
       </div>
     </div>
     <div>
       <div class="branch-label yes">Yes（ポケモン）</div>
       <div class="node confirmed">
         <div class="title">cardId照合を行う</div>
-        <div class="detail">setInfo（公式カード番号表記）からcardIdを変換し、card:{cardId}の遅延キャッシュと突き合わせる</div>
+        <div class="detail">setInfo（公式カード番号表記）からcardIdを変換し、card:{cardId}の遅延キャッシュと突き合わせる
+（setInfoから1件のIDを直接組み立てる方式のため、この照合方法では構造上「複数ヒット」は発生しない）</div>
       </div>
     </div>
   </div>
 
-  <div class="arrow">↓（照合方法は違うが、ここで両ルート合流。以降は共通処理）</div>
+  <div class="node unresolved" style="max-width:520px;margin:8px auto 0;">
+    <div class="title">【2026-07-21追加】トレーナーズ／エネ限定：複数ヒット時の追加ルール</div>
+    <div class="detail">同一setCode（同じ拡張パック）内に、同名カードだが型番（localId）だけが違うカードが複数存在するケースが実在すると判明した
+（例：ボスの指令＝724/742と760/742の2種、ポケパッド＝070/080と103/080の2種。いずれも同一パック内の別レアリティ違いで、名前とsetCodeだけでは1件に絞れない）
+
+この場合、旧ロジックは「1件に絞れない＝諦めてnull」としており、結果として毎回provisionalに落ちて確定させる手段が無かった（エラーも出ず静かに未確定のまま残る不具合として発覚）
+
+対処として、複数ヒット時は<b>型番（localId）が最小のもの</b>を機械的に採用するルールを追加した（pickSmallestLocalIdCard関数）。型番最小＝必ずしも「正しいカード」という保証ではなく割り切りルールである点は要注意。ポケモン側（setInfo直接変換方式）はこの問題が構造的に起こらないため対象外</div>
+  </div>
+
+  <div class="arrow">↓（照合方法・複数ヒット処理は違うが、ここで両ルート合流。以降は共通処理。この時点でcardIdは0件かちょうど1件のどちらかに揃っている）</div>
 
   <div class="node decision">
-    <div class="title">cardIdが一意にヒットしたか</div>
+    <div class="title">cardIdがヒットしたか</div>
   </div>
 
   <div class="branch">
@@ -189,7 +203,8 @@
 <div class="footer">
   作成：2026-07-19<br>
   読み方の補足：分岐（decision）ノードは「Yes/No」の2択で下に枝分かれする。枝分かれした先が同じ色（confirmed同士など）でも、通ってきた分岐条件が違えば意味が違うので、必ず直前の分岐ノードとセットで読むこと。<br>
-  2026-07-20更新：トレーナーズ／エネのcardId照合（setCode＋名前の完全一致）を実装済みと確認。あわせてprovisional化時にsetInfo/setCodeを保持するよう変更、provisionalからconfirmedへの再照合はrecheck_mine（mine限定）で実装済み。詳細は状態遷移図②を参照。
+  2026-07-20更新：トレーナーズ／エネのcardId照合（setCode＋名前の完全一致）を実装済みと確認。あわせてprovisional化時にsetInfo/setCodeを保持するよう変更、provisionalからconfirmedへの再照合はrecheck_mine（mine限定）で実装済み。詳細は状態遷移図②を参照。<br>
+  2026-07-21更新：トレーナーズ／エネのcardId照合で「同一setCode内に同名カードの型番違いが複数存在し、絞り込めず常にprovisional行きになる」不具合を発見・修正。複数ヒット時は型番（localId）最小を機械的に採用するルールを追加し、実機（ボスの指令・ポケパッド）で確定への昇格を確認済み。
 </div>
 
 </body>

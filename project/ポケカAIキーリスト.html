@@ -101,11 +101,11 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-20時点（新弾受け入れ手順セッションでの修正反映）</p>
+  <p>2026-07-21時点（トレーナーズ／エネ複数ヒット不具合の修正反映）</p>
 </header>
 
 <div class="update-note">
-  <b>今回の更新メモ：</b>recheck_mine実動作確認の過程で、provisionalカードがレギュ判定で"card_not_found"として違反扱いされ登録自体が弾かれる不具合を発見・修正。provisional状態のカードはレギュ判定の対象から除外し、登録を通すよう変更した（cardId確定済み＝confirmedのカードのみ判定）。violationsの説明を修正版に更新。あわせて「登録時に弾くか？askアドバイス行きにするか」の判断基準＝「公式大会のデッキチェックで引っかかるかどうか」を決定事項として追加。
+  <b>今回の更新メモ：</b>ボスの指令（MC）・ポケパッド（M3）が確定せずprovisionalのまま残り続ける不具合を調査。原因は「同一setCode内に同名カードの型番違いが複数存在」しており、matchTrainerOrEnergyCardの名前＋setCode完全一致検索が複数ヒットして絞り込めず、常にprovisional行きになっていたこと（エラーは出ず静かに未確定のまま残る挙動やったので発見が遅れた）。対処として「複数ヒット時は型番（localId）最小を機械的に採用」するルールを実装・デプロイし、実機で確定への昇格を確認済み。用語一覧に新規追加。
 </div>
 
 <div class="group">
@@ -193,6 +193,10 @@
       <td class="term">recheck_mine<div class="status done">実装済み</div></td>
       <td class="desc">mine1件分のprovisionalエントリーをまとめてTCGdexへ再照合するエンドポイント。保持しているsetInfo/setCodeを使って照合し、ヒットした分だけconfirmedへ昇格。ロック中でも実行可</td>
     </tr>
+    <tr>
+      <td class="term">matchTrainerOrEnergyCard 複数ヒット時ルール<div class="status done">2026-07-21実装</div></td>
+      <td class="desc">トレーナーズ／エネの照合（setCode＋名前の完全一致）は、同一setCode内に同名カードの型番違いが複数存在するケースがあると判明（例：ボスの指令＝724/742と760/742の2種、ポケパッド＝070/080と103/080の2種。同じ拡張パック内の別レアリティ違い）。<br>従来は複数ヒット時に絞り込めず諦めてnullを返しており、結果として常にprovisionalへ落ちて確定させる手段が無い不具合になっていた（エラーは出ず静かにprovisional行き）。<br>対処として、<b style="color:#ffd76a;">複数ヒット時は型番（localId）が最小のものを機械的に採用する</b>ルールを決定・実装した（pickSmallestLocalIdCard関数）。型番最小＝必ずしも「正しいカード」という保証がある訳ではない割り切りルールである点に注意。ポケモン側（setInfo直接変換方式）はこの問題が構造的に起こらないため対象外</td>
+    </tr>
   </table>
 </div>
 
@@ -251,6 +255,7 @@
 </div>
 
 <footer>Dictionary.jsonへの登録はまだ。登録するか要確認</footer>
+<footer style="margin-top:4px;">更新履歴：2026-07-21 matchTrainerOrEnergyCard複数ヒット時ルールを追加</footer>
 
 </body>
 </html>
