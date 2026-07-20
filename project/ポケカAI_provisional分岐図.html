@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokeca-ai provisional分岐図（awaitStatus）</title>
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --ink:#242019;
+    --card:#ffffff;
+    --line:#d8d1c2;
+    --confirmed:#2f6f5e;
+    --confirmed-bg:#e6f0ec;
+    --waiting:#b4711f;
+    --waiting-bg:#f6ead9;
+    --manual:#9a3b3b;
+    --manual-bg:#f5e4e1;
+    --decision:#1f4d6b;
+    --decision-bg:#e6eef4;
+    --accent:#1f4d6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:24px 16px 64px;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+  }
+  .header{margin-bottom:20px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+
+  .context-box{
+    max-width:520px;margin:0 auto 22px;
+    background:#fff8e6;border:1px solid #f0d999;border-radius:10px;
+    padding:12px 14px;font-size:12px;color:#7a5c1c;line-height:1.7;
+  }
+  .context-box b{color:#9c7412;}
+
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px auto 26px;font-size:12px;max-width:520px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.decision{background:var(--decision);}
+  .dot.waiting{background:var(--waiting);}
+  .dot.manual{background:var(--manual);}
+  .dot.confirmed{background:var(--confirmed);}
+
+  .section-title{
+    font-size:14px;font-weight:700;color:var(--accent);
+    margin:34px auto 12px;max-width:520px;
+    padding-bottom:6px;border-bottom:2px solid var(--accent);
+  }
+
+  .flow{display:flex;flex-direction:column;align-items:stretch;max-width:520px;margin:0 auto;}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  .node .label{font-size:11px;color:#8a8271;margin-bottom:4px;}
+  .node .title{font-size:14px;font-weight:700;}
+  .node .detail{font-size:12.5px;color:#4a4437;margin-top:6px;white-space:pre-line;}
+  .node.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg);}
+  .node.waiting{border-color:var(--waiting); background:var(--waiting-bg);}
+  .node.manual{border-color:var(--manual); background:var(--manual-bg);}
+  .node.decision{border-color:var(--decision); background:var(--decision-bg);}
+  .node.decision .title::before{content:"分岐：";color:var(--decision);}
+
+  .arrow{align-self:center;font-size:18px;color:#a89f8c;margin:2px 0;}
+
+  .branch{display:flex;gap:10px;margin:4px 0;}
+  .branch > div{flex:1;display:flex;flex-direction:column;}
+  .branch-label{font-size:11px;text-align:center;color:#8a8271;margin-bottom:4px;font-weight:700;}
+  .branch-label.waiting-l{color:var(--waiting);}
+  .branch-label.manual-l{color:var(--manual);}
+
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+
+  table{width:100%;border-collapse:collapse;max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  th,td{text-align:left;padding:9px 10px;font-size:12px;vertical-align:top;border-bottom:1px solid var(--line);}
+  th{background:#efe9db;font-size:11px;color:#5a5347;width:26%;}
+  tr:last-child td{border-bottom:none;}
+
+  .footer{max-width:520px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">RES-008 / pokeca-ai</div>
+  <h1>provisional分岐図：awaitStatus（waiting / manual）</h1>
+  <div class="sub">状態遷移図②「provisional / confirmed」の中身を、さらに1段掘り下げた図。provisionalは一枚岩じゃなく、「そのうち解決する見込みがあるやつ」と「解決する見込みが薄いやつ」の2種類が混ざっている、という話。</div>
+</div>
+
+<div class="context-box">
+  <b>そもそもの前提（TCGdexの仕組み）：</b>TCGdexは「国際版セット」を軸にデータが作られていて、各言語の翻訳データがその国際版セットに乗っかる構造になっている。日本限定パック（国際版として発売されたことが一度もないもの）は、乗っかる先の国際版セット自体が存在しないため、丸ごと未収録になる。これは「そのうち直る」ようなバグではなく、TCGdex側の設計そのものに起因する。<br><br>
+  この前提があるから、「TCGdexに載ってないカード＝いつか載る」とは限らない、という区別が必要になった。
+</div>
+
+<div class="legend">
+  <span><span class="dot decision"></span>分岐判定</span>
+  <span><span class="dot waiting"></span>waiting（待てば解決見込みあり）</span>
+  <span><span class="dot manual"></span>manual（待っても解決しない見込み）</span>
+  <span><span class="dot confirmed"></span>確定</span>
+</div>
+
+<div class="section-title">① provisionalに入った後、どっちに振り分けるか</div>
+
+<div class="flow">
+
+  <div class="node waiting">
+    <div class="label">出発点</div>
+    <div class="title">provisionalとして登録される</div>
+    <div class="detail">resolve_cardlist時点でTCGdex照合が0件だったカード。この時点ではまだwaiting/manualの区別はついていない</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node decision">
+    <div class="title">awaitStatusフィールドを付与する</div>
+    <div class="detail">provisionalエントリーに新規追加するフィールド。デフォルト値は必ずwaiting固定（自動でmanualになることはない）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node waiting">
+    <div class="title">awaitStatus: "waiting"（初期状態・全件ここから始まる）</div>
+    <div class="detail">「いずれTCGdexに載る見込みがある」扱い。該当するケース：
+・普通の新弾カード（発売直後でまだTCGdex側の収録が追いついてないだけ）
+・日本限定パックだが、将来的に国際版が出て収録される可能性が残っているもの</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node decision">
+    <div class="title">人間が個別に見て判断する</div>
+    <div class="detail">「これは実質載らんやつやな」と判断できたものだけ、手動でmanualへ切り替える。自動判定のロジックは無い（載る/載らないをシステム側で機械的に判定する材料が無いため）</div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branch-label waiting-l">そのまま待つ</div>
+      <div class="node waiting">
+        <div class="title">waitingに留まる</div>
+        <div class="detail">recheck_mineの対象に含まれ続ける。新弾収録や国際版化が進めば、いずれconfirmedへ昇格するのを待つ</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-label manual-l">見切りをつける</div>
+      <div class="node manual">
+        <div class="title">manualへ切り替える</div>
+        <div class="detail">該当するケース：国別限定プロモ等、そもそも実在や仕様が怪しい／TCGdexに載る構造上の道筋がないもの。recheck_mineの対象から外れる（未実装）</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-title">② waiting と manual の違い一覧</div>
+
+<table>
+  <tr><th></th><th style="width:37%">waiting</th><th>manual</th></tr>
+  <tr>
+    <td>意味</td>
+    <td>待てばTCGdexに載る見込みがある</td>
+    <td>待っても永久に載らない可能性が高い／実在も怪しい</td>
+  </tr>
+  <tr>
+    <td>該当例</td>
+    <td>発売直後の新弾／国際版化待ちの日本限定パック</td>
+    <td>国別限定プロモ等</td>
+  </tr>
+  <tr>
+    <td>recheck_mineの対象か</td>
+    <td>対象（毎回再照合される）</td>
+    <td>対象外・スキップ（未実装）</td>
+  </tr>
+  <tr>
+    <td>切り替えのきっかけ</td>
+    <td>デフォルト値（自動で入る）</td>
+    <td>人間が個別に見て判断・手動切り替えのみ</td>
+  </tr>
+  <tr>
+    <td>一覧画面のバッジ（未実装）</td>
+    <td>「⏳対応待ち×N」</td>
+    <td>「❓手動×N」</td>
+  </tr>
+</table>
+
+<div class="context-box" style="margin-top:22px;">
+  <b>注意：</b>manualへ切り替わったカードも、cardListからは消えない。あくまで「recheck_mineが自動で再照合する対象から外れる」だけで、中身（tempName・count等）はprovisionalのまま残り続ける。手動でcardIdを調べて編集パネルから直す経路は今まで通り使える。
+</div>
+
+<div class="footer">
+  作成：2026-07-20<br>
+  位置づけ：状態遷移図②「provisional／confirmed」の詳細図。①のmine全体ロック（locked/unlocked）とは無関係の別軸。<br>
+  実装状況：awaitStatusフィールド設計は確定（spec反映済み）。src/index.js・register_meta_test.htmlへの実装、recheck_mineのmanualスキップ分岐、バッジ2分割はいずれも未実装。
+</div>
+
+</body>
+</html>
