@@ -1,0 +1,277 @@
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RES-008 OCR共通スキーマ ロジック図</title>
+<meta property="og:image" content="https://placehold.co/1200x630/2c2c33/ffffff?text=RES-008+OCR+Schema+Logic">
+<style>
+  :root {
+    --paper: #f7f6f2;
+    --line: #d8d8de;
+    --raw: #6b6b76;
+    --raw-bg: #eef0f2;
+    --fixed: #4a7fb5;
+    --fixed-bg: #e8f1fa;
+    --subtypes: #6a4fae;
+    --subtypes-bg: #f1ecfa;
+    --ruletags: #b5451a;
+    --ruletags-bg: #fff1e8;
+    --deckrules: #b58a1a;
+    --deckrules-bg: #fdf6e3;
+    --output: #2b6e2e;
+    --output-bg: #e8f5e9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: var(--paper);
+    color: #2c2c33;
+    padding: 24px 14px 60px;
+  }
+  .header { text-align: center; margin-bottom: 18px; }
+  .header .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    background: #2c2c33;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .header h1 { font-size: 19px; margin: 0 0 4px; }
+  .header p { font-size: 12px; color: #6b6b76; margin: 0; }
+
+  .flow { max-width: 480px; margin: 24px auto 0; }
+
+  .box {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .box .kicker {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .box .name { font-size: 14px; font-weight: bold; margin-bottom: 6px; }
+  .box .items {
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: #4a4a54;
+  }
+  .box .items li { margin-left: 16px; }
+  .box .note {
+    margin-top: 8px;
+    font-size: 10.5px;
+    color: #7a7a86;
+    line-height: 1.5;
+    border-top: 1px dashed var(--line);
+    padding-top: 6px;
+  }
+
+  .box.raw { background: var(--raw-bg); border-color: #ccced4; }
+  .box.raw .kicker, .box.raw .name { color: var(--raw); }
+
+  .split {
+    display: flex;
+    gap: 10px;
+    margin: 0 auto;
+  }
+  .split .box { flex: 1; }
+
+  .box.fixed { background: var(--fixed-bg); border-color: #c2dcf0; }
+  .box.fixed .kicker, .box.fixed .name { color: var(--fixed); }
+
+  .box.subtypes { background: var(--subtypes-bg); border-color: #d3c4ee; }
+  .box.subtypes .kicker, .box.subtypes .name { color: var(--subtypes); }
+
+  .box.ruletags { background: var(--ruletags-bg); border-color: #f3c3a6; }
+  .box.ruletags .kicker, .box.ruletags .name { color: var(--ruletags); }
+
+  .box.deckrules { background: var(--deckrules-bg); border-color: #ecd48a; }
+  .box.deckrules .kicker, .box.deckrules .name { color: var(--deckrules); }
+
+  .box.output { background: var(--output-bg); border-color: #bfe0c1; }
+  .box.output .kicker, .box.output .name { color: var(--output); }
+
+  .box.cross { background: #e5f3f3; border-color: #b9dddd; }
+  .box.cross .kicker, .box.cross .name { color: #1f6b6b; }
+
+  .note-banner {
+    max-width: 480px;
+    margin: 0 auto 20px;
+    background: #fff8e6;
+    border: 1px solid #f0d999;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: #7a5c1c;
+    line-height: 1.7;
+  }
+  .note-banner b { color: #9c7412; }
+
+  .arrow {
+    text-align: center;
+    font-size: 18px;
+    color: #b0b0ba;
+    line-height: 1;
+    margin: 4px 0;
+  }
+  .arrow.merge { position: relative; height: 26px; }
+  .arrow.merge::before {
+    content: "";
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    top: 0;
+    height: 14px;
+    border: 2px solid #b0b0ba;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+  }
+  .arrow.merge::after {
+    content: "▾";
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    color: #b0b0ba;
+    font-size: 14px;
+  }
+
+  .sidetrack {
+    max-width: 480px;
+    margin: 8px auto 0;
+  }
+  .sidetrack .connector {
+    font-size: 10px;
+    color: #9a9aa4;
+    text-align: center;
+    margin: 4px 0;
+    line-height: 1.6;
+  }
+
+  .legend {
+    max-width: 480px;
+    margin: 26px auto 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11px;
+    color: #55555f;
+    line-height: 1.8;
+  }
+  .legend b { color: #2c2c33; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
+  <h1>OCR共通スキーマ ロジック図</h1>
+  <p>2026-07-21 更新版（設計確定・実装はまだ）</p>
+</div>
+
+<div class="note-banner">
+  <b>2026-07-21の更新内容：</b>subtypes／ruleTagsの導出ルールを1項目ずつ見直した。ACE SPECはポケモンには付かないラベルなので、ruleTags側の導出元をsubtypesから外し、下の「横断フラグ（cross_category_fields）」という別枠に移した（トレーナーズ・エネにも共通で付き得るため）。VMAXはレギュ落ち済みで、値は保持するが特別扱いはせずregulationMark判定に任せる方針に確定。hasAbility（特性の有無）はsubtypesにはあるが、deckRules（枚数ルール）には一切関与しないため「今は繋がない・将来のAI相談機能用の情報フラグ」と明記した。
+</div>
+
+<div class="flow">
+
+  <div class="box raw">
+    <div class="kicker">INPUT</div>
+    <div class="name">カード生データ（TCGdex／OCR結果）</div>
+    <div class="items">カード名・印刷されてる属性・わざ欄・進化段階表記・ex/メガ等のラベル表記・特性欄の有無など、そのまま読み取れる情報一式</div>
+  </div>
+
+  <div class="arrow">↓ そのまま保持する情報と、分類ラベルとして抜き出す情報に分かれる</div>
+
+  <div class="split">
+    <div class="box fixed">
+      <div class="kicker">そのまま保持（そのまま入れる、分岐なし）</div>
+      <div class="name">type / moves[].cost</div>
+      <div class="items">
+        ・type：ポケモン自身の属性（1個）<br>
+        ・moves[].cost：技ごとの消費エネルギー（技の性質で複数属性持つ可能性あり）
+      </div>
+      <div class="note">例：マシマシラはtype「エスパー」だがmoves[].costには「悪」が入る。属性と技コストは常に別フィールド</div>
+    </div>
+
+    <div class="box subtypes">
+      <div class="kicker">分類ラベルとして抽出（ポケモン専用）</div>
+      <div class="name">subtypes</div>
+      <div class="items">
+        ・進化段階（たね/1進化/2進化）<br>
+        ・特殊ラベル系（ex/メガ/VMAX/テラスタル/未来/古代/かがやく）<br>
+        ・どうぐ扱いポケモンか<br>
+        ・特性の有無（hasAbility）
+      </div>
+      <div class="note">ACE SPECはここには含まない（ポケモンに付かないラベルのため。下の「横断フラグ」枠を参照）。VMAXはレギュ落ち済みだが値としては保持し、除外はregulationMark判定に任せる。hasAbilityはsubtypesとしては持つが、ruleTags側へは導出しない（右下の注記参照）</div>
+    </div>
+  </div>
+
+  <div class="sidetrack">
+    <div class="connector">type / moves[].cost はここで一旦横に置いておく（deckRulesとは直接つながらない）</div>
+  </div>
+
+  <div class="arrow">↓ subtypes（どういうポケモンの分類か）を見て、性質フラグ（各々の処理用フラグ）を導出する</div>
+
+  <div class="box ruletags">
+    <div class="kicker">DERIVE（導出）</div>
+    <div class="name">ruleTags</div>
+    <div class="items">
+      ・exラベル → 「サイド取られる枚数変化」フラグ<br>
+      ・未来/古代/かがやく等 → 「レギュレーションで有効/無効が変わる」フラグ（実際の合否判定は既存のregulationMark照合が担当）<br>
+      ・どうぐ扱いポケモン → 「ポケモンだがトレーナーズ扱い」等の制約フラグ
+    </div>
+    <div class="note">ruleTagsはフラグを持つだけ。「何枚まで」「合法かどうか」の実計算はここではしない。ACE SPECはポケモンのsubtypesに存在しないため、ここでの導出対象からは外れる（下の横断フラグ枠を参照）。hasAbilityも意図的にここへは導出しない（2026-07-21確定）</div>
+  </div>
+
+  <div class="sidetrack">
+    <div class="connector">↓ ここでポケモン以外（グッズ／どうぐ／サポート／スタジアム／エネ）のカードが合流する</div>
+  </div>
+
+  <div class="box cross">
+    <div class="kicker">CROSS-CATEGORY（横断フラグ）</div>
+    <div class="name">cross_category_fields</div>
+    <div class="items">
+      ・isAceSpec：true/false（グッズ・どうぐ・サポート・スタジアム・エネのいずれにも付き得る）<br>
+      ・isBasicEnergy：true/false（エネのみ対象）
+    </div>
+    <div class="note">deckRulesの枚数判定に直接使う2フラグのみを構造化。「相手のグッズを使えなくする」「どうぐを破壊する」「ベンチ最大数を増やすスタジアム」等の対戦中の効果は、デッキ登録時の枚数には影響しないため構造化対象外（trainer_card_rulesで対戦中ルールとして別管理、原文テキスト保持）</div>
+  </div>
+
+  <div class="arrow">↓ ruleTagsとcross_category_fields、両方を材料に構築枚数等のルールを計算する</div>
+
+  <div class="box deckrules">
+    <div class="kicker">CALCULATE（計算）</div>
+    <div class="name">deckRules</div>
+    <div class="items">
+      ・同名カード基本4枚まで（名前基準の合算）<br>
+      ・isAceSpec:trueのカードは合計1枚まで（cross_category_fields参照）<br>
+      ・isBasicEnergy:trueのカードは無制限（cross_category_fields参照）<br>
+      ・デッキ合計60枚ちょうど<br>
+      ・ポケモン最低1枚必須（事故率の話は?ask機能側、ideas.md今後検討に記録済み）
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="box output">
+    <div class="kicker">OUTPUT</div>
+    <div class="name">デッキ構築 可否判定結果</div>
+    <div class="items">枚数ルール違反があれば一覧化して返す（既存のレギュ判定violations方式と同じ考え方を踏襲予定）</div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>読み方：</b>上から下へ「OCR生データ→分類ラベル→性質フラグ→計算ルール→判定結果」の順で処理が流れる想定。type/moves[].costだけは枚数ルールに関与しないため本流から外れて横に置いてある（将来の対戦シミュレーション機能で技コストを参照する可能性はideas.mdに記録済み）。<br><br>
+  <b>subtypes／ruleTagsはポケモン専用の分類・導出フロー。</b>グッズ／どうぐ／サポート／スタジアム／エネは別カテゴリのため、この2層は通らず、横断フラグ（cross_category_fields）としてdeckRulesに直接合流する。トレーナーズの対戦中の使用ルール（1ターン1枚・場に1枚まで等）はこの図の範囲外で、trainer_card_rulesセクションが別途管理する。
+</div>
+
+</body></html>

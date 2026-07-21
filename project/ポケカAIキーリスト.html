@@ -101,11 +101,12 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-21時点（トレーナーズ／エネ複数ヒット不具合の修正反映）</p>
+  <p>2026-07-21時点（OCR共通スキーマ横断フラグを追加）</p>
 </header>
 
 <div class="update-note">
-  <b>今回の更新メモ：</b>ボスの指令（MC）・ポケパッド（M3）が確定せずprovisionalのまま残り続ける不具合を調査。原因は「同一setCode内に同名カードの型番違いが複数存在」しており、matchTrainerOrEnergyCardの名前＋setCode完全一致検索が複数ヒットして絞り込めず、常にprovisional行きになっていたこと（エラーは出ず静かに未確定のまま残る挙動やったので発見が遅れた）。対処として「複数ヒット時は型番（localId）最小を機械的に採用」するルールを実装・デプロイし、実機で確定への昇格を確認済み。用語一覧に新規追加。
+  <b>今回の更新メモ：</b>ボスの指令（MC）・ポケパッド（M3）が確定せずprovisionalのまま残り続ける不具合を調査。原因は「同一setCode内に同名カードの型番違いが複数存在」しており、matchTrainerOrEnergyCardの名前＋setCode完全一致検索が複数ヒットして絞り込めず、常にprovisional行きになっていたこと（エラーは出ず静かに未確定のまま残る挙動やったので発見が遅れた）。対処として「複数ヒット時は型番（localId）最小を機械的に採用」するルールを実装・デプロイし、実機で確定への昇格を確認済み。用語一覧に新規追加。<br><br>
+  <b>同日追記：</b>OCR共通スキーマ（未実装）の導出ルール整理で、ACE SPECはポケモンには付かないラベルと判明。グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec／isBasicEnergy）として、OCR共通スキーマのグループに新規追加した。
 </div>
 
 <div class="group">
@@ -154,6 +155,18 @@
     <tr>
       <td class="term">deckRules</td>
       <td class="desc">ruleTagsを見て実際にデッキ構築時の枚数をチェックする計算ロジック側。同名カード基本4枚、ACE SPEC合計1枚、基本エネルギー無制限、デッキ合計60枚、ポケモン最低1枚、などが対象</td>
+    </tr>
+    <tr>
+      <td class="term">cross_category_fields<span class="status done">2026-07-21追加</span></td>
+      <td class="desc">ポケモン専用のsubtypesとは別に、グッズ／どうぐ／サポート／スタジアム／エネの共通で持つ横断フラグ層。isAceSpec・isBasicEnergyの2つのみを持ち、deckRulesの枚数判定に直接使う。ACE SPECはポケモンには付かないラベルと判明したため、subtypes／ruleTagsからはここに移設された</td>
+    </tr>
+    <tr>
+      <td class="term">isAceSpec<span class="status done">2026-07-21追加</span></td>
+      <td class="desc">true/falseのフラグ。グッズ・どうぐ・サポート・スタジアム・エネのいずれにも付き得る。deckRulesの「ACE SPEC合計1枚まで」判定に使用</td>
+    </tr>
+    <tr>
+      <td class="term">isBasicEnergy<span class="status done">2026-07-21追加</span></td>
+      <td class="desc">true/falseのフラグ。エネのみ対象。deckRulesの「基本エネルギー無制限（4枚制限の対象外）」判定に使用</td>
     </tr>
   </table>
 </div>

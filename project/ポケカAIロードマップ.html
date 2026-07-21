@@ -208,11 +208,12 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-21 時点（実コード確認済み）</p>
+  <p>2026-07-21 時点（OCR共通スキーマ導出ルール・トレーナーズ横断フラグ確定を反映）</p>
 </div>
 
 <div class="note-banner">
-  <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。
+  <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。<br><br>
+  <b>同日追記：</b>OCR共通スキーマの導出ルール整理・トレーナーズ専用フィールド洗い出しが決着。ACE SPECはポケモンのsubtypesには存在せず、グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec）として別枠管理する方針に確定。VMAXはレギュ落ち済みとして値のみ保持、hasAbility（特性の有無）はdeckRulesに関与しない情報フラグと位置づけ。「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果でありデッキ構築の枚数には影響しないため構造化対象外と判断。詳細はロジック図参照。
 </div>
 
 <div class="legend">
@@ -289,8 +290,8 @@
       <div class="node-desc">8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）＋{cardId,count}、TCGdex未照合時は{provisional:true,tempName,count}の仮登録形式で実運用中。</div>
     </div>
     <div class="node now">
-      <div class="node-title">OCR共通スキーマの整理 <span class="tag">現在地</span></div>
-      <div class="node-desc">3層構造（subtypes／ruleTags／deckRules）のうち、subtypesとruleTagsの重複整理（導出ルール検討）と、サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出しが未着手のまま持ち越し中。</div>
+      <div class="node-title">OCR共通スキーマの整理 <span class="tag">現在地（一部完了・2026-07-21）</span></div>
+      <div class="node-desc">subtypes／ruleTagsの導出ルール見直しが完了。ACE SPECはポケモンのsubtypesに存在しないと判明→横断フラグ（isAceSpec／isBasicEnergy）として別枠に移設。VMAXはレギュ落ち済みで値のみ保持、regulationMark判定に除外を任せる方針。hasAbilityはdeckRulesに関与しない情報フラグと確定。トレーナーズ側の専用フィールド洗い出しも完了：deckRulesに直接効くのはisAceSpec／isBasicEnergyの2つのみで、「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果としてtrainer_card_rules（原文テキスト保持）に留める判断。残るは対象拡張パック（SV6a・MA、SVHM）のカード一覧確定・OCR作業範囲確定のみ（ストームエメラルダ発売後）。詳細はspec.json ocr_schema_design・ロジック図参照。</div>
     </div>
     <div class="node todo">
       <div class="node-title">cardRuleOverrides初期データ <span class="tag">未着手</span></div>
@@ -331,12 +332,12 @@
 
 <div class="now-panel">
   <div class="label">NEXT ACTION</div>
-  <div class="title">OCR共通スキーマの整理、ここから着手</div>
+  <div class="title">OCR共通スキーマ：残りは新セットのカード一覧確定のみ</div>
   <ol>
-    <li>スキーマ構造（3層：subtypes／ruleTags／deckRules）を図解（ロジック設計図・入出力設計図）で提示</li>
-    <li>subtypes／ruleTagsの重複整理・導出ルール検討</li>
-    <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し</li>
-    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定</li>
+    <li>スキーマ構造（3層：subtypes／ruleTags／deckRules）を図解（ロジック設計図・入出力設計図）で提示：対応済み</li>
+    <li>subtypes／ruleTagsの重複整理・導出ルール検討：対応済み（2026-07-21）</li>
+    <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し：対応済み（2026-07-21、isAceSpec／isBasicEnergyの横断フラグに集約）</li>
+    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定（ストームエメラルダ発売後に着手）</li>
     <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
     <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
     <li>MC/M3のprovisional固着バグ修正（pickSmallestLocalIdCard）・awaitStatus実装・旧テストデータ削除：対応済み（2026-07-21）</li>
