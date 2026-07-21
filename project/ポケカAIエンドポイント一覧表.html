@@ -201,8 +201,8 @@
   <div class="ep-summary">provisional1件のawaitStatusを手動で'manual'へ切り替える</div>
   <div class="ep-detail">
     <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>deckId / category / tempName / setInfo</div>
-    <div class="row"><span class="k">備考</span>対象特定はdeckId＋category＋tempName＋setInfoの完全一致（<span class="kv">findProvisionalEntry</span>関数）。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄に渡す。recheck_mineと同じ理屈でロック中のデッキでも実行可。切替後はrecheck_mineの再照合対象から外れる</div>
+    <div class="row"><span class="k">必須項目</span>deckId / category　＋　（pid）または（tempName / setInfo）</div>
+    <div class="row"><span class="k">備考</span>対象特定はdeckId＋category＋tempName＋setInfoの完全一致（<span class="kv">findProvisionalEntry</span>関数）。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄に渡す。recheck_mineと同じ理屈でロック中のデッキでも実行可。切替後はrecheck_mineの再照合対象から外れる<br>2026-07-21追記：<span class="kv">pid</span>（背番号）を任意項目として追加。pidを渡す場合はtempName/setInfoは省略可（categoryのみ引き続き必須）。pidを渡さない場合は従来通りtempName/setInfo必須（pid実装前の古いprovisional向けの経路として存続）</div>
   </div>
 </div>
 
@@ -211,8 +211,8 @@
   <div class="ep-summary">provisional1件のwaitDaysを更新する</div>
   <div class="ep-detail">
     <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>deckId / category / tempName / setInfo / waitDays</div>
-    <div class="row"><span class="k">備考</span>対象特定はset_manualと同じくfindProvisionalEntry。waitDaysは絶対値方式（UIの「+7」ボタン相当の計算はフロント側で行い、ここには計算済みの絶対値を送る）。1以上の整数のみ許可。ロック中でも実行可</div>
+    <div class="row"><span class="k">必須項目</span>deckId / category / waitDays　＋　（pid）または（tempName / setInfo）</div>
+    <div class="row"><span class="k">備考</span>対象特定はset_manualと同じくfindProvisionalEntry（pid優先、無ければtempName/setInfo）。waitDaysは絶対値方式（UIの「+7」ボタン相当の計算はフロント側で行い、ここには計算済みの絶対値を送る）。1以上の整数のみ許可。ロック中でも実行可</div>
   </div>
 </div>
 
@@ -322,7 +322,8 @@
   作成：2026-07-20（RES-008 spec / project_state / project files を突き合わせて作成）<br>
   出典：spec.json の endpoint_design_policy / deck_register_schema / card_data_design / regulation_legality_design セクション、ならびにロードマップ・入出力設計図・状態遷移図・処理フロー図・キーリストの各HTML。<br>
   更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。<br>
-  更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。
+  更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。<br>
+  更新履歴：2026-07-21（追記）set_manual・update_wait_daysにpid（背番号）対応を追加。tempName表記ゆれ対策として、pid優先・従来方式フォールバックの2経路に。
 </div>
 
 </body>

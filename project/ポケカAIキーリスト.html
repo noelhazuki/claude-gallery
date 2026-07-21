@@ -101,7 +101,7 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-21時点（OCR共通スキーマ横断フラグを追加）</p>
+  <p>2026-07-21時点（pid＝provisional一時ID追加を反映）</p>
 </header>
 
 <div class="update-note">
@@ -128,6 +128,10 @@
     <tr>
       <td class="term">provisional / tempName</td>
       <td class="desc">仮登録エントリー用のフィールド。TCGdexで照合できなかったカードは{cardId,count}の代わりに{provisional:true, tempName:"カード名", count}の形で登録される。2026-07-20以降はこれに加え、再照合用の元データ（ポケモンはsetInfo、トレーナーズ／エネはsetCode）も一緒に保持するよう拡張された（recheck_mineで使用）。それより前に登録されたprovisionalはこれらを持たず、再照合できない</td>
+    </tr>
+    <tr>
+      <td class="term">pid<div class="status done">2026-07-21追加</div></td>
+      <td class="desc">provisionalエントリーごとに振られる、デッキ内で一意な背番号（p1, p2…カテゴリを跨いだ通し番号）。tempName（人間が入力したテキスト）は末尾スペース等の表記ゆれで完全一致に失敗するリスクがあったため、それに依らない識別手段として導入。applyProvisionalAwaitDefaults（register_meta/register_mine/update_mine共通の初期値付与関数）が、pidを持たないprovisionalエントリーにだけ自動採番する（recheck_mine単体では振られない点に注意。次にupdate_mine等が走った時点で振られる）。set_manual／update_wait_daysの対象特定（findProvisionalEntry）はpidが渡されればpid一致のみで特定し、渡されなければ従来のcategory＋tempName＋setInfo方式にフォールバックする（pid実装前の古いprovisionalとの後方互換）</td>
     </tr>
   </table>
 </div>
@@ -269,6 +273,7 @@
 
 <footer>Dictionary.jsonへの登録はまだ。登録するか要確認</footer>
 <footer style="margin-top:4px;">更新履歴：2026-07-21 matchTrainerOrEnergyCard複数ヒット時ルールを追加</footer>
+<footer style="margin-top:4px;">更新履歴：2026-07-21（追記）pid（provisional一時ID）を追加</footer>
 
 </body>
 </html>
