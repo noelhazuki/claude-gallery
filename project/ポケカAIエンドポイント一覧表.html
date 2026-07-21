@@ -192,7 +192,27 @@
   <div class="ep-head"><span class="ep-name">?recheck_mine=true</span><span class="tag done">実装済み（2026-07-20）</span></div>
   <div class="ep-summary">mine1件分のprovisionalカードをまとめて再照合する</div>
   <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>ヒット分はconfirmedへ昇格。ロック中でも実行可（枚数・構成は変えず正体確定のみのため）。setInfo/setCodeを持たない旧provisionalはskipped扱い</div>
+    <div class="row"><span class="k">備考</span>ヒット分はconfirmedへ昇格。ロック中でも実行可（枚数・構成は変えず正体確定のみのため）。setInfo/setCodeを持たない旧provisionalはskipped扱い。awaitStatus:'manual'のエントリーは再照合対象から自動で除外される（manualSkippedとしてカウント）</div>
+  </div>
+</div>
+
+<div class="ep-card done">
+  <div class="ep-head"><span class="ep-name">?set_manual=true</span><span class="tag done">実装済み（2026-07-21）</span></div>
+  <div class="ep-summary">provisional1件のawaitStatusを手動で'manual'へ切り替える</div>
+  <div class="ep-detail">
+    <div class="row"><span class="k">method</span>POST</div>
+    <div class="row"><span class="k">必須項目</span>deckId / category / tempName / setInfo</div>
+    <div class="row"><span class="k">備考</span>対象特定はdeckId＋category＋tempName＋setInfoの完全一致（<span class="kv">findProvisionalEntry</span>関数）。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄に渡す。recheck_mineと同じ理屈でロック中のデッキでも実行可。切替後はrecheck_mineの再照合対象から外れる</div>
+  </div>
+</div>
+
+<div class="ep-card done">
+  <div class="ep-head"><span class="ep-name">?update_wait_days=true</span><span class="tag done">実装済み（2026-07-21）</span></div>
+  <div class="ep-summary">provisional1件のwaitDaysを更新する</div>
+  <div class="ep-detail">
+    <div class="row"><span class="k">method</span>POST</div>
+    <div class="row"><span class="k">必須項目</span>deckId / category / tempName / setInfo / waitDays</div>
+    <div class="row"><span class="k">備考</span>対象特定はset_manualと同じくfindProvisionalEntry。waitDaysは絶対値方式（UIの「+7」ボタン相当の計算はフロント側で行い、ここには計算済みの絶対値を送る）。1以上の整数のみ許可。ロック中でも実行可</div>
   </div>
 </div>
 
@@ -301,7 +321,8 @@
 <div class="footer">
   作成：2026-07-20（RES-008 spec / project_state / project files を突き合わせて作成）<br>
   出典：spec.json の endpoint_design_policy / deck_register_schema / card_data_design / regulation_legality_design セクション、ならびにロードマップ・入出力設計図・状態遷移図・処理フロー図・キーリストの各HTML。<br>
-  更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。
+  更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。<br>
+  更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。
 </div>
 
 </body>

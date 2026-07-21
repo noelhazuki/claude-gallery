@@ -208,12 +208,13 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-21 時点（OCR共通スキーマ導出ルール・トレーナーズ横断フラグ確定を反映）</p>
+  <p>2026-07-21 時点（provisional手動manual切替・waitDays延長エンドポイント新設を反映）</p>
 </div>
 
 <div class="note-banner">
   <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。<br><br>
-  <b>同日追記：</b>OCR共通スキーマの導出ルール整理・トレーナーズ専用フィールド洗い出しが決着。ACE SPECはポケモンのsubtypesには存在せず、グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec）として別枠管理する方針に確定。VMAXはレギュ落ち済みとして値のみ保持、hasAbility（特性の有無）はdeckRulesに関与しない情報フラグと位置づけ。「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果でありデッキ構築の枚数には影響しないため構造化対象外と判断。詳細はロジック図参照。
+  <b>同日追記：</b>OCR共通スキーマの導出ルール整理・トレーナーズ専用フィールド洗い出しが決着。ACE SPECはポケモンのsubtypesには存在せず、グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec）として別枠管理する方針に確定。VMAXはレギュ落ち済みとして値のみ保持、hasAbility（特性の有無）はdeckRulesに関与しない情報フラグと位置づけ。「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果でありデッキ構築の枚数には影響しないため構造化対象外と判断。詳細はロジック図参照。<br><br>
+  <b>同日再追記：</b>awaitStatus実装時からの持ち越し課題やった「手動manual切替・waitDays延長がロック中デッキで操作不可」を解消。専用エンドポイント<span class="kv">?set_manual=true</span>／<span class="kv">?update_wait_days=true</span>を新設し、実機テスト（単体確認ツールset_manual_test.htmlで動作確認・テストデータは確認後削除予定）まで完了。次はSTAGE2最後の課題②「meta側provisional確認パネル」の実装に進む。
 </div>
 
 <div class="legend">
@@ -273,11 +274,15 @@
     </div>
     <div class="node done">
       <div class="node-title">provisional内サブ状態 awaitStatus（waiting/manual）<span class="tag">完了</span></div>
-      <div class="node-desc">provisionalエントリーに registeredAt／awaitStatus／waitDays を付与する仕組み。新規provisionalは基本waiting、KV「provisional:knownManualSetCodes」（恒久的にTCGdex未収録と判断済みのsetCode一覧、プロモ等）に一致すれば自動でmanualに切り替わる。manualはrecheck_mineの再照合対象から除外される（無駄な問い合わせを省く）。人間による手動manual切替・waitDays延長はupdate_mine経由のため、ロック中デッキでは操作不可という制約が残っている（課題として持ち越し中）。詳細は状態遷移図③参照。</div>
+      <div class="node-desc">provisionalエントリーに registeredAt／awaitStatus／waitDays を付与する仕組み。新規provisionalは基本waiting、KV「provisional:knownManualSetCodes」（恒久的にTCGdex未収録と判断済みのsetCode一覧、プロモ等）に一致すれば自動でmanualに切り替わる。manualはrecheck_mineの再照合対象から除外される（無駄な問い合わせを省く）。詳細は状態遷移図③参照。</div>
     </div>
     <div class="node done">
       <div class="node-title">トレーナーズ／エネ複数ヒット時の確定ルール <span class="tag">完了（2026-07-21）</span></div>
       <div class="node-desc">同一setCode内に同名カードの型番違いが複数存在するケース（例：ボスの指令、ポケパッド）で、以前は複数ヒットを処理できず常にprovisional行きになっていた不具合（MC/M3）を修正。「型番(localId)最小のものを機械的に採用してconfirmed扱いにする」pickSmallestLocalIdCardルールを追加し、デプロイ・実機確認済み。型番最小＝必ず正解の保証はない割り切りルール。</div>
+    </div>
+    <div class="node done">
+      <div class="node-title">provisional手動manual切替・waitDays延長 専用エンドポイント <span class="tag">完了（2026-07-21）</span></div>
+      <div class="node-desc">従来はupdate_mine経由だったため、ロック中デッキでは手動manual切替・waitDays延長ができないという制約があった（上のawaitStatus実装時からの持ち越し課題）。recheck_mineと同じ「ロックチェックを回避する」考え方に倣い、<span class="kv">?set_manual=true</span>（manualへの手動切替）と<span class="kv">?update_wait_days=true</span>（waitDaysの絶対値上書き）の2本を専用エンドポイントとして新設し解消。対象特定はdeckId＋category＋tempName＋setInfoの完全一致（findProvisionalEntry関数で共通化。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄で受ける）。waitDaysは絶対値方式（UI側で+7等の計算をしてから送る想定、Worker側では単純上書きのみ）。専用の単体テストツール（set_manual_test.html）で動作確認済み。</div>
     </div>
   </div>
 </div>
@@ -341,6 +346,9 @@
     <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
     <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
     <li>MC/M3のprovisional固着バグ修正（pickSmallestLocalIdCard）・awaitStatus実装・旧テストデータ削除：対応済み（2026-07-21）</li>
+    <li>provisional手動manual切替・waitDays延長の専用エンドポイント（set_manual／update_wait_days）実装・実機テスト：対応済み（2026-07-21）</li>
+    <li>（次回）provisionalエントリーへの一時ID（p1,p2…連番）フィールド追加：未着手</li>
+    <li>（次回）②meta側provisional確認パネル（register_meta_test.html、登録前の目視確認用。表示項目にレギュマークのヒントも追加検討）：未着手</li>
   </ol>
 </div>
 
