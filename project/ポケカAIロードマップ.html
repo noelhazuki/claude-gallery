@@ -208,10 +208,11 @@
 <div class="header">
   <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
   <h1>進化ロードマップ</h1>
-  <p>2026-07-21 時点（provisionalエントリーへの一時ID＝pid実装を反映）</p>
+  <p>2026-07-21 時点（meta側provisional確認パネル実装を反映、STAGE2完了）</p>
 </div>
 
 <div class="note-banner">
+  <b>今回の更新メモ（2026-07-21・さらに追記）：</b>STAGE2最後の課題やった「meta側provisional確認パネル」を実装・実機確認済み。register_meta_test.htmlのcardList入力欄に「❓未確定カードを確認」ボタンを追加し、POST前の下書きJSONをブラウザ側でその場でパースしてprovisional:trueのエントリーだけ一覧表示する（カテゴリ／tempName／count／setInfo or setCode）。編集操作は無し・確認専用（本人の判断で編集機能は不要と決定）。サーバー通信は発生しないため、mine側のような編集用provisionalパネルとは別系統。動作確認は手書きJSON（実在カード・公式コード不要）で実施し、confirmed（cardId確定済み）とprovisionalの混在データから、provisional分だけ正しく抽出できることを確認済み。これでSTAGE2は全項目完了。<br><br>
   <b>今回の更新メモ（2026-07-21・追記）：</b>provisionalエントリーへの一時ID（<span class="kv">pid</span>：p1,p2…のデッキ内通し番号）を実装・実機確認まで完了。tempName（人間が入力したカード名テキスト）は末尾スペース等の表記ゆれで完全一致に失敗するリスクがあったため、それに依らない識別手段として追加した。<span class="kv">applyProvisionalAwaitDefaults</span>（register_meta/register_mine/update_mine共通で通る初期値付与関数）に相乗りさせ、provisionalエントリーにpidが無ければ自動採番する形。<span class="kv">findProvisionalEntry</span>はpidが渡されたらpid一致のみで特定し、渡されなければ従来のcategory＋tempName＋setInfo方式にフォールバックする（pid実装前に登録された古いprovisionalとの後方互換のため）。<span class="kv">set_manual</span>／<span class="kv">update_wait_days</span>の2エンドポイントにもpidを任意項目として追加。set_manual_test.htmlにpid入力欄を追加し、mine-014（テストデッキ、確認後ハノイさんが削除済み）でpid単独指定による両エンドポイントの動作を実機確認済み。<br><br>
   <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。<br><br>
   <b>同日追記：</b>OCR共通スキーマの導出ルール整理・トレーナーズ専用フィールド洗い出しが決着。ACE SPECはポケモンのsubtypesには存在せず、グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec）として別枠管理する方針に確定。VMAXはレギュ落ち済みとして値のみ保持、hasAbility（特性の有無）はdeckRulesに関与しない情報フラグと位置づけ。「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果でありデッキ構築の枚数には影響しないため構造化対象外と判断。詳細はロジック図参照。<br><br>
@@ -289,6 +290,10 @@
       <div class="node-title">provisionalの一時ID（pid）追加 <span class="tag">完了（2026-07-21）</span></div>
       <div class="node-desc">上のfindProvisionalEntry方式は「tempName＋setInfoの完全一致」に依存していたが、tempNameは人間が入力したテキストのため表記ゆれ（末尾スペース等）で一致に失敗するリスクがあった。対策として、provisionalエントリーごとにデッキ内で一意な背番号<span class="kv">pid</span>（p1, p2…カテゴリを跨いだ通し番号）を導入。applyProvisionalAwaitDefaults（register_meta/register_mine/update_mine共通の初期値付与関数）に相乗りさせ、pidが無いエントリーにだけ自動採番する形（recheck_mineでは触らない＝次にupdate_mine等が走った時点で振られる）。findProvisionalEntryはpidが渡されたらpid一致のみで特定し、渡されなければ従来方式にフォールバック（pid未実装時代の古いprovisionalとの後方互換）。set_manual／update_wait_daysの両エンドポイントもpidを任意項目として受理するよう拡張。set_manual_test.htmlにpid入力欄を追加し、mine-014（テスト後ハノイさんが削除済み）でpid単独指定による両エンドポイントの動作を実機確認済み。</div>
     </div>
+    <div class="node done">
+      <div class="node-title">meta側provisional確認パネル（登録前プレビュー）<span class="tag">完了（2026-07-21）</span></div>
+      <div class="node-desc">register_meta_test.htmlのcardList入力欄（textarea）に「❓未確定カードを確認」ボタンを追加。POST前の下書きJSONをその場でブラウザ側でパースし、provisional:trueのエントリーだけ抜き出して一覧表示する（カテゴリ／tempName／count／setInfo or setCode）。サーバー通信・KV書き込みは一切発生しない、確認専用の機能。mine側の既存provisionalパネル（recheck_mine・set_manual等と連動する編集用パネル）とは別物で、こちらは編集ボタンを持たない。pid・awaitStatus・registeredAtはregister_meta/register_mine実行後にサーバー側（applyProvisionalAwaitDefaults）が初めて付与するフィールドのため、登録前のこの時点ではまだ存在せず、意図的に表示対象から外している。手書きJSON（例：{"provisional":true,"tempName":"...","count":1,"setInfo":"..."}）を直接textareaに貼るだけで動作確認でき、実在するcardIdである必要も公式デッキコードである必要もない点を実機確認済み。</div>
+    </div>
   </div>
 </div>
 
@@ -342,18 +347,19 @@
 
 <div class="now-panel">
   <div class="label">NEXT ACTION</div>
-  <div class="title">残るはmeta側provisional確認パネルの実装のみ</div>
+  <div class="title">STAGE2完了。残るはSTAGE3のOCR共通スキーマ・対象拡張パック確定待ち</div>
   <ol>
     <li>スキーマ構造（3層：subtypes／ruleTags／deckRules）を図解（ロジック設計図・入出力設計図）で提示：対応済み</li>
     <li>subtypes／ruleTagsの重複整理・導出ルール検討：対応済み（2026-07-21）</li>
     <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し：対応済み（2026-07-21、isAceSpec／isBasicEnergyの横断フラグに集約）</li>
-    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定（ストームエメラルダ発売後に着手）</li>
+    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定（ストームエメラルダ発売後に着手・未着手のまま）</li>
     <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
     <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
     <li>MC/M3のprovisional固着バグ修正（pickSmallestLocalIdCard）・awaitStatus実装・旧テストデータ削除：対応済み（2026-07-21）</li>
     <li>provisional手動manual切替・waitDays延長の専用エンドポイント（set_manual／update_wait_days）実装・実機テスト：対応済み（2026-07-21）</li>
     <li>provisionalエントリーへの一時ID（pid：p1,p2…連番）フィールド追加：対応済み（2026-07-21、実機確認済み）</li>
-    <li>（次回）②meta側provisional確認パネル（register_meta_test.html、登録前の目視確認用。表示項目にレギュマーク・pidのヒントも追加検討）：未着手</li>
+    <li>②meta側provisional確認パネル（register_meta_test.html、登録前の目視確認用）：対応済み（2026-07-21、編集無し・確認専用で確定。実機確認済み）</li>
+    <li>（次）cardRuleOverrides初期データ登録、または?ask等STAGE4の設計相談へ：未着手</li>
   </ol>
 </div>
 
