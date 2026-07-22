@@ -3,310 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RES-008 用語一覧</title>
+<meta property="og:image" content="https://placehold.co/1200x630/1f4d6b/ffffff?text=RES-008+Key+List">
+<title>pokeca-ai キーリスト</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-    background: radial-gradient(ellipse at top, #1b1030 0%, #0a0716 60%, #05040c 100%);
-    color: #eae6f5;
-    padding: 24px 14px 50px;
-  }
-  header { text-align: center; margin-bottom: 22px; }
-  header .badge {
-    display: inline-block;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: #c9a6ff;
-    border: 1px solid #6a4fae;
-    border-radius: 20px;
-    padding: 3px 12px;
-    margin-bottom: 10px;
-  }
-  header h1 { font-size: 18px; }
-  header p { font-size: 12px; color: #9a8fc0; margin-top: 4px; }
-
-  .update-note {
-    max-width: 480px;
-    margin: 0 auto 22px;
-    background: #241a3f;
-    border: 1px solid #4a3a78;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 11px;
-    color: #cbb8ec;
-    line-height: 1.6;
-  }
-  .update-note b { color: #ffd76a; }
-
-  .group { max-width: 480px; margin: 0 auto 26px; }
-  .group h2 {
-    font-size: 13px;
-    color: #ffd76a;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    padding-left: 4px;
-    border-left: 3px solid #ffd76a;
-    padding-left: 8px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #171029;
-    border: 1px solid #352a55;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  th, td {
-    text-align: left;
-    padding: 9px 10px;
-    font-size: 12.5px;
-    vertical-align: top;
-    border-bottom: 1px solid #2a2244;
-  }
-  th {
-    background: #201a3a;
-    font-size: 11px;
-    color: #b0a6d8;
-    letter-spacing: 0.5px;
-    width: 30%;
-  }
-  tr:last-child td { border-bottom: none; }
-  td.term {
-    font-family: monospace;
-    color: #ff9ecf;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  td.desc { color: #cfc6e8; line-height: 1.5; }
-  .status {
-    display: inline-block;
-    font-size: 9.5px;
-    padding: 1px 6px;
-    border-radius: 5px;
-    margin-top: 4px;
-  }
-  .status.done { background: #2f5c34; color: #b6e6bb; }
-  .status.todo { background: #5c2e2e; color: #ffb3b3; }
-  footer {
-    text-align: center;
-    font-size: 11px;
-    color: #6e6590;
-    margin-top: 10px;
-  }
+  :root{--bg:#f6f3ec;--ink:#242019;--card:#fff;--line:#d8d1c2;--accent:#1f4d6b;}
+  *{box-sizing:border-box;}
+  body{margin:0;padding:24px 14px 60px;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Yu Gothic",sans-serif;line-height:1.6;}
+  h1{font-size:19px;margin:4px 0 16px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  .group-title{font-size:14px;font-weight:700;color:var(--accent);margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent);}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  tr{border-bottom:1px solid var(--line);}
+  tr:last-child{border-bottom:none;}
+  td{padding:8px 10px;font-size:12.5px;vertical-align:top;}
+  .term{font-family:"SF Mono","Menlo",monospace;font-weight:700;white-space:nowrap;color:var(--accent);}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
-  <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-22時点（?ask設計確定分・openConcerns等を追加反映）</p>
-</header>
+<div class="eyebrow">RES-008 / pokeca-ai</div>
+<h1>キーリスト</h1>
 
-<div class="update-note">
-  <b>今回の更新メモ：</b>ボスの指令（MC）・ポケパッド（M3）が確定せずprovisionalのまま残り続ける不具合を調査。原因は「同一setCode内に同名カードの型番違いが複数存在」しており、matchTrainerOrEnergyCardの名前＋setCode完全一致検索が複数ヒットして絞り込めず、常にprovisional行きになっていたこと（エラーは出ず静かに未確定のまま残る挙動やったので発見が遅れた）。対処として「複数ヒット時は型番（localId）最小を機械的に採用」するルールを実装・デプロイし、実機で確定への昇格を確認済み。用語一覧に新規追加。<br><br>
-  <b>同日追記：</b>OCR共通スキーマ（未実装）の導出ルール整理で、ACE SPECはポケモンには付かないラベルと判明。グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec／isBasicEnergy）として、OCR共通スキーマのグループに新規追加した。
-</div>
+<div class="group-title">デッキの中身</div>
+<table>
+<tr><td class="term">cardId</td><td>TCGdexカード個別ID（例：SV11W-043）</td></tr>
+<tr><td class="term">count</td><td>投入枚数</td></tr>
+<tr><td class="term">cardList</td><td>デッキ全体（8分類：pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）</td></tr>
+<tr><td class="term">provisional / tempName</td><td>照合できなかった仮登録カード</td></tr>
+<tr><td class="term">pid</td><td>provisionalエントリーの一意背番号</td></tr>
+</table>
 
-<div class="group">
-  <h2>デッキの中身に関わるやつ</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">cardId</td>
-      <td class="desc">TCGdexのカード個別ID。カード名だけでなく収録パック・型番まで含めた一意の識別子。setInfo（例：「SV11W 043/086」）からスペース→ハイフン置換＋「/」より前だけ取る形で自動生成される<br><span style="color:#8f84b0;">例：SV11W-043</span></td>
-    </tr>
-    <tr>
-      <td class="term">count</td>
-      <td class="desc">そのカードの投入枚数（1以上の整数）</td>
-    </tr>
-    <tr>
-      <td class="term">cardList</td>
-      <td class="desc">デッキの中身全体を表すオブジェクト。8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）に分かれ、各分類が配列</td>
-    </tr>
-    <tr>
-      <td class="term">provisional / tempName</td>
-      <td class="desc">仮登録エントリー用のフィールド。TCGdexで照合できなかったカードは{cardId,count}の代わりに{provisional:true, tempName:"カード名", count}の形で登録される。2026-07-20以降はこれに加え、再照合用の元データ（ポケモンはsetInfo、トレーナーズ／エネはsetCode）も一緒に保持するよう拡張された（recheck_mineで使用）。それより前に登録されたprovisionalはこれらを持たず、再照合できない</td>
-    </tr>
-    <tr>
-      <td class="term">pid<div class="status done">2026-07-21追加</div></td>
-      <td class="desc">provisionalエントリーごとに振られる、デッキ内で一意な背番号（p1, p2…カテゴリを跨いだ通し番号）。tempName（人間が入力したテキスト）は末尾スペース等の表記ゆれで完全一致に失敗するリスクがあったため、それに依らない識別手段として導入。applyProvisionalAwaitDefaults（register_meta/register_mine/update_mine共通の初期値付与関数）が、pidを持たないprovisionalエントリーにだけ自動採番する（recheck_mine単体では振られない点に注意。次にupdate_mine等が走った時点で振られる）。set_manual／update_wait_daysの対象特定（findProvisionalEntry）はpidが渡されればpid一致のみで特定し、渡されなければ従来のcategory＋tempName＋setInfo方式にフォールバックする（pid実装前の古いprovisionalとの後方互換）</td>
-    </tr>
-  </table>
-</div>
+<div class="group-title">OCR共通スキーマ</div>
+<table>
+<tr><td class="term">type</td><td>ポケモン自身の属性</td></tr>
+<tr><td class="term">moves[].cost</td><td>技ごとの消費エネルギー</td></tr>
+<tr><td class="term">subtypes</td><td>ポケモンの分類ラベル（進化段階・ex/メガ等・どうぐ扱い・特性有無）</td></tr>
+<tr><td class="term">ruleTags</td><td>subtypesから派生する性質フラグ</td></tr>
+<tr><td class="term">deckRules</td><td>枚数ルール計算ロジック（同名4枚・60枚ちょうど等）</td></tr>
+<tr><td class="term">cross_category_fields</td><td>ポケモン以外も含む横断フラグ層</td></tr>
+<tr><td class="term">isAceSpec</td><td>ACE SPEC判定フラグ</td></tr>
+<tr><td class="term">isBasicEnergy</td><td>基本エネルギー判定フラグ</td></tr>
+</table>
 
-<div class="group">
-  <h2>OCR共通スキーマ（カード属性の階層）<span class="status todo">設計確定・未実装</span></h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">type</td>
-      <td class="desc">ポケモン自身に印刷されてる属性（水・火・エスパー等）。カード1枚につき1個。技の消費エネルギーとは別物（例：マシマシラはエスパータイプだが技で悪エネルギーを使う）</td>
-    </tr>
-    <tr>
-      <td class="term">moves[].cost</td>
-      <td class="desc">技ごとの消費エネルギー。1枚のカードに技が複数あれば、その数だけcostも別々に持つ</td>
-    </tr>
-    <tr>
-      <td class="term">subtypes</td>
-      <td class="desc">カードに書いてある分類ラベルそのもの（見たまま）。進化段階（たね／1進化／2進化）、特殊ラベル系（ex／メガ／VMAX／テラスタル／未来／古代／かがやく）、どうぐ扱いポケモンかどうか、特性の有無、を含む</td>
-    </tr>
-    <tr>
-      <td class="term">ruleTags</td>
-      <td class="desc">subtypesから派生する「カードの性質フラグ」。フラグを持つだけで枚数計算などの判定はしない（例：ex→サイド枚数変化の対象、ACE SPEC→数量制限対象というフラグ）</td>
-    </tr>
-    <tr>
-      <td class="term">deckRules<div class="status done">一部実装済み（2026-07-21）</div></td>
-      <td class="desc">ruleTagsを見て実際にデッキ構築時の枚数をチェックする計算ロジック側。同名カード基本4枚、ACE SPEC合計1枚、基本エネルギー無制限、デッキ合計60枚、たね最低1体、などが対象（このテーブル自体はOCR共通スキーマ＝未実装の設計図だが、deckRules本体は2026-07-21にsrc/index.jsへ一部実装済み）。<br><br><b style="color:#ffd76a;">実装済みの2つ（同名4枚まで／60枚ちょうど）は、実はruleTags／subtypesを経由せずcardListの生データだけで判定できるため、OCR共通スキーマの実装を待たずに先行実装できた。</b>残る3つ（たね最低1体・ACE SPEC合計1枚・基本エネルギー無制限）はcross_category_fieldsが必要なため、OCR共通スキーマ実装後になる見込み。判定方式はMTGA方式（下記参照）</td>
-    </tr>
-    <tr>
-      <td class="term">cross_category_fields<span class="status done">2026-07-21追加</span></td>
-      <td class="desc">ポケモン専用のsubtypesとは別に、グッズ／どうぐ／サポート／スタジアム／エネの共通で持つ横断フラグ層。isAceSpec・isBasicEnergyの2つのみを持ち、deckRulesの枚数判定に直接使う。ACE SPECはポケモンには付かないラベルと判明したため、subtypes／ruleTagsからはここに移設された</td>
-    </tr>
-    <tr>
-      <td class="term">isAceSpec<span class="status done">2026-07-21追加</span></td>
-      <td class="desc">true/falseのフラグ。グッズ・どうぐ・サポート・スタジアム・エネのいずれにも付き得る。deckRulesの「ACE SPEC合計1枚まで」判定に使用</td>
-    </tr>
-    <tr>
-      <td class="term">isBasicEnergy<span class="status done">2026-07-21追加</span></td>
-      <td class="desc">true/falseのフラグ。エネのみ対象。deckRulesの「基本エネルギー無制限（4枚制限の対象外）」判定に使用</td>
-    </tr>
-  </table>
-</div>
+<div class="group-title">登録データのフィールド</div>
+<table>
+<tr><td class="term">howToPlay</td><td>meta専用・回し方メモ</td></tr>
+<tr><td class="term">concern</td><td>mine専用・相談したい点（1個、人間記述）</td></tr>
+<tr><td class="term">openConcerns</td><td>?ask専用・AIが自動で貯める未解決懸念点の配列（concernとは別物）</td></tr>
+</table>
 
-<div class="group">
-  <h2>登録データのフィールド</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">howToPlay</td>
-      <td class="desc">register_meta（環境デッキ）専用。そのデッキの回し方</td>
-    </tr>
-    <tr>
-      <td class="term">concern</td>
-      <td class="desc">register_mine（自分のデッキ）専用。気になってる点・相談したいこと（登録時に人間が書く自由記述。1個だけ持つ）</td>
-    </tr>
-    <tr>
-      <td class="term">openConcerns<span class="status todo">2026-07-22追加・未実装</span></td>
-      <td class="desc"><span style="color:#ffb3b3;">concernとは別物。混同注意。</span>?ask（?ask項目参照）で相談した結果、AIが「まだ解決してへん」と判断した懸念点を自動で貯めていく配列フィールド。deck:mine内に新設予定。concernが登録時に人間が1回書く自由記述なのに対し、openConcernsは相談のたびにAIが自動追加していく複数件のリストという違いがある。次回?ask相談時は「今のcardList」＋「openConcerns」をまとめて渡し、文脈を引き継ぐ。人間が「解決した」ボタンを押した項目だけKVから完全削除される（ローカル保存はしない。複数端末で同じ状態を見たいため）</td>
-    </tr>
-  </table>
-</div>
+<div class="group-title">変換・照合</div>
+<table>
+<tr><td class="term">setInfo</td><td>公式カード番号表記</td></tr>
+<tr><td class="term">deckCode</td><td>resolve_cardlistの入力</td></tr>
+<tr><td class="term">unmappedCategories</td><td>8分類に対応しなかったカテゴリの別出し先</td></tr>
+</table>
 
-<div class="group">
-  <h2>変換・照合まわりの用語</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">setInfo</td>
-      <td class="desc">公式サイト形式のカード番号表記（例：「SV11W 043/086」）。resolve_card_idでcardIdに変換する元データ</td>
-    </tr>
-    <tr>
-      <td class="term">deckCode</td>
-      <td class="desc">resolve_cardlistの入力。pokeka2 Service Binding経由でデッキの生データを取得するためのコード</td>
-    </tr>
-    <tr>
-      <td class="term">unmappedCategories</td>
-      <td class="desc">pokeka2側のカテゴリ名（日本語）が内部8分類のどれにも対応しなかった場合、cardListには含めずこちらに別出しされる</td>
-    </tr>
-    <tr>
-      <td class="term">recheck_mine<div class="status done">実装済み</div></td>
-      <td class="desc">mine1件分のprovisionalエントリーをまとめてTCGdexへ再照合するエンドポイント。保持しているsetInfo/setCodeを使って照合し、ヒットした分だけconfirmedへ昇格。ロック中でも実行可</td>
-    </tr>
-    <tr>
-      <td class="term">matchTrainerOrEnergyCard 複数ヒット時ルール<div class="status done">2026-07-21実装</div></td>
-      <td class="desc">トレーナーズ／エネの照合（setCode＋名前の完全一致）は、同一setCode内に同名カードの型番違いが複数存在するケースがあると判明（例：ボスの指令＝724/742と760/742の2種、ポケパッド＝070/080と103/080の2種。同じ拡張パック内の別レアリティ違い）。<br>従来は複数ヒット時に絞り込めず諦めてnullを返しており、結果として常にprovisionalへ落ちて確定させる手段が無い不具合になっていた（エラーは出ず静かにprovisional行き）。<br>対処として、<b style="color:#ffd76a;">複数ヒット時は型番（localId）が最小のものを機械的に採用する</b>ルールを決定・実装した（pickSmallestLocalIdCard関数）。型番最小＝必ずしも「正しいカード」という保証がある訳ではない割り切りルールである点に注意。ポケモン側（setInfo直接変換方式）はこの問題が構造的に起こらないため対象外</td>
-    </tr>
-  </table>
-</div>
+<div class="group-title">レギュレーション判定</div>
+<table>
+<tr><td class="term">regulation:current:legalMarks</td><td>現行合法レギュマークの一覧</td></tr>
+<tr><td class="term">regulation:{id}:legalNameWhitelist</td><td>カード名ベースの救済リスト</td></tr>
+<tr><td class="term">violations</td><td>レギュ違反リスト</td></tr>
+<tr><td class="term">deckRuleViolations</td><td>枚数ルール違反リスト</td></tr>
+<tr><td class="term">MTGA方式</td><td>違反があっても登録はブロックせず警告のみ返す方針</td></tr>
+</table>
 
-<div class="group">
-  <h2>レギュレーション判定まわりの用語</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">regulation:current:legalMarks</td>
-      <td class="desc">現行合法とされるレギュレーションマークの一覧。カードのregulationMarkがここに含まれていればOK</td>
-    </tr>
-    <tr>
-      <td class="term">regulation:{id}:legalNameWhitelist</td>
-      <td class="desc">マークだけでは合法判定できないカードを、カード名ベースで救済するホワイトリスト<br><span style="color:#8f84b0;">例：regulation:2026H:legalNameWhitelist</span></td>
-    </tr>
-    <tr>
-      <td class="term">violations<div class="status done">2026-07-20仕様修正</div></td>
-      <td class="desc">レギュ違反として積まれるリスト。<b style="color:#ffb3b3;">provisional（cardId未確定）のカードはレギュ判定の対象から除外される</b>ため、violationsに積まれるのはconfirmed（cardId確定済み）のカードが実際にマーク・ホワイトリストどちらでも救済できず違反していた場合（reason: "regulation_violation"）のみ。以前ここに書いていた"card_not_found"というreasonでの違反計上は、2026-07-20の仕様修正で廃止された（provisional化した時点でそもそもレギュ判定を通らなくなったため）<br><br><b style="color:#ffd76a;">2026-07-21〜：</b>violationsが積まれても登録・保存はブロックされなくなった（下記MTGA方式を参照）。register_meta/register_mine/update_mineのレスポンスに警告として含めて返すのみで、登録自体は通る</td>
-    </tr>
-    <tr>
-      <td class="term">MTGA方式<div class="status done">2026-07-21追加</div></td>
-      <td class="desc">register_meta/register_mine/update_mineにおける判定結果の扱い方針。「違反があっても登録・保存はブロックしない、警告として結果を返すだけ」というMTGアリーナのデッキ構築画面に倣った考え方。2026-07-21に運用方針として確定し、レギュ判定（violations）・deckRules判定（deckRuleViolations）の両方に適用された。<b style="color:#ffb3b3;">以前（〜2026-07-20）はレギュ違反があると400エラーで登録自体を弾いていたが、この変更で廃止された</b></td>
-    </tr>
-    <tr>
-      <td class="term">deckRuleViolations<div class="status done">2026-07-21追加</div></td>
-      <td class="desc">deckRules判定（枚数ルール）の違反リスト。既存のviolations（レギュ違反用）とは別物として新設された（性質が違うものを同じ箱に混ぜない方針）。1件の形は3パターン：デッキ全体用<span style="color:#8f84b0;">{reason,count,expected}</span>（60枚ちょうど・たね最低1体）、カード単位用<span style="color:#8f84b0;">{reason,name,count,limit}</span>（同名4枚まで）、合計超過用<span style="color:#8f84b0;">{reason,total,limit,cards}</span>（ACE SPEC合計1枚まで）。2026-07-21時点で実装済みなのは同名4枚まで・60枚ちょうどの2つのみ（詳細はdeckRules項目参照）</td>
-    </tr>
-  </table>
-</div>
+<div class="group-title">?ask（STAGE4）</div>
+<table>
+<tr><td class="term">?ask=true</td><td>デッキ構築相談専用エンドポイント（設計確定・未実装）</td></tr>
+<tr><td class="term">answer</td><td>表示用の自由文回答</td></tr>
+<tr><td class="term">newConcerns</td><td>AIが拾った未解決懸念点の配列</td></tr>
+</table>
 
-<div class="group">
-  <h2>?ask（STAGE4・デッキ構築相談機能）関連<span class="status todo">設計確定・未実装（2026-07-22）</span></h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">?ask=true</td>
-      <td class="desc">Claude API呼び出しによるデッキ構築相談専用エンドポイント（未実装）。環境デッキ対策（メタ分析・対戦戦略）は対象外で別テーマ扱い。会話履歴は持たず、毎回「対象deck:mineのcardList」＋「質問文」＋「openConcerns」だけを材料にその場で完結させる（トークン節約のため）</td>
-    </tr>
-    <tr>
-      <td class="term">answer</td>
-      <td class="desc">?askのレスポンスJSON内、画面表示用の自由文回答が入るフィールド。見た目は普通の会話文そのまま</td>
-    </tr>
-    <tr>
-      <td class="term">newConcerns</td>
-      <td class="desc">?askのレスポンスJSON内、AIがその回答の中で拾った「まだ解決してへん懸念点」を短い一言メモの配列で返すフィールド。ユーザー画面には表示しない裏メモ。Claude自身に構造化出力させる想定で、別途の抽出ロジック（キーワード判定等）は用意しない。返ってきたらそのままdeck:mine内のopenConcernsへ追加される</td>
-    </tr>
-  </table>
-</div>
-
-<div class="group">
-  <h2>KVキー（データの保存場所の名前）</h2>
-  <table>
-    <tr><th>用語</th><td class="desc">意味</td></tr>
-    <tr>
-      <td class="term">deck:meta:{id}</td>
-      <td class="desc">環境デッキの保存キー。{id}部分にdorapa01みたいな略称IDが入る</td>
-    </tr>
-    <tr>
-      <td class="term">deck:mine:{id}</td>
-      <td class="desc">自分のデッキの保存キー</td>
-    </tr>
-    <tr>
-      <td class="term">card:{cardId}<div class="status done">実装済み</div></td>
-      <td class="desc">カード表示用データ（名前・画像・技など）の保存キー。get_cardとレギュ判定の共通ヘルパーが遅延キャッシュ方式で使用（無ければTCGdexから取得して保存）</td>
-    </tr>
-    <tr>
-      <td class="term">set:{setId}<div class="status done">実装済み</div></td>
-      <td class="desc">セット単位のカードデータ。トレーナーズ・エネの名前照合専用、こちらも遅延キャッシュ方式</td>
-    </tr>
-    <tr>
-      <td class="term">sets:standard</td>
-      <td class="desc">スタンダードレギュレーション対象セットの一覧</td>
-    </tr>
-    <tr>
-      <td class="term">counter:meta / counter:mine</td>
-      <td class="desc">register時のid連番発行用カウンター。type-XXX（3桁ゼロ埋め）の採番に使用</td>
-    </tr>
-    <tr>
-      <td class="term">cardRuleOverrides<div class="status todo">未実装</div></td>
-      <td class="desc">4枚制限などのルール例外だけをまとめておくキー（かがやくゲッコウガ・ACE SPEC等）。レギュ判定（legalMarks/whitelist）とは別軸の仕組み</td>
-    </tr>
-  </table>
-</div>
-
-<footer>Dictionary.jsonへの登録はまだ。登録するか要確認</footer>
-<footer style="margin-top:4px;">更新履歴：2026-07-21 matchTrainerOrEnergyCard複数ヒット時ルールを追加</footer>
-<footer style="margin-top:4px;">更新履歴：2026-07-21（追記）pid（provisional一時ID）を追加</footer>
-<footer style="margin-top:4px;">更新履歴：2026-07-21（さらに追記）deckRuleViolations・MTGA方式を追加。violations・deckRulesの説明を実装状況に合わせて更新</footer>
-<footer style="margin-top:4px;">更新履歴：2026-07-22 ?ask関連用語（openConcerns・answer・newConcerns）を追加。concernとopenConcernsの違いを明記</footer>
+<div class="group-title">KVキー</div>
+<table>
+<tr><td class="term">deck:meta:{id}</td><td>環境デッキ保存キー</td></tr>
+<tr><td class="term">deck:mine:{id}</td><td>自分のデッキ保存キー</td></tr>
+<tr><td class="term">card:{cardId}</td><td>カード表示データ（遅延キャッシュ）</td></tr>
+<tr><td class="term">set:{setId}</td><td>セット単位カードデータ（遅延キャッシュ）</td></tr>
+<tr><td class="term">sets:standard</td><td>スタンダード対象セット一覧</td></tr>
+<tr><td class="term">counter:meta / counter:mine</td><td>id連番カウンター</td></tr>
+<tr><td class="term">cardRuleOverrides</td><td>4枚制限等のルール例外（未実装）</td></tr>
+</table>
 
 </body>
 </html>

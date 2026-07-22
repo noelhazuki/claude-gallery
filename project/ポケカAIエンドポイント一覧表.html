@@ -6,350 +6,80 @@
 <meta property="og:image" content="https://placehold.co/1200x630/1f4d6b/ffffff?text=RES-008+Endpoint+List">
 <title>pokeca-ai エンドポイント一覧表</title>
 <style>
-  :root{
-    --bg:#f6f3ec;
-    --ink:#242019;
-    --card:#ffffff;
-    --line:#d8d1c2;
-    --done:#2f6f5e;
-    --done-bg:#e6f0ec;
-    --todo:#9a3b3b;
-    --todo-bg:#f5e4e1;
-    --notdo:#8a8271;
-    --notdo-bg:#eeece4;
-    --accent:#1f4d6b;
-  }
+  :root{--bg:#f6f3ec;--ink:#242019;--card:#fff;--line:#d8d1c2;--done:#2f6f5e;--todo:#9a3b3b;--notdo:#8a8271;--accent:#1f4d6b;}
   *{box-sizing:border-box;}
-  body{
-    margin:0; padding:24px 14px 60px;
-    background:var(--bg); color:var(--ink);
-    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
-    line-height:1.6;
-  }
-  .header{margin-bottom:20px;}
+  body{margin:0;padding:24px 14px 60px;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Yu Gothic",sans-serif;line-height:1.6;}
+  h1{font-size:19px;margin:4px 0 16px;}
   .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
-  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
-  .sub{font-size:12.5px;color:#5a5347;}
-
-  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 24px;font-size:11.5px;}
-  .legend span{display:inline-flex;align-items:center;gap:6px;}
-  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
-
-  .group-title{
-    font-size:14px;font-weight:700;color:var(--accent);
-    margin:30px 0 10px;
-    padding-bottom:6px;border-bottom:2px solid var(--accent);
-  }
-  .group-note{font-size:11.5px;color:#5a5347;margin:-4px 0 10px;}
-
-  .ep-card{
-    background:var(--card); border:1px solid var(--line); border-radius:10px;
-    padding:12px 14px; margin-bottom:10px;
-    box-shadow:0 1px 2px rgba(0,0,0,0.04);
-  }
-  .ep-card.done{border-left:4px solid var(--done);}
-  .ep-card.todo{border-left:4px solid var(--todo);}
-  .ep-card.notdo{border-left:4px solid var(--notdo); background:var(--notdo-bg);}
-
-  .ep-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
-  .ep-name{
-    font-family:"SF Mono","Menlo",monospace;
-    font-size:13.5px; font-weight:700; color:var(--ink);
-  }
-  .tag{font-size:9.5px;padding:1px 7px;border-radius:5px;color:#fff;font-weight:normal;}
+  .group-title{font-size:14px;font-weight:700;color:var(--accent);margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent);}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  tr{border-bottom:1px solid var(--line);}
+  tr:last-child{border-bottom:none;}
+  td{padding:8px 10px;font-size:12.5px;vertical-align:top;}
+  .name{font-family:"SF Mono","Menlo",monospace;font-weight:700;white-space:nowrap;}
+  .tag{display:inline-block;font-size:9.5px;padding:1px 6px;border-radius:5px;color:#fff;margin-left:6px;}
   .tag.done{background:var(--done);}
   .tag.todo{background:var(--todo);}
   .tag.notdo{background:var(--notdo);}
-
-  .ep-summary{font-size:12.5px;color:#3a352b;margin-bottom:6px;}
-  .ep-detail{font-size:12px;color:#5a5347;}
-  .ep-detail .row{display:flex;gap:6px;margin-top:3px;}
-  .ep-detail .k{flex-shrink:0;color:#8a8271;min-width:64px;}
-  .kv{font-family:"SF Mono","Menlo",monospace;font-size:11.5px;background:#efe9db;padding:1px 5px;border-radius:4px;}
-
-  .footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;color:#8a8271;}
+  .note{max-width:520px;font-size:11px;color:#8a8271;margin-top:20px;}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="eyebrow">RES-008 / pokeca-ai</div>
-  <h1>エンドポイント一覧表</h1>
-  <div class="sub">Worker（pokeca-ai-worker）が持つ全エンドポイントの一覧。「別Workerを新規に作らず、既存の1つのWorkerにURLパラメータでの分岐を増やす方式」のため、全て同一Workerへの<span class="kv">?〇〇=true</span>形式のクエリパラメータ呼び出し。</div>
-</div>
+<div class="eyebrow">RES-008 / pokeca-ai</div>
+<h1>エンドポイント一覧表</h1>
 
-<div class="legend">
-  <span><span class="dot" style="background:var(--done)"></span>実装済み</span>
-  <span><span class="dot" style="background:var(--todo)"></span>未着手・計画中</span>
-  <span><span class="dot" style="background:var(--notdo)"></span>不採用・廃止済み</span>
-</div>
+<div class="group-title">① meta系</div>
+<table>
+<tr><td class="name">?register_meta=true</td><td>環境デッキ新規登録<span class="tag done">済</span></td></tr>
+<tr><td class="name">?delete_meta=true</td><td>環境デッキ削除<span class="tag done">済</span></td></tr>
+<tr><td class="name">?copy_meta=true</td><td>環境デッキ複製<span class="tag done">済</span></td></tr>
+<tr><td class="name">?update_meta_howtoplay=true</td><td>howToPlay更新<span class="tag done">済</span></td></tr>
+<tr><td class="name">?get_meta_howtoplay={id}</td><td>howToPlay単体取得<span class="tag done">済</span></td></tr>
+<tr><td class="name">?list_meta=true</td><td>環境デッキ一覧取得<span class="tag done">済</span></td></tr>
+<tr><td class="name">?update_meta=true（フル編集）</td><td>不採用<span class="tag notdo">廃</span></td></tr>
+</table>
 
-<!-- ===== meta系 ===== -->
-<div class="group-title">① meta系（環境デッキ：deck:meta:{id}）</div>
-<div class="group-note">メタデッキは基本的に直接フル編集しない方針。中身を直したい時はcopy_mineでmineへ複製してから編集する運用。</div>
+<div class="group-title">② mine系</div>
+<table>
+<tr><td class="name">?register_mine=true</td><td>自分のデッキ新規登録<span class="tag done">済</span></td></tr>
+<tr><td class="name">?update_mine=true</td><td>更新（マージ）<span class="tag done">済</span></td></tr>
+<tr><td class="name">?delete_mine=true</td><td>削除<span class="tag done">済</span></td></tr>
+<tr><td class="name">?unlock_mine=true</td><td>ロック解除<span class="tag done">済</span></td></tr>
+<tr><td class="name">?copy_mine=true</td><td>複製<span class="tag done">済</span></td></tr>
+<tr><td class="name">?recheck_mine=true</td><td>provisional再照合<span class="tag done">済</span></td></tr>
+<tr><td class="name">?set_manual=true</td><td>awaitStatusをmanualへ<span class="tag done">済</span></td></tr>
+<tr><td class="name">?update_wait_days=true</td><td>waitDays更新<span class="tag done">済</span></td></tr>
+<tr><td class="name">?list_mine=true</td><td>一覧取得<span class="tag done">済</span></td></tr>
+</table>
 
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?register_meta=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">環境デッキを新規登録する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>name / cardList（idは自動採番）</div>
-    <div class="row"><span class="k">備考</span>cardListはresolve_cardlistの出力を人が確認UIでチェックしてから渡す想定</div>
-    <div class="row"><span class="k">2026-07-21〜</span>登録時、レギュ判定・deckRules判定（枚数ルール、下記④参照）を実行するが<b>MTGA方式</b>のためどちらも登録・保存はブロックしない。レスポンスに<span class="kv">violations</span>（レギュ）・<span class="kv">deckRuleViolations</span>（枚数）を警告として含めて返す（以前は違反時400エラーで登録自体を弾いていたが変更）</div>
-  </div>
-</div>
+<div class="group-title">③ カード基盤</div>
+<table>
+<tr><td class="name">?get_card={cardId}</td><td>カード表示データ取得（遅延キャッシュ）<span class="tag done">済</span></td></tr>
+<tr><td class="name">?resolve_card_id=xxx</td><td>setInfo→cardId単体変換<span class="tag done">済</span></td></tr>
+<tr><td class="name">?resolve_cardlist=true</td><td>deckCode→cardList一括変換<span class="tag done">済</span></td></tr>
+</table>
 
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?delete_meta=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">環境デッキを削除する</div>
-</div>
+<div class="group-title">④ レギュレーション・deckRules判定</div>
+<table>
+<tr><td class="name">?check_set=true</td><td>新弾差分確認<span class="tag done">済</span></td></tr>
+<tr><td class="name">?recheck_all=true</td><td>全デッキ一括再判定<span class="tag done">済</span></td></tr>
+<tr><td class="name">（register/update内で自動実行）</td><td>レギュ判定・deckRules判定<span class="tag done">一部済</span></td></tr>
+</table>
 
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?copy_meta=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">環境デッキを複製する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>sourceIdから元デッキを取得し、新id・新名称を自動生成して複製</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?update_meta_howtoplay=true</span><span class="tag done">実装済み（2026-07-19）</span></div>
-  <div class="ep-summary">howToPlay（回し方メモ）だけを更新する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>name / cardList / deckCodeは更新不可。「フル編集はしないがメモだけ書き足したい」要望に対応</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?get_meta_howtoplay={id}</span><span class="tag done">実装済み（2026-07-19）</span></div>
-  <div class="ep-summary">howToPlay単体を取得する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>list_metaが軽量レスポンス（id/nameのみ）でhowToPlayを含まないため、編集パネル表示専用に追加</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?list_meta=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">環境デッキの一覧を取得する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>id/nameのみの軽量レスポンス（howToPlay等は含まない）</div>
-  </div>
-</div>
-
-<div class="ep-card notdo">
-  <div class="ep-head"><span class="ep-name">?update_meta=true（フル編集）</span><span class="tag notdo">不採用・実装しない方針（2026-07-19確定）</span></div>
-  <div class="ep-summary">cardList等を含む全項目編集</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">理由</span>メタデッキは直接編集せず、copy_mine（sourceType:"meta"）でmineへコピーしてから編集する運用に統一したため</div>
-  </div>
-</div>
-
-<!-- ===== mine系 ===== -->
-<div class="group-title">② mine系（自分のデッキ：deck:mine:{id}）</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?register_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">自分のデッキを新規登録する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>name / cardList（idは自動採番）</div>
-    <div class="row"><span class="k">任意項目</span>concern</div>
-    <div class="row"><span class="k">2026-07-21〜</span>register_metaと同じくMTGA方式。レギュ判定・deckRules判定（下記④参照）とも登録・保存はブロックせず、レスポンスに<span class="kv">violations</span>・<span class="kv">deckRuleViolations</span>を警告として含めて返す</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?update_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">自分のデッキを更新する（マージロジック込み）</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>locked:trueのレコードは拒否される（誤上書き防止）。ロックボタンからは<span class="kv">{id, locked:true}</span>のみ送信される</div>
-    <div class="row"><span class="k">2026-07-21〜</span>cardListを含む更新時のみレギュ判定・deckRules判定（下記④参照）を実行。MTGA方式のため更新・保存はブロックせず、レスポンスに<span class="kv">violations</span>・<span class="kv">deckRuleViolations</span>を警告として含めて返す</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?unlock_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">ロックを解除する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>自動ロック解除の経路はなく、常にこのエンドポイントの明示的な呼び出しでのみ解除される</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?delete_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">自分のデッキを削除する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>deck:mine:backup:{id}（1世代前スナップショット）も同時に削除される</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?copy_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">デッキを複製する（Windows方式の自動命名）</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>sourceType:"meta"／"mine"どちらも指定可。meta→mineコピー時はhowToPlayを「[元メタの回し方] 〜」形式でconcernへ引き継ぐ。複製後は常にlocked:falseにリセット</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?recheck_mine=true</span><span class="tag done">実装済み（2026-07-20）</span></div>
-  <div class="ep-summary">mine1件分のprovisionalカードをまとめて再照合する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>ヒット分はconfirmedへ昇格。ロック中でも実行可（枚数・構成は変えず正体確定のみのため）。setInfo/setCodeを持たない旧provisionalはskipped扱い。awaitStatus:'manual'のエントリーは再照合対象から自動で除外される（manualSkippedとしてカウント）</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?set_manual=true</span><span class="tag done">実装済み（2026-07-21）</span></div>
-  <div class="ep-summary">provisional1件のawaitStatusを手動で'manual'へ切り替える</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>deckId / category　＋　（pid）または（tempName / setInfo）</div>
-    <div class="row"><span class="k">備考</span>対象特定はdeckId＋category＋tempName＋setInfoの完全一致（<span class="kv">findProvisionalEntry</span>関数）。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄に渡す。recheck_mineと同じ理屈でロック中のデッキでも実行可。切替後はrecheck_mineの再照合対象から外れる<br>2026-07-21追記：<span class="kv">pid</span>（背番号）を任意項目として追加。pidを渡す場合はtempName/setInfoは省略可（categoryのみ引き続き必須）。pidを渡さない場合は従来通りtempName/setInfo必須（pid実装前の古いprovisional向けの経路として存続）</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?update_wait_days=true</span><span class="tag done">実装済み（2026-07-21）</span></div>
-  <div class="ep-summary">provisional1件のwaitDaysを更新する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>deckId / category / waitDays　＋　（pid）または（tempName / setInfo）</div>
-    <div class="row"><span class="k">備考</span>対象特定はset_manualと同じくfindProvisionalEntry（pid優先、無ければtempName/setInfo）。waitDaysは絶対値方式（UIの「+7」ボタン相当の計算はフロント側で行い、ここには計算済みの絶対値を送る）。1以上の整数のみ許可。ロック中でも実行可</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?list_mine=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">自分のデッキの一覧を取得する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>全データを返却（list_metaと違い軽量化していない）</div>
-  </div>
-</div>
-
-<!-- ===== カード基盤 ===== -->
-<div class="group-title">③ カード取得・照合の基盤</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?get_card={cardId}</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">カード表示用データ（名前・画像・技等）を取得する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">方式</span>遅延キャッシュ（card:{cardId}確認→無ければTCGdexから取得して保存）</div>
-    <div class="row"><span class="k">備考</span>見つからない場合は404</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?resolve_card_id=xxx</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">setInfo（公式カード番号表記）→cardId の単体変換</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">用途</span>デバッグ用</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?resolve_cardlist=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">deckCode→cardList一括変換（register_metaの入力材料作成用）</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">内部処理</span>pokeka2 Service Binding呼び出し→8分類マッピング→ポケモンはsetInfo変換、トレーナーズ／エネはsetCode＋名前完全一致でcardId照合</div>
-    <div class="row"><span class="k">出力</span>cardList（8分類構造）＋unmappedCategories</div>
-    <div class="row"><span class="k">備考</span>詳細な内部分岐は「処理フロー図：resolve_cardlist」参照</div>
-  </div>
-</div>
-
-<!-- ===== レギュレーション ===== -->
-<div class="group-title">④ レギュレーション判定</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?check_set=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">新弾差分の確認</div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?recheck_all=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">登録済み全デッキのレギュ違反を一括再判定する</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">実行タイミング</span>年1回のレギュ改定タイミングのみ（決定事項）</div>
-    <div class="row"><span class="k">備考</span>自動削除・自動修正はせず、違反マーク表示のみ。recheck_mine（provisional再照合）とは目的が違うので混同注意</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">（register_meta/register_mine/update_mine内で自動実行）</span><span class="tag done">独立エンドポイントではない</span></div>
-  <div class="ep-summary">register時のレギュ検証はcardList変更を伴う保存処理の内部で実行される</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">備考</span>provisional（cardId未確定）のカードは判定対象から除外。confirmedのカードのみ判定する（2026-07-20仕様修正）</div>
-    <div class="row"><span class="k">2026-07-21〜</span><b>MTGA方式に変更。</b>違反（violations）があっても登録・保存はブロックしない（以前は400エラーでブロックしていたが、運用方針変更により警告として返すのみに統一）</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">（register_meta/register_mine/update_mine内で自動実行）deckRules判定</span><span class="tag done">一部実装済み（2026-07-21）</span></div>
-  <div class="ep-summary">枚数ルール判定。独立エンドポイントではなく、上のレギュ検証と同じタイミング・同じ内部処理で実行される</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">実装範囲</span>同名カード基本4枚まで／デッキ合計60枚ちょうど の2つのみ</div>
-    <div class="row"><span class="k">未実装</span>たね最低1体必須／ACE SPEC合計1枚まで／基本エネルギー無制限（cross_category_fields〈isAceSpec/isBasicEnergy、OCR共通スキーマ側〉の実装待ち）</div>
-    <div class="row"><span class="k">判定方式</span>MTGA方式（違反があっても登録・保存はブロックしない、警告のみ）</div>
-    <div class="row"><span class="k">返り値</span>既存のviolations（レギュ違反用）とは別に<span class="kv">deckRuleViolations</span>で返す。形は3パターン：デッキ全体用<span class="kv">{reason,count,expected}</span>／カード単位用<span class="kv">{reason,name,count,limit}</span>／合計超過用<span class="kv">{reason,total,limit,cards}</span>（合計超過用は未実装ルール向けで現時点では発生しない）</div>
-    <div class="row"><span class="k">暫定措置</span>energyカテゴリは基本エネルギー無制限との切り分けが今はできないため、同名4枚チェックの対象から一旦除外中（cross_category_fields実装後に見直し）</div>
-  </div>
-</div>
-
-<!-- ===== 初期化・同期 ===== -->
 <div class="group-title">⑤ 初期化・同期</div>
+<table>
+<tr><td class="name">?init=true</td><td>初回一括ロード<span class="tag done">済</span></td></tr>
+<tr><td class="name">?sync=true</td><td>続き・再開<span class="tag done">済</span></td></tr>
+<tr><td class="name">（仮称）?add_set=true</td><td>新セット差分追加<span class="tag todo">構想のみ</span></td></tr>
+</table>
 
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?init=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">スタンダード合法28セット分のカードデータを初回一括ロードする</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">注意</span>初回一括ロード専用。新セットの差分追加には使えない（sync:progressが巻き戻るため、実コード確認で判明・2026-07-20）</div>
-  </div>
-</div>
-
-<div class="ep-card done">
-  <div class="ep-head"><span class="ep-name">?sync=true</span><span class="tag done">実装済み</span></div>
-  <div class="ep-summary">初回一括ロードの続き・再開用</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">注意</span>?init=true同様、差分追加用途には使えない</div>
-  </div>
-</div>
-
-<div class="ep-card todo">
-  <div class="ep-head"><span class="ep-name">（仮称）?add_set=true</span><span class="tag todo">構想のみ・今後検討</span></div>
-  <div class="ep-summary">新セット1件だけをKVへ差分追加するための専用エンドポイント（案）</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">対象</span>SVシリーズ本弾のみ（いずれTCGdexに載るもの）。日本限定パックはTCGdex非対応のため構造的に対象外</div>
-    <div class="row"><span class="k">状態</span>ideas.mdの「今後検討」に記録済み・未実装</div>
-  </div>
-</div>
-
-<!-- ===== 未着手 ===== -->
 <div class="group-title">⑥ 未着手・計画中</div>
+<table>
+<tr><td class="name">?ask=true</td><td>デッキ構築相談（AI）<span class="tag todo">設計確定・未実装</span></td></tr>
+</table>
 
-<div class="ep-card todo">
-  <div class="ep-head"><span class="ep-name">?ask=true</span><span class="tag todo">設計確定・未実装（2026-07-22）</span></div>
-  <div class="ep-summary">Claude API呼び出しによるAIアドバイス機能（デッキ構築相談専用）</div>
-  <div class="ep-detail">
-    <div class="row"><span class="k">対象範囲</span>デッキ構築相談のみ。環境デッキ対策（メタ分析・対戦戦略）は別テーマとして保留中、この仕様には含まない</div>
-    <div class="row"><span class="k">method</span>POST（想定）</div>
-    <div class="row"><span class="k">入力材料</span>対象<span class="kv">deck:mine</span>の<span class="kv">cardList</span>＋質問文（フリーテキスト）。会話履歴は持たず、毎回その場のcardListだけで完結させる（トークン節約のため）</div>
-    <div class="row"><span class="k">cardId→カード名変換</span>渡す前にcardList中の全cardIdを既存<span class="kv">get_card</span>（遅延キャッシュ）にそのまま回してカード名に変換する素直な全件方式。大半は既にcard:{cardId}がKVキャッシュ済みのため、TCGdexへ実際に取りに行くのは未キャッシュカードのみのレアケース想定</div>
-    <div class="row"><span class="k">レスポンス形式</span>JSON構造化。<span class="kv">{ answer, newConcerns }</span>の2フィールド<br>・<span class="kv">answer</span>：画面表示用の自由文回答（見た目は普通の会話文）<br>・<span class="kv">newConcerns</span>：回答の中でAIが拾った「まだ解決してへん懸念点」の配列（表示しない裏メモ、Claude自身が構造化出力する想定。別途の抽出ロジックは不要）</div>
-    <div class="row"><span class="k">openConcerns</span><span class="kv">deck:mine</span>内に新設する配列フィールド。既存の<span class="kv">concern</span>（登録時の相談したい点メモ）とは別物なので混同注意。相談のたびに<span class="kv">newConcerns</span>が自動追加され、次回相談時は「今のcardList」＋「openConcerns」をまとめて渡す</div>
-    <div class="row"><span class="k">解決判定</span>AIによる自動判定はしない。awaitStatusのmanual切替やmeta側provisional確認パネルと同じ「人間が見て判断する」方針に統一。人間がボタンを押した時だけopenConcernsから該当項目を完全削除（ローカル保存なし、複数端末で同じ状態を見るため必ずKV側で削除）</div>
-    <div class="row"><span class="k">未確定</span>?askのレスポンスJSONのパース失敗時のフォールバック挙動は未検討</div>
-  </div>
-</div>
-
-<div class="footer">
-  作成：2026-07-20（RES-008 spec / project_state / project files を突き合わせて作成）<br>
-  出典：spec.json の endpoint_design_policy / deck_register_schema / card_data_design / regulation_legality_design セクション、ならびにロードマップ・入出力設計図・状態遷移図・処理フロー図・キーリストの各HTML。<br>
-  更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。<br>
-  更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。<br>
-  更新履歴：2026-07-21（追記）set_manual・update_wait_daysにpid（背番号）対応を追加。tempName表記ゆれ対策として、pid優先・従来方式フォールバックの2経路に。<br>
-  更新履歴：2026-07-21（さらに追記）deckRules判定（同名4枚まで・60枚ちょうど）を実装。あわせてレギュ判定・deckRules判定ともMTGA方式（違反があっても登録・保存はブロックしない、警告のみ返す）に統一。以前のregister_meta/register_mine/update_mineの400ブロック仕様は廃止。<br>
-  更新履歴：2026-07-22 ?askエンドポイントの設計が確定（未実装のまま）。対象をデッキ構築相談のみに絞り、入力材料（cardList＋質問文・履歴なし）、cardId→カード名変換方式（get_card全件回し）、レスポンス形式（answer/newConcerns構造化）、openConcerns運用（AIが追加・人間がボタンで解決済み判定しKVから完全削除）を決定。処理フローの詳細は専用の新規フロー図（ポケカAI_ask処理フロー図.html）を別途参照。
-</div>
+<div class="note">詳細仕様はspec.json参照。</div>
 
 </body>
 </html>

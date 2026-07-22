@@ -1,378 +1,89 @@
-<html lang="ja"><head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RES-008 ロードマップ</title>
 <meta property="og:image" content="https://placehold.co/1200x630/2c2c33/ffffff?text=RES-008+Roadmap">
+<title>pokeca-ai ロードマップ</title>
 <style>
-  :root {
-    --done: #3f9142;
-    --done-bg: #e8f5e9;
-    --now: #e0592a;
-    --now-bg: #fff1e8;
-    --todo: #8b8b95;
-    --todo-bg: #f4f4f6;
-    --line: #d8d8de;
-    --card-bg: #ffffff;
-    --paper: #f7f6f2;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: var(--paper);
-    color: #2c2c33;
-    padding: 24px 14px 60px;
-  }
-  .header {
-    text-align: center;
-    margin-bottom: 6px;
-  }
-  .header .badge {
-    display: inline-block;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    background: #2c2c33;
-    color: #fff;
-    padding: 3px 10px;
-    border-radius: 999px;
-    margin-bottom: 10px;
-  }
-  .header h1 {
-    font-size: 20px;
-    margin: 0 0 4px;
-  }
-  .header p {
-    font-size: 12px;
-    color: #6b6b76;
-    margin: 0 0 20px;
-  }
-  .note-banner {
-    max-width: 520px;
-    margin: 0 auto 20px;
-    background: #fff8e6;
-    border: 1px solid #f0d999;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 11.5px;
-    color: #7a5c1c;
-    line-height: 1.6;
-  }
-  .note-banner b { color: #9c7412; }
-
-  .stage-group {
-    position: relative;
-    margin-bottom: 6px;
-  }
-  .stage-label {
-    font-size: 11px;
-    font-weight: bold;
-    color: #9a9aa4;
-    letter-spacing: 0.1em;
-    margin: 26px 4px 10px;
-  }
-
-  .track {
-    position: relative;
-    padding-left: 26px;
-  }
-  .track::before {
-    content: "";
-    position: absolute;
-    left: 10px;
-    top: 6px;
-    bottom: 6px;
-    width: 3px;
-    background: var(--line);
-    border-radius: 3px;
-  }
-
-  .node {
-    position: relative;
-    background: var(--card-bg);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  }
-  .node::before {
-    content: "";
-    position: absolute;
-    left: -22px;
-    top: 16px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--todo);
-    border: 3px solid var(--paper);
-    box-shadow: 0 0 0 2px var(--line);
-  }
-  .node.done { background: var(--done-bg); border-color: #bfe0c1; }
-  .node.done::before { background: var(--done); box-shadow: 0 0 0 2px #bfe0c1; }
-  .node.now { background: var(--now-bg); border-color: #f3c3a6; }
-  .node.now::before {
-    background: var(--now);
-    box-shadow: 0 0 0 2px #f3c3a6;
-    animation: pulse 1.8s infinite;
-  }
-  .node.todo { background: var(--todo-bg); }
-
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 2px #f3c3a6; }
-    50% { box-shadow: 0 0 0 6px #fbd9c3; }
-    100% { box-shadow: 0 0 0 2px #f3c3a6; }
-  }
-
-  .node-title {
-    font-size: 13.5px;
-    font-weight: bold;
-    margin-bottom: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .node.done .node-title { color: #2b6e2e; }
-  .node.now .node-title { color: #b5451a; }
-  .node.todo .node-title { color: #5c5c66; }
-
-  .tag {
-    font-size: 9.5px;
-    padding: 1px 6px;
-    border-radius: 5px;
-    font-weight: normal;
-  }
-  .node.done .tag { background: var(--done); color: #fff; }
-  .node.now .tag { background: var(--now); color: #fff; }
-  .node.todo .tag { background: #c6c6ce; color: #fff; }
-  .tag.small { background: #d8d1e8 !important; color: #4a3c66 !important; }
-
-  .node-desc {
-    font-size: 11.5px;
-    color: #55555f;
-    line-height: 1.5;
-  }
-
-  .now-panel {
-    margin: 22px 0 8px;
-    background: #2c2c33;
-    color: #fff;
-    border-radius: 14px;
-    padding: 16px;
-  }
-  .now-panel .label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: #f3a878;
-    margin-bottom: 6px;
-  }
-  .now-panel .title {
-    font-size: 15px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-  .now-panel ol {
-    margin: 0;
-    padding-left: 18px;
-    font-size: 12px;
-    line-height: 1.9;
-    color: #e4e4ea;
-  }
-  .now-panel ol li::marker {
-    color: #f3a878;
-    font-weight: bold;
-  }
-
-  .legend {
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-    margin: 22px 0 4px;
-    font-size: 10.5px;
-    color: #6b6b76;
-  }
-  .legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .dot {
-    width: 9px; height: 9px; border-radius: 50%;
-  }
-  .dot.done { background: var(--done); }
-  .dot.now { background: var(--now); }
-  .dot.todo { background: var(--todo); }
+  :root{--done:#3f9142;--done-bg:#e8f5e9;--now:#e0592a;--now-bg:#fff1e8;--todo:#8b8b95;--todo-bg:#f4f4f6;--line:#d8d8de;--paper:#f7f6f2;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Hiragino Sans","Yu Gothic",sans-serif;background:var(--paper);color:#2c2c33;padding:24px 14px 60px;}
+  h1{font-size:19px;margin:4px 0 16px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:#2c2c33;font-weight:700;}
+  .stage-label{font-size:11px;font-weight:bold;color:#9a9aa4;letter-spacing:0.1em;margin:24px 4px 8px;}
+  .track{position:relative;padding-left:20px;}
+  .track::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:3px;background:var(--line);border-radius:3px;}
+  .node{position:relative;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;}
+  .node::before{content:"";position:absolute;left:-17px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--todo);}
+  .node.done{background:var(--done-bg);border-color:#bfe0c1;}
+  .node.done::before{background:var(--done);}
+  .node.now{background:var(--now-bg);border-color:#f3c3a6;}
+  .node.now::before{background:var(--now);}
+  .tag{font-size:9.5px;padding:1px 6px;border-radius:5px;margin-left:6px;color:#fff;}
+  .node.done .tag{background:var(--done);}
+  .node.now .tag{background:var(--now);}
+  .node.todo .tag{background:#c6c6ce;}
+  .now-panel{margin:24px 0 8px;background:#2c2c33;color:#fff;border-radius:10px;padding:12px 14px;}
+  .now-panel .label{font-size:10px;letter-spacing:0.1em;color:#f3a26a;margin-bottom:4px;}
+  .now-panel ol{margin:6px 0 0;padding-left:18px;font-size:12px;line-height:1.7;}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="badge">RES-008 ・ ポケカAIアドバイザー</div>
-  <h1>進化ロードマップ</h1>
-  <p>2026-07-21 時点（deckRules本体を一部実装・登録判定をMTGA方式へ変更）</p>
+<div class="eyebrow">RES-008 / pokeca-ai</div>
+<h1>ロードマップ</h1>
+
+<div class="stage-label">STAGE 1 ・ たまご期（基盤構築）</div>
+<div class="track">
+  <div class="node done">Worker / KV 稼働開始<span class="tag">完了</span></div>
+  <div class="node done">register / list エンドポイント<span class="tag">完了</span></div>
+  <div class="node done">HTMLテストツール<span class="tag">完了</span></div>
 </div>
 
-<div class="note-banner">
-  <b>今回の更新メモ（2026-07-21・実装セッション）：</b>deckRules本体（枚数ルール判定）を設計→実装まで完了。実装できたのは同名カード基本4枚まで／デッキ合計60枚ちょうどの2つのみで、残る3つ（たね最低1体・ACE SPEC合計1枚・基本エネルギー無制限）はcross_category_fields（OCR共通スキーマ側、未実装）待ち。<br><br>あわせて運用方針を変更：register_meta/register_mine/update_mineでの判定は「違反があっても登録・保存はブロックしない、警告として返すだけ」というMTGアリーナ方式に統一した。実はこれまでのレギュ判定（violations）は運用メモ上「MTGA方式＝既存のレギュ判定と同じ考え方」と書いていたが、実コードを確認したところ実際には400エラーで登録をブロックする方式やったと判明。ハノイさんに確認の上、レギュ判定側も含めて非ブロック方式へ統一する形で決着した（以前の400ブロック仕様は廃止）。src/index.jsを修正し、node --checkで構文確認済み。GitHubへの反映はハノイさん側で実施予定。<br><br>
-  <b>今回の更新メモ（2026-07-21・さらに追記）：</b>STAGE2最後の課題やった「meta側provisional確認パネル」を実装・実機確認済み。register_meta_test.htmlのcardList入力欄に「❓未確定カードを確認」ボタンを追加し、POST前の下書きJSONをブラウザ側でその場でパースしてprovisional:trueのエントリーだけ一覧表示する（カテゴリ／tempName／count／setInfo or setCode）。編集操作は無し・確認専用（本人の判断で編集機能は不要と決定）。サーバー通信は発生しないため、mine側のような編集用provisionalパネルとは別系統。動作確認は手書きJSON（実在カード・公式コード不要）で実施し、confirmed（cardId確定済み）とprovisionalの混在データから、provisional分だけ正しく抽出できることを確認済み。これでSTAGE2は全項目完了。<br><br>
-  <b>今回の更新メモ（2026-07-21・追記）：</b>provisionalエントリーへの一時ID（<span class="kv">pid</span>：p1,p2…のデッキ内通し番号）を実装・実機確認まで完了。tempName（人間が入力したカード名テキスト）は末尾スペース等の表記ゆれで完全一致に失敗するリスクがあったため、それに依らない識別手段として追加した。<span class="kv">applyProvisionalAwaitDefaults</span>（register_meta/register_mine/update_mine共通で通る初期値付与関数）に相乗りさせ、provisionalエントリーにpidが無ければ自動採番する形。<span class="kv">findProvisionalEntry</span>はpidが渡されたらpid一致のみで特定し、渡されなければ従来のcategory＋tempName＋setInfo方式にフォールバックする（pid実装前に登録された古いprovisionalとの後方互換のため）。<span class="kv">set_manual</span>／<span class="kv">update_wait_days</span>の2エンドポイントにもpidを任意項目として追加。set_manual_test.htmlにpid入力欄を追加し、mine-014（テストデッキ、確認後ハノイさんが削除済み）でpid単独指定による両エンドポイントの動作を実機確認済み。<br><br>
-  <b>今回の更新メモ（2026-07-21）：</b>MC（ボスの指令）・M3（ポケパッド）がprovisionalのまま確定しない不具合を修正（同一setCode内に型番違いの同名カードが複数存在するケースで、複数ヒット時に型番最小のものを機械的に採用する<b>pickSmallestLocalIdCard</b>ルールを追加）。実機でconfirmed昇格を確認済み。あわせてlegalMarks/whitelistの更新要否を判断する運用手順（新弾情報はまとめサイトで気づき、確定判断は公式の例外リストで行う）を決定事項化。旧テストデータ（test/test2/dora03等）は全て削除済み。<br><br>
-  <b>同日追記：</b>OCR共通スキーマの導出ルール整理・トレーナーズ専用フィールド洗い出しが決着。ACE SPECはポケモンのsubtypesには存在せず、グッズ／どうぐ／サポート／スタジアム／エネ共通の横断フラグ（isAceSpec）として別枠管理する方針に確定。VMAXはレギュ落ち済みとして値のみ保持、hasAbility（特性の有無）はdeckRulesに関与しない情報フラグと位置づけ。「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果でありデッキ構築の枚数には影響しないため構造化対象外と判断。詳細はロジック図参照。<br><br>
-  <b>同日再追記：</b>awaitStatus実装時からの持ち越し課題やった「手動manual切替・waitDays延長がロック中デッキで操作不可」を解消。専用エンドポイント<span class="kv">?set_manual=true</span>／<span class="kv">?update_wait_days=true</span>を新設し、実機テスト（単体確認ツールset_manual_test.htmlで動作確認・テストデータは確認後削除予定）まで完了。次はSTAGE2最後の課題②「meta側provisional確認パネル」の実装に進む。
+<div class="stage-label">STAGE 2 ・ 1進化（エンドポイント整備）</div>
+<div class="track">
+  <div class="node done">mine系フル装備<span class="tag">完了</span></div>
+  <div class="node done">meta系（register・delete・copy）<span class="tag">完了</span></div>
+  <div class="node done">カード取得・照合の基盤（get_card／resolve_cardlist）<span class="tag">完了</span></div>
+  <div class="node done">レギュレーション適合チェック<span class="tag">完了</span></div>
+  <div class="node done">mineロック操作の一本化<span class="tag">完了</span></div>
+  <div class="node done">provisional一括再チェック（recheck_mine）<span class="tag">完了</span></div>
+  <div class="node done">provisional内サブ状態 awaitStatus<span class="tag">完了</span></div>
+  <div class="node done">トレーナーズ／エネ複数ヒット確定ルール<span class="tag">完了</span></div>
+  <div class="node done">set_manual・update_wait_days<span class="tag">完了</span></div>
+  <div class="node done">provisionalの一時ID（pid）<span class="tag">完了</span></div>
+  <div class="node done">meta側provisional確認パネル<span class="tag">完了</span></div>
 </div>
 
-<div class="legend">
-  <span><i class="dot done"></i>完了</span>
-  <span><i class="dot now"></i>現在地</span>
-  <span><i class="dot todo"></i>未着手</span>
+<div class="stage-label">STAGE 3 ・ 2進化（カードデータ構造化）</div>
+<div class="track">
+  <div class="node done">cardList構造の再設計<span class="tag">完了</span></div>
+  <div class="node done">deckRules本体（同名4枚・60枚ちょうど）<span class="tag">一部完了</span></div>
+  <div class="node done">登録判定のMTGA方式統一<span class="tag">完了</span></div>
+  <div class="node now">OCR共通スキーマの整理<span class="tag">現在地・一部完了</span></div>
+  <div class="node todo">cardRuleOverrides初期データ<span class="tag">未着手</span></div>
+  <div class="node done">既存テストデータ削除<span class="tag">完了</span></div>
 </div>
 
-<div class="stage-group">
-  <div class="stage-label">STAGE 1 ・ たまご期（基盤構築）</div>
-  <div class="track">
-    <div class="node done">
-      <div class="node-title">Worker / KV 稼働開始 <span class="tag">完了</span></div>
-      <div class="node-desc">pokeca-ai-worker と pokeca-ai-kv を構築。GitHub連携で自動デプロイパイプラインも構築済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">register / list エンドポイント <span class="tag">完了</span></div>
-      <div class="node-desc">register_meta・register_mine・list_meta・list_mineを実装。KVスキーマ（deck:meta:* / deck:mine:*）確定。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">HTMLテストツール <span class="tag">完了</span></div>
-      <div class="node-desc">register_meta_test.htmlでmeta/mine登録トグル＋一覧表示を確認できる状態。</div>
-    </div>
-  </div>
-</div>
-
-<div class="stage-group">
-  <div class="stage-label">STAGE 2 ・ 1進化（エンドポイント整備）</div>
-  <div class="track">
-    <div class="node done">
-      <div class="node-title">mine系フル装備 <span class="tag">完了</span></div>
-      <div class="node-desc">register_mine・update_mine（マージロジック込み）・unlock_mine・delete_mine・copy_mine（Windows方式の自動命名込み）まで実装済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">meta系（register・delete）<span class="tag">完了</span></div>
-      <div class="node-desc">register_meta・delete_meta・copy_metaは実装済み（resolve_card_id込みで入力フロー完成、実コード確認済み）。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">カード取得・照合の基盤 <span class="tag">完了</span></div>
-      <div class="node-desc">get_card（card:{cardId}の遅延キャッシュ）、resolve_cardlist（pokeka2連携でdeckCode→cardList変換）を実装。ポケモンはsetInfo変換、トレーナーズ／エネはsetCode＋名前の完全一致でcardId照合（実コード確認済み、以前は未確認扱いやったが実装済みと判明）。マッチ確定/仮登録provisionalの振り分けも実装済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">レギュレーション適合チェック <span class="tag">完了</span></div>
-      <div class="node-desc">regulation:current:legalMarks（現行合法マーク）＋regulation:{id}:legalNameWhitelist（名前救済リスト）方式で判定。register_meta・register_mine・update_mine共通で使用。check_set（新弾差分確認）・recheck_all（登録済み全デッキの一括再判定）も実装済み。<br><b>2026-07-21追記（運用手順）：</b>legalMarks自体は年1回のレギュ改定時のみ更新（普段は触らない）。whitelistは新弾のたび、再録トレーナーズ（同名・新イラスト）が公式の例外リストに載っているか確認して追加するかどうかを判断する。新弾情報の把握自体はまとめサイト等の自然な流入に任せ、確定判断は必ず公式の例外リストで行う（人間＝ハノイさんが確認しClaudeへ投げるルート、自動巡回はしない）。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">copy_meta <span class="tag">完了</span></div>
-      <div class="node-desc">環境デッキのコピー機能。sourceIdから元デッキを取得し、新id・新名称を自動生成して複製。実コード確認済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">mineロック操作の一本化 <span class="tag">完了</span></div>
-      <div class="node-desc">編集パネルのlockedプルダウンを廃止し、一覧画面の専用トグルボタンに統一。ロックはupdate_mineへ{id, locked:true}のみ送信、解除は従来通りunlock_mine。あわせて「自動ロック（deckCode確定時）」という以前の想定は実コード上存在しないと判明したため記録から削除。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">provisional一括再チェック（recheck_mine）<span class="tag">完了</span></div>
-      <div class="node-desc">mine1件分のprovisionalカードをまとめて再照合する新規エンドポイント。あわせてprovisional保存内容を拡張し、setInfo（ポケモン）／setCode（トレーナーズ／エネ）を保持するよう変更（再照合の材料として必要だったため）。拡張前に登録済みの古いprovisionalは再照合不可（skipped扱い）。ロック中デッキでも実行可。一覧画面に「❓未確定×N」バッジも追加。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">provisional内サブ状態 awaitStatus（waiting/manual）<span class="tag">完了</span></div>
-      <div class="node-desc">provisionalエントリーに registeredAt／awaitStatus／waitDays を付与する仕組み。新規provisionalは基本waiting、KV「provisional:knownManualSetCodes」（恒久的にTCGdex未収録と判断済みのsetCode一覧、プロモ等）に一致すれば自動でmanualに切り替わる。manualはrecheck_mineの再照合対象から除外される（無駄な問い合わせを省く）。詳細は状態遷移図③参照。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">トレーナーズ／エネ複数ヒット時の確定ルール <span class="tag">完了（2026-07-21）</span></div>
-      <div class="node-desc">同一setCode内に同名カードの型番違いが複数存在するケース（例：ボスの指令、ポケパッド）で、以前は複数ヒットを処理できず常にprovisional行きになっていた不具合（MC/M3）を修正。「型番(localId)最小のものを機械的に採用してconfirmed扱いにする」pickSmallestLocalIdCardルールを追加し、デプロイ・実機確認済み。型番最小＝必ず正解の保証はない割り切りルール。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">provisional手動manual切替・waitDays延長 専用エンドポイント <span class="tag">完了（2026-07-21）</span></div>
-      <div class="node-desc">従来はupdate_mine経由だったため、ロック中デッキでは手動manual切替・waitDays延長ができないという制約があった（上のawaitStatus実装時からの持ち越し課題）。recheck_mineと同じ「ロックチェックを回避する」考え方に倣い、<span class="kv">?set_manual=true</span>（manualへの手動切替）と<span class="kv">?update_wait_days=true</span>（waitDaysの絶対値上書き）の2本を専用エンドポイントとして新設し解消。対象特定はdeckId＋category＋tempName＋setInfoの完全一致（findProvisionalEntry関数で共通化。setInfoはポケモンならsetInfo値、トレーナーズ／エネならsetCode値を同じ欄で受ける）。waitDaysは絶対値方式（UI側で+7等の計算をしてから送る想定、Worker側では単純上書きのみ）。専用の単体テストツール（set_manual_test.html）で動作確認済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">provisionalの一時ID（pid）追加 <span class="tag">完了（2026-07-21）</span></div>
-      <div class="node-desc">上のfindProvisionalEntry方式は「tempName＋setInfoの完全一致」に依存していたが、tempNameは人間が入力したテキストのため表記ゆれ（末尾スペース等）で一致に失敗するリスクがあった。対策として、provisionalエントリーごとにデッキ内で一意な背番号<span class="kv">pid</span>（p1, p2…カテゴリを跨いだ通し番号）を導入。applyProvisionalAwaitDefaults（register_meta/register_mine/update_mine共通の初期値付与関数）に相乗りさせ、pidが無いエントリーにだけ自動採番する形（recheck_mineでは触らない＝次にupdate_mine等が走った時点で振られる）。findProvisionalEntryはpidが渡されたらpid一致のみで特定し、渡されなければ従来方式にフォールバック（pid未実装時代の古いprovisionalとの後方互換）。set_manual／update_wait_daysの両エンドポイントもpidを任意項目として受理するよう拡張。set_manual_test.htmlにpid入力欄を追加し、mine-014（テスト後ハノイさんが削除済み）でpid単独指定による両エンドポイントの動作を実機確認済み。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">meta側provisional確認パネル（登録前プレビュー）<span class="tag">完了（2026-07-21）</span></div>
-      <div class="node-desc">register_meta_test.htmlのcardList入力欄（textarea）に「❓未確定カードを確認」ボタンを追加。POST前の下書きJSONをその場でブラウザ側でパースし、provisional:trueのエントリーだけ抜き出して一覧表示する（カテゴリ／tempName／count／setInfo or setCode）。サーバー通信・KV書き込みは一切発生しない、確認専用の機能。mine側の既存provisionalパネル（recheck_mine・set_manual等と連動する編集用パネル）とは別物で、こちらは編集ボタンを持たない。pid・awaitStatus・registeredAtはregister_meta/register_mine実行後にサーバー側（applyProvisionalAwaitDefaults）が初めて付与するフィールドのため、登録前のこの時点ではまだ存在せず、意図的に表示対象から外している。手書きJSON（例：{"provisional":true,"tempName":"...","count":1,"setInfo":"..."}）を直接textareaに貼るだけで動作確認でき、実在するcardIdである必要も公式デッキコードである必要もない点を実機確認済み。</div>
-    </div>
-  </div>
-</div>
-
-<div class="stage-group">
-  <div class="stage-label">STAGE 3 ・ 2進化（カードデータ構造化）</div>
-  <div class="track">
-    <div class="node done">
-      <div class="node-title">cardList構造の再設計 <span class="tag">完了</span></div>
-      <div class="node-desc">8分類（pokemon/goods/tools/technical/supporters/stadiums/energy/aceSpec）＋{cardId,count}、TCGdex未照合時は{provisional:true,tempName,count}の仮登録形式で実運用中。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">deckRules本体（枚数ルール判定） <span class="tag">一部完了（2026-07-21）</span></div>
-      <div class="node-desc">設計→実装まで完了。register_meta/register_mine/update_mine内、既存レギュ判定と同じ位置で実行。実装済みは「同名カード基本4枚まで」「デッキ合計60枚ちょうど」の2つのみ（この2つはruleTags／cross_category_fieldsを経由せずcardListの生データだけで判定できるため、OCR共通スキーマの完成を待たずに先行実装できた）。残る3つ（たね最低1体・ACE SPEC合計1枚・基本エネルギー無制限）はcross_category_fields実装後に追加予定。energyカテゴリは基本エネルギー無制限との切り分けができないため、同名4枚チェックから暫定除外中。返り値は既存violationsとは別にdeckRuleViolationsを新設（3パターンの形）。判定方式はMTGA方式（下の運用方針変更を参照）。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">登録判定のMTGA方式統一 <span class="tag">完了（2026-07-21）</span></div>
-      <div class="node-desc">register_meta/register_mine/update_mineでの違反判定（レギュ判定・deckRules判定とも）を「違反があっても登録・保存はブロックしない、警告として返すだけ」の方式に統一。以前のレギュ判定は実際には違反時400エラーで登録自体をブロックしていたが（設計メモ上の記載と実装がズレていたことが判明）、この変更で非ブロック方式に揃えた。</div>
-    </div>
-    <div class="node now">
-      <div class="node-title">OCR共通スキーマの整理 <span class="tag">現在地（一部完了・2026-07-21）</span></div>
-      <div class="node-desc">subtypes／ruleTagsの導出ルール見直しが完了。ACE SPECはポケモンのsubtypesに存在しないと判明→横断フラグ（isAceSpec／isBasicEnergy）として別枠に移設。VMAXはレギュ落ち済みで値のみ保持、regulationMark判定に除外を任せる方針。hasAbilityはdeckRulesに関与しない情報フラグと確定。トレーナーズ側の専用フィールド洗い出しも完了：deckRulesに直接効くのはisAceSpec／isBasicEnergyの2つのみで、「相手のグッズ無効化」「どうぐ破壊」「ベンチ拡張」等は対戦中の効果としてtrainer_card_rules（原文テキスト保持）に留める判断。残るは対象拡張パック（SV6a・MA、SVHM）のカード一覧確定・OCR作業範囲確定のみ（ストームエメラルダ発売後）。詳細はspec.json ocr_schema_design・ロジック図参照。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">cardRuleOverrides初期データ <span class="tag">未着手</span></div>
-      <div class="node-desc">かがやくゲッコウガ・ACE SPEC・ストームエメラルダ等、既知の例外ルール登録。レギュレーション判定（legalMarks/whitelist）とは別軸の仕組みとして未実装のまま。</div>
-    </div>
-    <div class="node done">
-      <div class="node-title">既存テストデータ移行 <span class="tag">完了（2026-07-21・方針転換）</span></div>
-      <div class="node-desc">当初は test / test2 / dora03 を新cardList形式へ移行する方針やったが、どれも使わないテスト用データやったため、移行ではなく<b>削除</b>で決着。全て削除済み（「登録日情報なし」表示の混同疑いも、この旧データが原因と判明→データ削除により解消）。</div>
-    </div>
-  </div>
-</div>
-
-<div class="stage-group">
-  <div class="stage-label">STAGE 4 ・ 完全体（AIアドバイス機能）</div>
-  <div class="track">
-    <div class="node todo">
-      <div class="node-title">?ask エンドポイント <span class="tag">未着手</span></div>
-      <div class="node-desc">Claude API呼び出しによるAIアドバイス機能。デッキ構築・対戦戦略・メタ分析の相談カテゴリ設計含む。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">カード画像・詳細データ表示 <span class="tag">未着手</span></div>
-      <div class="node-desc">cardList構造化・get_card実装済みなので前提は揃った。表示側（フロント）の実装がこれから。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">購入サポート機能 再開 <span class="tag">未着手</span></div>
-      <div class="node-desc">目標デッキの不足カード特定Worker。カード画像取得問題の解決待ちで中断中（ideas.md記録済み）。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">pokeka2 Worker 本統合 <span class="tag">未着手</span></div>
-      <div class="node-desc">resolve_cardlist（Service Binding経由の呼び出し）は実装済みだが、register_metaの入力フローへの本統合（UI側でdeckCode入力→自動でcardList埋まる、まで）はこれから。</div>
-    </div>
-    <div class="node todo">
-      <div class="node-title">対戦シミュレーション <span class="tag small">今後検討</span></div>
-      <div class="node-desc">両デッキを指定して先攻/後攻の展開を読ませたいという新しい要望。効果テキストを将来構造化する余地（effectStructured等の拡張フィールド）を残す方向とだけ一致、詳細は未確定（ideas.md記録済み）。</div>
-    </div>
-  </div>
+<div class="stage-label">STAGE 4 ・ 完全体（AIアドバイス機能）</div>
+<div class="track">
+  <div class="node now">?ask エンドポイント<span class="tag">設計確定・未実装</span></div>
+  <div class="node todo">カード画像・詳細データ表示<span class="tag">未着手</span></div>
+  <div class="node todo">購入サポート機能 再開<span class="tag">未着手</span></div>
+  <div class="node todo">pokeka2 Worker 本統合<span class="tag">未着手</span></div>
+  <div class="node todo">対戦シミュレーション<span class="tag">今後検討</span></div>
 </div>
 
 <div class="now-panel">
   <div class="label">NEXT ACTION</div>
-  <div class="title">deckRules本体（一部）実装完了。次は実機動作確認とGitHub反映</div>
   <ol>
-    <li>deckRules本体（枚数ルール判定）の設計相談・src/index.jsへの実装：対応済み（2026-07-21、同名4枚まで・60枚ちょうどの2つ。登録判定はMTGA方式に統一）</li>
-    <li>（次）修正済みindex.jsのGitHubアップロード・デプロイ・実機動作確認（register_meta_test.html等で60枚超過・同名5枚・レギュ違反いずれも登録は通り警告が返るか）：未着手</li>
-    <li>（次）cross_category_fields実装後、残る3つのdeckRules（たね最低1体・ACE SPEC合計1枚・基本エネルギー無制限）を追加：未着手</li>
-    <li>スキーマ構造（3層：subtypes／ruleTags／deckRules）を図解（ロジック設計図・入出力設計図）で提示：対応済み</li>
-    <li>subtypes／ruleTagsの重複整理・導出ルール検討：対応済み（2026-07-21）</li>
-    <li>サポート／グッズ／どうぐ／スタジアムそれぞれの専用フィールド洗い出し：対応済み（2026-07-21、isAceSpec／isBasicEnergyの横断フラグに集約）</li>
-    <li>対象拡張パック（SV6a・MA、SVHM）のカード一覧確定、OCR作業範囲確定（ストームエメラルダ発売後に着手・未着手のまま）</li>
-    <li>register_meta_test.htmlの「🏷️ deckCode編集」ボタン削除：対応済み</li>
-    <li>mineロック操作の専用ボタン化・provisional一括再チェック（recheck_mine）実装：対応済み</li>
-    <li>MC/M3のprovisional固着バグ修正（pickSmallestLocalIdCard）・awaitStatus実装・旧テストデータ削除：対応済み（2026-07-21）</li>
-    <li>provisional手動manual切替・waitDays延長の専用エンドポイント（set_manual／update_wait_days）実装・実機テスト：対応済み（2026-07-21）</li>
-    <li>provisionalエントリーへの一時ID（pid：p1,p2…連番）フィールド追加：対応済み（2026-07-21、実機確認済み）</li>
-    <li>②meta側provisional確認パネル（register_meta_test.html、登録前の目視確認用）：対応済み（2026-07-21、編集無し・確認専用で確定。実機確認済み）</li>
-    <li>（次）cardRuleOverrides初期データ登録、または?ask等STAGE4の設計相談へ：未着手</li>
+    <li>spec.jsonへ?ask設計を反映</li>
+    <li>?ask専用の処理フロー図を作成</li>
+    <li>?askの実装（src/index.js）</li>
+    <li>環境デッキ対策（メタ分析・対戦戦略）の設計に着手</li>
   </ol>
 </div>
 
-</body></html>
+</body>
+</html>
