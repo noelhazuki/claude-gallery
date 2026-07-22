@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="https://placehold.co/1200x630/1f4d6b/ffffff?text=RES-008+deckRules+Flow">
+<title>pokeca-ai deckRules判定フロー図</title>
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --ink:#242019;
+    --card:#ffffff;
+    --line:#d8d1c2;
+    --confirmed:#2f6f5e;
+    --confirmed-bg:#e6f0ec;
+    --waiting:#b4711f;
+    --waiting-bg:#f6ead9;
+    --manual:#9a3b3b;
+    --manual-bg:#f5e4e1;
+    --decision:#1f4d6b;
+    --decision-bg:#e6eef4;
+    --pending:#6a4fae;
+    --pending-bg:#f1ecfa;
+    --accent:#1f4d6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:24px 16px 64px;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+  }
+  .header{margin-bottom:20px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+
+  .context-box{
+    max-width:520px;margin:0 auto 22px;
+    background:#fff8e6;border:1px solid #f0d999;border-radius:10px;
+    padding:12px 14px;font-size:12px;color:#7a5c1c;line-height:1.7;
+  }
+  .context-box b{color:#9c7412;}
+
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px auto 26px;font-size:12px;max-width:520px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.decision{background:var(--decision);}
+  .dot.confirmed{background:var(--confirmed);}
+  .dot.waiting{background:var(--waiting);}
+  .dot.pending{background:var(--pending);}
+
+  .section-title{
+    font-size:14px;font-weight:700;color:var(--accent);
+    margin:34px auto 12px;max-width:520px;
+    padding-bottom:6px;border-bottom:2px solid var(--accent);
+  }
+
+  .flow{display:flex;flex-direction:column;align-items:stretch;max-width:520px;margin:0 auto;}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  .node .label{font-size:11px;color:#8a8271;margin-bottom:4px;}
+  .node .title{font-size:14px;font-weight:700;}
+  .node .detail{font-size:12.5px;color:#4a4437;margin-top:6px;white-space:pre-line;}
+  .node.confirmed{border-color:var(--confirmed); background:var(--confirmed-bg);}
+  .node.waiting{border-color:var(--waiting); background:var(--waiting-bg);}
+  .node.decision{border-color:var(--decision); background:var(--decision-bg);}
+  .node.pending{border-color:var(--pending); background:var(--pending-bg);}
+  .node.decision .title::before{content:"分岐：";color:var(--decision);}
+  .node.pending .title::before{content:"未定：";color:var(--pending);}
+
+  .arrow{align-self:center;font-size:18px;color:#a89f8c;margin:2px 0;}
+
+  .branch{display:flex;gap:10px;margin:4px 0;}
+  .branch > div{flex:1;display:flex;flex-direction:column;}
+  .branch-label{font-size:11px;text-align:center;color:#8a8271;margin-bottom:4px;font-weight:700;}
+  .branch-label.confirmed-l{color:var(--confirmed);}
+  .branch-label.waiting-l{color:var(--waiting);}
+
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+
+  table{width:100%;border-collapse:collapse;max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  th,td{text-align:left;padding:9px 10px;font-size:12px;vertical-align:top;border-bottom:1px solid var(--line);}
+  th{background:#efe9db;font-size:11px;color:#5a5347;}
+  tr:last-child td{border-bottom:none;}
+  td.ok{color:var(--confirmed);font-weight:700;}
+  td.ng{color:var(--waiting);font-weight:700;}
+
+  .footer{max-width:520px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">RES-008 / pokeca-ai</div>
+  <h1>deckRules判定フロー図</h1>
+  <div class="sub">デッキ登録時（register_meta / register_mine / update_mine）に走る枚数ルール判定の全体フロー。既存のレギュレーション判定（violations）とは別軸の判定として並走する。</div>
+</div>
+
+<div class="context-box">
+  <b>方式の前提（2026-07-21確定）：</b>MTGA方式を採用。deckRules違反があっても登録・保存はブロックしない。違反は一覧化して返すだけで、修正するかどうかは本人の判断に委ねる（既存のレギュ判定と同じ考え方）。
+</div>
+
+<div class="legend">
+  <span><span class="dot decision"></span>分岐判定</span>
+  <span><span class="dot confirmed"></span>判定できる</span>
+  <span><span class="dot waiting"></span>判定できない（確定後に持ち越し）</span>
+  <span><span class="dot pending"></span>まだ決まってない</span>
+</div>
+
+<div class="section-title">① いつ走るか</div>
+
+<div class="flow">
+
+  <div class="node confirmed">
+    <div class="label">入り口</div>
+    <div class="title">register_meta / register_mine / update_mine が呼ばれる</div>
+    <div class="detail">cardListを含む保存リクエストが来たタイミング。既存のレギュレーション判定（regulationMark照合）がここで走っているのと同じ位置</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node decision">
+    <div class="title">保存処理の中でdeckRulesチェックも実行する</div>
+    <div class="detail">レギュ判定（violations）とdeckRules判定（deckRuleViolations）を、同じ保存処理の中で並行して実行する。どちらも判定結果は「違反リストに積むだけ」で、保存自体には影響しない</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node confirmed">
+    <div class="title">cardListは常に保存される（MTGA方式）</div>
+    <div class="detail">違反があってもKVへの書き込みは実行される。エラーで弾いて登録拒否、ということはしない</div>
+  </div>
+
+</div>
+
+<div class="section-title">② 何を判定するか（5ルール）</div>
+
+<table>
+  <tr><th style="width:34%">ルール</th><th style="width:22%">provisionalで判定可否</th><th>理由</th></tr>
+  <tr>
+    <td>同名カード基本4枚まで</td>
+    <td class="ok">できる</td>
+    <td>count・tempName（またはcardId）だけで数えられる</td>
+  </tr>
+  <tr>
+    <td>デッキ合計60枚ちょうど</td>
+    <td class="ok">できる</td>
+    <td>countの合計だけでよい</td>
+  </tr>
+  <tr>
+    <td>ポケモン（たね）最低1体必須</td>
+    <td class="ng">できない（confirmedのみ）</td>
+    <td>「ポケモンかどうか」はpokemon配列で分かるが、「たねかどうか」（進化段階）はcardId確定後にget_cardで取得する個別データが必要</td>
+  </tr>
+  <tr>
+    <td>ACE SPEC合計1枚まで</td>
+    <td class="ng">できない（confirmedのみ）</td>
+    <td>isAceSpecフラグはOCR共通スキーマのcross_category_fields由来。cardId確定後にしか取得できない</td>
+  </tr>
+  <tr>
+    <td>基本エネルギー無制限</td>
+    <td class="ng">できない（confirmedのみ）</td>
+    <td>isBasicEnergyフラグも同様、cardId確定後にしか取得できない</td>
+  </tr>
+</table>
+
+<div class="context-box" style="margin-top:16px;">
+  <b>provisionalが混ざっているデッキの扱い：</b>デッキ全体をスキップするのではなく、ルールごとに「判定できるものは判定する／できないものはそのカードだけ対象外にする」方式。たね最低1体・ACE SPEC・基本エネルギーの3ルールは、provisionalなカードがcardList内にある間はそのカード分を判定対象から除外し、recheck_mine等でconfirmedへ昇格した後に改めて判定される想定</div>
+
+<div class="section-title">③ 判定結果をどこに入れるか</div>
+
+<div class="flow">
+
+  <div class="node decision">
+    <div class="title">違反情報を専用の変数に分ける</div>
+    <div class="detail">既存のviolations（レギュ違反）とは別に、deckRuleViolationsという新しい配列を用意する（2026-07-21確定）。理由：性質が違うもの（カード自体が使用不可／枚数の数え間違い）を同じ箱に混ぜない方針。将来アイコンや表示位置を分けたくなった時にも対応しやすい</div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branch-label confirmed-l">既存のまま</div>
+      <div class="node confirmed">
+        <div class="title">violations</div>
+        <div class="detail">レギュレーション違反用。confirmedのカードのみ判定対象（従来通り）</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-label waiting-l">新設</div>
+      <div class="node waiting">
+        <div class="title">deckRuleViolations</div>
+        <div class="detail">deckRules違反用。中身のフィールド設計（cardId／count／limit等をどう持たせるか）はまだ未定</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="node pending">
+    <div class="title">deckRuleViolationsの中身の形</div>
+    <div class="detail">1件あたりどんな情報を持たせるか（例：cardId・count・limit等）は次回相談。この図では「別枠に分ける」ことだけが確定事項</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  作成：2026-07-21<br>
+  位置づけ：deckRules本体（同名4枚・ACE SPEC1枚・基本エネルギー無制限・60枚・たね最低1体）設計の途中経過図。OCR共通スキーマ（ロジック図）・cross_category_fieldsの実装が前提として必要。<br>
+  確定事項：登録タイミング／MTGA方式（保存はブロックしない）／provisionalのルールごとの判定可否／violationsとdeckRuleViolationsの分離<br>
+  未定事項：deckRuleViolations1件あたりのフィールド構成
+</div>
+
+</body>
+</html>
