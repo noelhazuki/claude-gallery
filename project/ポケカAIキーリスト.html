@@ -101,7 +101,7 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-21時点（deckRules一部実装・MTGA方式化を反映）</p>
+  <p>2026-07-22時点（?ask設計確定分・openConcerns等を追加反映）</p>
 </header>
 
 <div class="update-note">
@@ -185,7 +185,11 @@
     </tr>
     <tr>
       <td class="term">concern</td>
-      <td class="desc">register_mine（自分のデッキ）専用。気になってる点・相談したいこと</td>
+      <td class="desc">register_mine（自分のデッキ）専用。気になってる点・相談したいこと（登録時に人間が書く自由記述。1個だけ持つ）</td>
+    </tr>
+    <tr>
+      <td class="term">openConcerns<span class="status todo">2026-07-22追加・未実装</span></td>
+      <td class="desc"><span style="color:#ffb3b3;">concernとは別物。混同注意。</span>?ask（?ask項目参照）で相談した結果、AIが「まだ解決してへん」と判断した懸念点を自動で貯めていく配列フィールド。deck:mine内に新設予定。concernが登録時に人間が1回書く自由記述なのに対し、openConcernsは相談のたびにAIが自動追加していく複数件のリストという違いがある。次回?ask相談時は「今のcardList」＋「openConcerns」をまとめて渡し、文脈を引き継ぐ。人間が「解決した」ボタンを押した項目だけKVから完全削除される（ローカル保存はしない。複数端末で同じ状態を見たいため）</td>
     </tr>
   </table>
 </div>
@@ -245,6 +249,25 @@
 </div>
 
 <div class="group">
+  <h2>?ask（STAGE4・デッキ構築相談機能）関連<span class="status todo">設計確定・未実装（2026-07-22）</span></h2>
+  <table>
+    <tr><th>用語</th><td class="desc">意味</td></tr>
+    <tr>
+      <td class="term">?ask=true</td>
+      <td class="desc">Claude API呼び出しによるデッキ構築相談専用エンドポイント（未実装）。環境デッキ対策（メタ分析・対戦戦略）は対象外で別テーマ扱い。会話履歴は持たず、毎回「対象deck:mineのcardList」＋「質問文」＋「openConcerns」だけを材料にその場で完結させる（トークン節約のため）</td>
+    </tr>
+    <tr>
+      <td class="term">answer</td>
+      <td class="desc">?askのレスポンスJSON内、画面表示用の自由文回答が入るフィールド。見た目は普通の会話文そのまま</td>
+    </tr>
+    <tr>
+      <td class="term">newConcerns</td>
+      <td class="desc">?askのレスポンスJSON内、AIがその回答の中で拾った「まだ解決してへん懸念点」を短い一言メモの配列で返すフィールド。ユーザー画面には表示しない裏メモ。Claude自身に構造化出力させる想定で、別途の抽出ロジック（キーワード判定等）は用意しない。返ってきたらそのままdeck:mine内のopenConcernsへ追加される</td>
+    </tr>
+  </table>
+</div>
+
+<div class="group">
   <h2>KVキー（データの保存場所の名前）</h2>
   <table>
     <tr><th>用語</th><td class="desc">意味</td></tr>
@@ -283,6 +306,7 @@
 <footer style="margin-top:4px;">更新履歴：2026-07-21 matchTrainerOrEnergyCard複数ヒット時ルールを追加</footer>
 <footer style="margin-top:4px;">更新履歴：2026-07-21（追記）pid（provisional一時ID）を追加</footer>
 <footer style="margin-top:4px;">更新履歴：2026-07-21（さらに追記）deckRuleViolations・MTGA方式を追加。violations・deckRulesの説明を実装状況に合わせて更新</footer>
+<footer style="margin-top:4px;">更新履歴：2026-07-22 ?ask関連用語（openConcerns・answer・newConcerns）を追加。concernとopenConcernsの違いを明記</footer>
 
 </body>
 </html>

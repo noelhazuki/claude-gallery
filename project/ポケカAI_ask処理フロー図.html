@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="https://placehold.co/1200x630/1f4d6b/ffffff?text=RES-008+Ask+Flow">
+<title>pokeca-ai ?ask処理フロー図</title>
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --ink:#242019;
+    --card:#ffffff;
+    --line:#d8d1c2;
+    --input:#2f6f5e;
+    --input-bg:#e6f0ec;
+    --process:#1f4d6b;
+    --process-bg:#e6eef4;
+    --ai:#6a4fae;
+    --ai-bg:#f1ecfa;
+    --human:#b4711f;
+    --human-bg:#f6ead9;
+    --output:#2f6f5e;
+    --output-bg:#e6f0ec;
+    --unresolved:#9a3b3b;
+    --unresolved-bg:#f5e4e1;
+    --accent:#1f4d6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:24px 16px 64px;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic",sans-serif;
+    line-height:1.6;
+  }
+  .header{margin-bottom:20px;}
+  .eyebrow{font-size:12px;letter-spacing:0.12em;color:var(--accent);font-weight:700;}
+  h1{font-size:20px;margin:4px 0 8px;line-height:1.4;}
+  .sub{font-size:13px;color:#5a5347;}
+
+  .context-box{
+    max-width:520px;margin:0 auto 22px;
+    background:#fff8e6;border:1px solid #f0d999;border-radius:10px;
+    padding:12px 14px;font-size:12px;color:#7a5c1c;line-height:1.7;
+  }
+  .context-box b{color:#9c7412;}
+
+  .scope-box{
+    max-width:520px;margin:0 auto 22px;
+    background:#f5e4e1;border:1px solid #e0b8b0;border-radius:10px;
+    padding:12px 14px;font-size:12px;color:#7a3c34;line-height:1.7;
+  }
+  .scope-box b{color:#9a3b3b;}
+
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:14px auto 26px;font-size:12px;max-width:520px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.input{background:var(--input);}
+  .dot.process{background:var(--process);}
+  .dot.ai{background:var(--ai);}
+  .dot.human{background:var(--human);}
+  .dot.output{background:var(--output);}
+  .dot.unresolved{background:var(--unresolved);}
+
+  .section-title{
+    font-size:14px;font-weight:700;color:var(--accent);
+    margin:34px auto 12px;max-width:520px;
+    padding-bottom:6px;border-bottom:2px solid var(--accent);
+  }
+
+  .flow{display:flex;flex-direction:column;align-items:stretch;max-width:520px;margin:0 auto;}
+  .node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+  .node .label{font-size:11px;color:#8a8271;margin-bottom:4px;}
+  .node .title{font-size:14px;font-weight:700;}
+  .node .detail{font-size:12.5px;color:#4a4437;margin-top:6px;white-space:pre-line;}
+  .node.input{border-color:var(--input); background:var(--input-bg);}
+  .node.process{border-color:var(--process); background:var(--process-bg);}
+  .node.ai{border-color:var(--ai); background:var(--ai-bg);}
+  .node.human{border-color:var(--human); background:var(--human-bg);}
+  .node.output{border-color:var(--output); background:var(--output-bg);}
+  .node.unresolved{border-color:var(--unresolved); background:var(--unresolved-bg); border-style:dashed;}
+
+  .arrow{align-self:center;font-size:18px;color:#a89f8c;margin:2px 0;}
+  .arrow-label{align-self:center;font-size:11px;color:#8a8271;margin:0 0 2px;text-align:center;max-width:400px;}
+
+  .kv{font-family:"SF Mono","Menlo",monospace;font-size:12px;background:#efe9db;padding:2px 6px;border-radius:4px;}
+
+  .footer{max-width:520px;margin:32px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:#8a8271;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">RES-008 / pokeca-ai</div>
+  <h1>?ask処理フロー図（デッキ構築相談機能）</h1>
+  <div class="sub">2026-07-22時点：設計は確定したが実装はまだ。半年後に見返した時「なぜこの形にしたか」まで分かるように、決定の理由込みで残す図。</div>
+</div>
+
+<div class="scope-box">
+  <b>この図の対象範囲：</b>?askは「デッキ構築相談」専用。環境デッキ対策（メタ分析・対戦戦略の相談）は別テーマとして保留中で、この図には含まない。将来その部分を作る時は、別の処理フロー図として新設する想定（この図を後から拡張して詰め込まない）。
+</div>
+
+<div class="context-box">
+  <b>なぜ既存の処理フロー・入出力設計図に混ぜず、この図を新規で立てたか：</b>register_meta等の登録フローは「デッキコード→cardList確定→KV保存」という一本道の変換処理やけど、?askは「AIとの対話→懸念点の蓄積→次回への引き継ぎ」という性質が違う流れ（ループ構造）を持つため、混ぜると逆に分かりにくくなると判断した（2026-07-22決定）。
+</div>
+
+<div class="legend">
+  <span><span class="dot input"></span>入力</span>
+  <span><span class="dot process"></span>Worker内処理</span>
+  <span><span class="dot ai"></span>Claude API呼び出し</span>
+  <span><span class="dot human"></span>人間の判断が必要</span>
+  <span><span class="dot output"></span>出力・保存</span>
+  <span><span class="dot unresolved"></span>未検討・次回持ち越し</span>
+</div>
+
+<div class="section-title">① 相談1回分の処理の流れ</div>
+
+<div class="flow">
+
+  <div class="node input">
+    <div class="label">入力</div>
+    <div class="title">?ask呼び出し</div>
+    <div class="detail">対象deckId（deck:mineのid）＋質問文（フリーテキスト）を受け取る。会話履歴は一切持たない設計（トークン節約のため、毎回その場の材料だけで完結させる）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node process">
+    <div class="title">材料を集める</div>
+    <div class="detail">deck:mine:{id}から現在のcardListとopenConcerns（あれば）を取得</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node process">
+    <div class="title">cardId → カード名変換</div>
+    <div class="detail">cardList内の全cardIdを既存get_card（card:{cardId}の遅延キャッシュ）にそのまま回す素直な全件方式。多くは登録・レギュ判定時に既にcard:{cardId}がKVキャッシュ済みのため、TCGdexへ実際に取りに行くのは未キャッシュの一部カードのみ（レアケース）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node ai">
+    <div class="title">Claude API呼び出し</div>
+    <div class="detail">材料（カード名に変換済みのcardList＋質問文＋openConcerns）を渡し、JSON構造化での応答を依頼する</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node ai">
+    <div class="title">レスポンス受け取り</div>
+    <div class="detail"><span class="kv">{ answer, newConcerns }</span>の形で返る想定
+・answer：画面表示用の自由文回答（見た目は普通の会話文）
+・newConcerns：回答内でAIが拾った「まだ解決してへん懸念点」の配列（表示しない裏メモ、抽出は別ロジックを作らずAI自身の構造化出力に任せる）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node process">
+    <div class="title">openConcernsへ追加</div>
+    <div class="detail">newConcernsが空でなければ、deck:mine:{id}のopenConcerns配列へ追記してKV保存。既存concern（登録時メモ、1件のみ・別物）とは混同しないこと</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node output">
+    <div class="label">出力</div>
+    <div class="title">answerを画面に表示</div>
+    <div class="detail">ユーザーにはanswerの本文のみ表示。newConcernsの中身をそのまま見せる想定は今のところない（一覧表示するかは未検討）</div>
+  </div>
+
+</div>
+
+<div class="section-title">② openConcernsの解決サイクル（相談をまたいだループ）</div>
+
+<div class="flow">
+
+  <div class="node output">
+    <div class="label">蓄積</div>
+    <div class="title">openConcernsに懸念点が溜まっていく</div>
+    <div class="detail">相談のたびに①のフローでnewConcernsが追加される。複数件が並行して溜まる想定</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="arrow-label">次回?ask呼び出し時</div>
+
+  <div class="node ai">
+    <div class="title">「今のcardList」＋「openConcerns」を毎回渡す</div>
+    <div class="detail">前回までの懸念点を踏まえた回答をAIにさせるための引き継ぎ材料。会話履歴の代わりにこの2つだけで文脈を持たせる設計</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node human">
+    <div class="title">解決したかどうかは人間が判断</div>
+    <div class="detail">AIによる自動判定はしない（awaitStatusの手動manual切替・meta側provisional確認パネルと同じ「人間が見て判断する」方針に統一・2026-07-22決定）。UI上に解決済みボタンを用意する想定（UI設計は未着手）</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="node output">
+    <div class="title">ボタンを押したらKVから完全削除</div>
+    <div class="detail">該当のopenConcerns項目をdeck:mine:{id}から削除。ローカル保存はしない（複数端末で同じ状態を見たいため、必ずKV側の状態を正とする）</div>
+  </div>
+
+</div>
+
+<div class="section-title">③ 未検討・次回持ち越し</div>
+
+<div class="flow">
+  <div class="node unresolved">
+    <div class="title">Claude APIレスポンスのJSONパース失敗時の挙動</div>
+    <div class="detail">answerだけでも表示するフォールバックにするか等、まだ決めていない</div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="node unresolved">
+    <div class="title">openConcernsの一覧表示UI</div>
+    <div class="detail">「解決済みにする」ボタンをどこに置くか、一覧としてどう見せるかは未設計</div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="node unresolved">
+    <div class="title">環境デッキ対策（メタ分析・対戦戦略）</div>
+    <div class="detail">この図の対象外。デッキ構築相談の設計が固まった後、別テーマとして着手予定</div>
+  </div>
+</div>
+
+<div class="footer">
+  作成：2026-07-22<br>
+  位置づけ：エンドポイント一覧表の?ask項目・キーリストのopenConcerns/answer/newConcerns項目・ロードマップSTAGE4の詳細図。既存の入出力設計図（cardlist登録フロー専用）・処理フロー図（resolve_cardlist等の変換処理専用）とは別系統として新設（登録フローとは性質が違う「対話→蓄積→人間判断」のループ構造を持つため）。<br>
+  実装状況：設計確定（2026-07-22）・実装はまだ着手していない。spec.jsonへの正式反映も未実施（3論点確定を受けて次回一括反映予定）。
+</div>
+
+</body>
+</html>

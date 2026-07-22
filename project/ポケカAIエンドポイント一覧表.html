@@ -327,10 +327,17 @@
 <div class="group-title">⑥ 未着手・計画中</div>
 
 <div class="ep-card todo">
-  <div class="ep-head"><span class="ep-name">?ask=true</span><span class="tag todo">未着手（Stage4）</span></div>
-  <div class="ep-summary">Claude API呼び出しによるAIアドバイス機能</div>
+  <div class="ep-head"><span class="ep-name">?ask=true</span><span class="tag todo">設計確定・未実装（2026-07-22）</span></div>
+  <div class="ep-summary">Claude API呼び出しによるAIアドバイス機能（デッキ構築相談専用）</div>
   <div class="ep-detail">
-    <div class="row"><span class="k">想定範囲</span>デッキ構築・対戦戦略・メタ分析の相談カテゴリ設計含む</div>
+    <div class="row"><span class="k">対象範囲</span>デッキ構築相談のみ。環境デッキ対策（メタ分析・対戦戦略）は別テーマとして保留中、この仕様には含まない</div>
+    <div class="row"><span class="k">method</span>POST（想定）</div>
+    <div class="row"><span class="k">入力材料</span>対象<span class="kv">deck:mine</span>の<span class="kv">cardList</span>＋質問文（フリーテキスト）。会話履歴は持たず、毎回その場のcardListだけで完結させる（トークン節約のため）</div>
+    <div class="row"><span class="k">cardId→カード名変換</span>渡す前にcardList中の全cardIdを既存<span class="kv">get_card</span>（遅延キャッシュ）にそのまま回してカード名に変換する素直な全件方式。大半は既にcard:{cardId}がKVキャッシュ済みのため、TCGdexへ実際に取りに行くのは未キャッシュカードのみのレアケース想定</div>
+    <div class="row"><span class="k">レスポンス形式</span>JSON構造化。<span class="kv">{ answer, newConcerns }</span>の2フィールド<br>・<span class="kv">answer</span>：画面表示用の自由文回答（見た目は普通の会話文）<br>・<span class="kv">newConcerns</span>：回答の中でAIが拾った「まだ解決してへん懸念点」の配列（表示しない裏メモ、Claude自身が構造化出力する想定。別途の抽出ロジックは不要）</div>
+    <div class="row"><span class="k">openConcerns</span><span class="kv">deck:mine</span>内に新設する配列フィールド。既存の<span class="kv">concern</span>（登録時の相談したい点メモ）とは別物なので混同注意。相談のたびに<span class="kv">newConcerns</span>が自動追加され、次回相談時は「今のcardList」＋「openConcerns」をまとめて渡す</div>
+    <div class="row"><span class="k">解決判定</span>AIによる自動判定はしない。awaitStatusのmanual切替やmeta側provisional確認パネルと同じ「人間が見て判断する」方針に統一。人間がボタンを押した時だけopenConcernsから該当項目を完全削除（ローカル保存なし、複数端末で同じ状態を見るため必ずKV側で削除）</div>
+    <div class="row"><span class="k">未確定</span>?askのレスポンスJSONのパース失敗時のフォールバック挙動は未検討</div>
   </div>
 </div>
 
@@ -340,7 +347,8 @@
   更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。<br>
   更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。<br>
   更新履歴：2026-07-21（追記）set_manual・update_wait_daysにpid（背番号）対応を追加。tempName表記ゆれ対策として、pid優先・従来方式フォールバックの2経路に。<br>
-  更新履歴：2026-07-21（さらに追記）deckRules判定（同名4枚まで・60枚ちょうど）を実装。あわせてレギュ判定・deckRules判定ともMTGA方式（違反があっても登録・保存はブロックしない、警告のみ返す）に統一。以前のregister_meta/register_mine/update_mineの400ブロック仕様は廃止。
+  更新履歴：2026-07-21（さらに追記）deckRules判定（同名4枚まで・60枚ちょうど）を実装。あわせてレギュ判定・deckRules判定ともMTGA方式（違反があっても登録・保存はブロックしない、警告のみ返す）に統一。以前のregister_meta/register_mine/update_mineの400ブロック仕様は廃止。<br>
+  更新履歴：2026-07-22 ?askエンドポイントの設計が確定（未実装のまま）。対象をデッキ構築相談のみに絞り、入力材料（cardList＋質問文・履歴なし）、cardId→カード名変換方式（get_card全件回し）、レスポンス形式（answer/newConcerns構造化）、openConcerns運用（AIが追加・人間がボタンで解決済み判定しKVから完全削除）を決定。処理フローの詳細は専用の新規フロー図（ポケカAI_ask処理フロー図.html）を別途参照。
 </div>
 
 </body>
