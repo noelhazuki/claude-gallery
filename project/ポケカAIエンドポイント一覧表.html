@@ -93,8 +93,9 @@
   <div class="ep-summary">環境デッキを新規登録する</div>
   <div class="ep-detail">
     <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>id / name / cardList / howToPlay</div>
-    <div class="row"><span class="k">備考</span>同一id既存時は409エラー。cardListはresolve_cardlistの出力を人が確認UIでチェックしてから渡す想定</div>
+    <div class="row"><span class="k">必須項目</span>name / cardList（idは自動採番）</div>
+    <div class="row"><span class="k">備考</span>cardListはresolve_cardlistの出力を人が確認UIでチェックしてから渡す想定</div>
+    <div class="row"><span class="k">2026-07-21〜</span>登録時、レギュ判定・deckRules判定（枚数ルール、下記④参照）を実行するが<b>MTGA方式</b>のためどちらも登録・保存はブロックしない。レスポンスに<span class="kv">violations</span>（レギュ）・<span class="kv">deckRuleViolations</span>（枚数）を警告として含めて返す（以前は違反時400エラーで登録自体を弾いていたが変更）</div>
   </div>
 </div>
 
@@ -151,8 +152,9 @@
   <div class="ep-summary">自分のデッキを新規登録する</div>
   <div class="ep-detail">
     <div class="row"><span class="k">method</span>POST</div>
-    <div class="row"><span class="k">必須項目</span>id / name / cardList</div>
+    <div class="row"><span class="k">必須項目</span>name / cardList（idは自動採番）</div>
     <div class="row"><span class="k">任意項目</span>concern</div>
+    <div class="row"><span class="k">2026-07-21〜</span>register_metaと同じくMTGA方式。レギュ判定・deckRules判定（下記④参照）とも登録・保存はブロックせず、レスポンスに<span class="kv">violations</span>・<span class="kv">deckRuleViolations</span>を警告として含めて返す</div>
   </div>
 </div>
 
@@ -161,6 +163,7 @@
   <div class="ep-summary">自分のデッキを更新する（マージロジック込み）</div>
   <div class="ep-detail">
     <div class="row"><span class="k">備考</span>locked:trueのレコードは拒否される（誤上書き防止）。ロックボタンからは<span class="kv">{id, locked:true}</span>のみ送信される</div>
+    <div class="row"><span class="k">2026-07-21〜</span>cardListを含む更新時のみレギュ判定・deckRules判定（下記④参照）を実行。MTGA方式のため更新・保存はブロックせず、レスポンスに<span class="kv">violations</span>・<span class="kv">deckRuleViolations</span>を警告として含めて返す</div>
   </div>
 </div>
 
@@ -271,11 +274,24 @@
   </div>
 </div>
 
-<div class="ep-card notdo">
-  <div class="ep-head"><span class="ep-name">（register_meta/register_mine/update_mine内で自動実行）</span><span class="tag notdo">独立エンドポイントではない</span></div>
+<div class="ep-card done">
+  <div class="ep-head"><span class="ep-name">（register_meta/register_mine/update_mine内で自動実行）</span><span class="tag done">独立エンドポイントではない</span></div>
   <div class="ep-summary">register時のレギュ検証はcardList変更を伴う保存処理の内部で実行される</div>
   <div class="ep-detail">
     <div class="row"><span class="k">備考</span>provisional（cardId未確定）のカードは判定対象から除外。confirmedのカードのみ判定する（2026-07-20仕様修正）</div>
+    <div class="row"><span class="k">2026-07-21〜</span><b>MTGA方式に変更。</b>違反（violations）があっても登録・保存はブロックしない（以前は400エラーでブロックしていたが、運用方針変更により警告として返すのみに統一）</div>
+  </div>
+</div>
+
+<div class="ep-card done">
+  <div class="ep-head"><span class="ep-name">（register_meta/register_mine/update_mine内で自動実行）deckRules判定</span><span class="tag done">一部実装済み（2026-07-21）</span></div>
+  <div class="ep-summary">枚数ルール判定。独立エンドポイントではなく、上のレギュ検証と同じタイミング・同じ内部処理で実行される</div>
+  <div class="ep-detail">
+    <div class="row"><span class="k">実装範囲</span>同名カード基本4枚まで／デッキ合計60枚ちょうど の2つのみ</div>
+    <div class="row"><span class="k">未実装</span>たね最低1体必須／ACE SPEC合計1枚まで／基本エネルギー無制限（cross_category_fields〈isAceSpec/isBasicEnergy、OCR共通スキーマ側〉の実装待ち）</div>
+    <div class="row"><span class="k">判定方式</span>MTGA方式（違反があっても登録・保存はブロックしない、警告のみ）</div>
+    <div class="row"><span class="k">返り値</span>既存のviolations（レギュ違反用）とは別に<span class="kv">deckRuleViolations</span>で返す。形は3パターン：デッキ全体用<span class="kv">{reason,count,expected}</span>／カード単位用<span class="kv">{reason,name,count,limit}</span>／合計超過用<span class="kv">{reason,total,limit,cards}</span>（合計超過用は未実装ルール向けで現時点では発生しない）</div>
+    <div class="row"><span class="k">暫定措置</span>energyカテゴリは基本エネルギー無制限との切り分けが今はできないため、同名4枚チェックの対象から一旦除外中（cross_category_fields実装後に見直し）</div>
   </div>
 </div>
 
@@ -323,7 +339,8 @@
   出典：spec.json の endpoint_design_policy / deck_register_schema / card_data_design / regulation_legality_design セクション、ならびにロードマップ・入出力設計図・状態遷移図・処理フロー図・キーリストの各HTML。<br>
   更新ルール：エンドポイントの新規実装・仕様変更があった時は、まずspecの該当セクションを更新し、その反映としてこの一覧表も更新する。<br>
   更新履歴：2026-07-21 set_manual・update_wait_daysを追加（provisional内サブ状態awaitStatusの手動切替・waitDays延長用。ロック中デッキ操作不可の課題を解消）。<br>
-  更新履歴：2026-07-21（追記）set_manual・update_wait_daysにpid（背番号）対応を追加。tempName表記ゆれ対策として、pid優先・従来方式フォールバックの2経路に。
+  更新履歴：2026-07-21（追記）set_manual・update_wait_daysにpid（背番号）対応を追加。tempName表記ゆれ対策として、pid優先・従来方式フォールバックの2経路に。<br>
+  更新履歴：2026-07-21（さらに追記）deckRules判定（同名4枚まで・60枚ちょうど）を実装。あわせてレギュ判定・deckRules判定ともMTGA方式（違反があっても登録・保存はブロックしない、警告のみ返す）に統一。以前のregister_meta/register_mine/update_mineの400ブロック仕様は廃止。
 </div>
 
 </body>

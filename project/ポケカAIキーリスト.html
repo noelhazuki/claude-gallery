@@ -101,7 +101,7 @@
 <header>
   <div class="badge">RES-008 ・ ポケカAI強化ツール</div>
   <h1>用語一覧（cardList / KVキー関連）</h1>
-  <p>2026-07-21時点（pid＝provisional一時ID追加を反映）</p>
+  <p>2026-07-21時点（deckRules一部実装・MTGA方式化を反映）</p>
 </header>
 
 <div class="update-note">
@@ -157,8 +157,8 @@
       <td class="desc">subtypesから派生する「カードの性質フラグ」。フラグを持つだけで枚数計算などの判定はしない（例：ex→サイド枚数変化の対象、ACE SPEC→数量制限対象というフラグ）</td>
     </tr>
     <tr>
-      <td class="term">deckRules</td>
-      <td class="desc">ruleTagsを見て実際にデッキ構築時の枚数をチェックする計算ロジック側。同名カード基本4枚、ACE SPEC合計1枚、基本エネルギー無制限、デッキ合計60枚、ポケモン最低1枚、などが対象</td>
+      <td class="term">deckRules<div class="status done">一部実装済み（2026-07-21）</div></td>
+      <td class="desc">ruleTagsを見て実際にデッキ構築時の枚数をチェックする計算ロジック側。同名カード基本4枚、ACE SPEC合計1枚、基本エネルギー無制限、デッキ合計60枚、たね最低1体、などが対象（このテーブル自体はOCR共通スキーマ＝未実装の設計図だが、deckRules本体は2026-07-21にsrc/index.jsへ一部実装済み）。<br><br><b style="color:#ffd76a;">実装済みの2つ（同名4枚まで／60枚ちょうど）は、実はruleTags／subtypesを経由せずcardListの生データだけで判定できるため、OCR共通スキーマの実装を待たずに先行実装できた。</b>残る3つ（たね最低1体・ACE SPEC合計1枚・基本エネルギー無制限）はcross_category_fieldsが必要なため、OCR共通スキーマ実装後になる見込み。判定方式はMTGA方式（下記参照）</td>
     </tr>
     <tr>
       <td class="term">cross_category_fields<span class="status done">2026-07-21追加</span></td>
@@ -231,7 +231,15 @@
     </tr>
     <tr>
       <td class="term">violations<div class="status done">2026-07-20仕様修正</div></td>
-      <td class="desc">レギュ違反として積まれるリスト。<b style="color:#ffb3b3;">provisional（cardId未確定）のカードはレギュ判定の対象から除外される</b>ため、violationsに積まれるのはconfirmed（cardId確定済み）のカードが実際にマーク・ホワイトリストどちらでも救済できず違反していた場合（reason: "regulation_violation"）のみ。以前ここに書いていた"card_not_found"というreasonでの違反計上は、2026-07-20の仕様修正で廃止された（provisional化した時点でそもそもレギュ判定を通らなくなったため）</td>
+      <td class="desc">レギュ違反として積まれるリスト。<b style="color:#ffb3b3;">provisional（cardId未確定）のカードはレギュ判定の対象から除外される</b>ため、violationsに積まれるのはconfirmed（cardId確定済み）のカードが実際にマーク・ホワイトリストどちらでも救済できず違反していた場合（reason: "regulation_violation"）のみ。以前ここに書いていた"card_not_found"というreasonでの違反計上は、2026-07-20の仕様修正で廃止された（provisional化した時点でそもそもレギュ判定を通らなくなったため）<br><br><b style="color:#ffd76a;">2026-07-21〜：</b>violationsが積まれても登録・保存はブロックされなくなった（下記MTGA方式を参照）。register_meta/register_mine/update_mineのレスポンスに警告として含めて返すのみで、登録自体は通る</td>
+    </tr>
+    <tr>
+      <td class="term">MTGA方式<div class="status done">2026-07-21追加</div></td>
+      <td class="desc">register_meta/register_mine/update_mineにおける判定結果の扱い方針。「違反があっても登録・保存はブロックしない、警告として結果を返すだけ」というMTGアリーナのデッキ構築画面に倣った考え方。2026-07-21に運用方針として確定し、レギュ判定（violations）・deckRules判定（deckRuleViolations）の両方に適用された。<b style="color:#ffb3b3;">以前（〜2026-07-20）はレギュ違反があると400エラーで登録自体を弾いていたが、この変更で廃止された</b></td>
+    </tr>
+    <tr>
+      <td class="term">deckRuleViolations<div class="status done">2026-07-21追加</div></td>
+      <td class="desc">deckRules判定（枚数ルール）の違反リスト。既存のviolations（レギュ違反用）とは別物として新設された（性質が違うものを同じ箱に混ぜない方針）。1件の形は3パターン：デッキ全体用<span style="color:#8f84b0;">{reason,count,expected}</span>（60枚ちょうど・たね最低1体）、カード単位用<span style="color:#8f84b0;">{reason,name,count,limit}</span>（同名4枚まで）、合計超過用<span style="color:#8f84b0;">{reason,total,limit,cards}</span>（ACE SPEC合計1枚まで）。2026-07-21時点で実装済みなのは同名4枚まで・60枚ちょうどの2つのみ（詳細はdeckRules項目参照）</td>
     </tr>
   </table>
 </div>
@@ -274,6 +282,7 @@
 <footer>Dictionary.jsonへの登録はまだ。登録するか要確認</footer>
 <footer style="margin-top:4px;">更新履歴：2026-07-21 matchTrainerOrEnergyCard複数ヒット時ルールを追加</footer>
 <footer style="margin-top:4px;">更新履歴：2026-07-21（追記）pid（provisional一時ID）を追加</footer>
+<footer style="margin-top:4px;">更新履歴：2026-07-21（さらに追記）deckRuleViolations・MTGA方式を追加。violations・deckRulesの説明を実装状況に合わせて更新</footer>
 
 </body>
 </html>
